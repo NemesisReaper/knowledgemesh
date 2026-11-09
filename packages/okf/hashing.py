@@ -1,5 +1,7 @@
 """Deterministic cryptographic hashing and canonicalization for the Open Knowledge Format (OKF)."""
 
+from __future__ import annotations
+
 from datetime import datetime
 import hashlib
 import json
