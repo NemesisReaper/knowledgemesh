@@ -5,7 +5,6 @@ from uuid import UUID
 
 from sqlalchemy import String, Text, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from .base import Base, UUIDMixin, TimestampMixin
 
 
@@ -30,4 +29,4 @@ class ClaimEvidence(Base, UUIDMixin, TimestampMixin):
 
 
 # Backward compatibility alias
-ClaimEvidece = ClaimEvidence
+ClaimEvidece = ClaimEvidence  # Deprecated misspelling retained for compatibility

@@ -4,7 +4,7 @@ import uuid
 from typing import TYPE_CHECKING, Any, Optional
 
 from sqlalchemy import ForeignKey, Index, String
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import JSON, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, TimestampMixin, UUIDMixin
@@ -28,18 +28,18 @@ class Operation(Base, UUIDMixin, TimestampMixin):
         String(50), nullable=False, index=True
     )  # e.g., 'bundle', 'claim', 'evidence', 'verification'
     entity_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        Uuid(as_uuid=True), nullable=False, index=True
     )
     actor_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("identities.id", ondelete="SET NULL"),
+        Uuid(as_uuid=True),
+        ForeignKey("publisher_identities.id", ondelete="SET NULL"),
         nullable=True,
         index=True,
     )
     status: Mapped[str] = mapped_column(
         String(50), default="completed", nullable=False, index=True
     )
-    payload: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB, nullable=True)
+    payload: Mapped[Optional[dict[str, Any]]] = mapped_column(JSON, nullable=True)
 
     # Relationships
     actor: Mapped[Optional["Identity"]] = relationship(

@@ -1,22 +1,31 @@
-import uuid
+from __future__ import annotations
 
+import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime
+from sqlalchemy import DateTime, Uuid
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy.dialects.postgresql import UUID
+
 
 class Base(DeclarativeBase):
-    pass
+    """Declarative base shared by all KnowMesh persistence models."""
+
 
 class UUIDMixin:
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
+        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-class TimestampMixin:
-    created_at: Mapped[datetime]=mapped_column(DateTime(timezone=True),default=lambda:datetime.now(timezone.utc),nullable=False)
-    updated_at: Mapped[datetime]=mapped_column(DateTime(timezone=True),default=lambda:datetime.now(timezone.utc),onupdate=lambda:datetime.now(timezone.utc),nullable=False)
 
-    
+
+class TimestampMixin:
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )

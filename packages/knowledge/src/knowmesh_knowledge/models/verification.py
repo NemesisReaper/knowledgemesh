@@ -3,8 +3,8 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, Any, Optional
 
-from sqlalchemy import Float, ForeignKey, Index, String, Text
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import CheckConstraint, Float, ForeignKey, Index, String, Text
+from sqlalchemy import JSON, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, TimestampMixin, UUIDMixin
@@ -20,25 +20,30 @@ class Verification(Base, UUIDMixin, TimestampMixin):
 
     __tablename__ = "verifications"
     __table_args__ = (
+        CheckConstraint(
+            "(claim_id IS NOT NULL AND bundle_id IS NULL) OR "
+            "(claim_id IS NULL AND bundle_id IS NOT NULL)",
+            name="ck_verification_exactly_one_target",
+        ),
         Index("ix_verifications_target_claim", "claim_id", "verifier_id"),
         Index("ix_verifications_target_bundle", "bundle_id", "verifier_id"),
     )
 
     claim_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        UUID(as_uuid=True),
+        Uuid(as_uuid=True),
         ForeignKey("claims.id", ondelete="CASCADE"),
         nullable=True,
         index=True,
     )
     bundle_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        UUID(as_uuid=True),
+        Uuid(as_uuid=True),
         ForeignKey("bundles.id", ondelete="CASCADE"),
         nullable=True,
         index=True,
     )
     verifier_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("identities.id", ondelete="CASCADE"),
+        Uuid(as_uuid=True),
+        ForeignKey("publisher_identities.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -52,7 +57,7 @@ class Verification(Base, UUIDMixin, TimestampMixin):
     )
     comments: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     metadata_: Mapped[Optional[dict[str, Any]]] = mapped_column(
-        "metadata", JSONB, nullable=True
+        "metadata", JSON, nullable=True
     )
 
     # Relationships

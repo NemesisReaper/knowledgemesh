@@ -5,7 +5,7 @@ from uuid import UUID
 
 from sqlalchemy import String, Text, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSON
+from sqlalchemy import JSON
 from .base import Base, UUIDMixin, TimestampMixin
 
 class Bundle(Base,UUIDMixin,TimestampMixin):

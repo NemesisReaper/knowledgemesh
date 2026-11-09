@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, Optional
 
 from sqlalchemy import DateTime, ForeignKey, String
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import JSON, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, TimestampMixin, UUIDMixin
@@ -24,15 +24,15 @@ class NetworkNode(Base, UUIDMixin, TimestampMixin):
     )
     endpoint: Mapped[str] = mapped_column(String(512), nullable=False)
     identity_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("identities.id", ondelete="SET NULL"),
+        Uuid(as_uuid=True),
+        ForeignKey("publisher_identities.id", ondelete="SET NULL"),
         nullable=True,
         index=True,
     )
     status: Mapped[str] = mapped_column(
         String(50), default="active", nullable=False, index=True
     )
-    capabilities: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB, nullable=True)
+    capabilities: Mapped[Optional[dict[str, Any]]] = mapped_column(JSON, nullable=True)
     last_seen_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )

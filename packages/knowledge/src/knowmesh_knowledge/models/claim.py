@@ -1,7 +1,7 @@
 from uuid import UUID
 from sqlalchemy import String, Text, ForeignKey, Index
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID, TSVECTOR, JSON
+from sqlalchemy import JSON
 from .base import Base, UUIDMixin, TimestampMixin
 from .bundle import BundleVersion
 
