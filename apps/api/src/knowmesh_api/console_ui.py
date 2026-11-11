@@ -35,6 +35,16 @@ def render_console_html() -> str:
   <style>{css}</style>
   <script src="/static/three.min.js"></script>
   <script>if(typeof THREE==="undefined"){{document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\\/script>')}};</script>
+  <script>
+    window.addEventListener('error', function(e) {{
+      var b = document.body || document.documentElement;
+      var errDiv = document.createElement('div');
+      errDiv.id = 'captured-error';
+      errDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:#0b0f19;color:#ef4444;font-family:monospace;font-size:18px;padding:40px;z-index:999999;overflow:auto';
+      errDiv.innerHTML = '<h2 style=\"color:#f87171\">JavaScript Syntax/Runtime Error:</h2><p><strong>Message:</strong> ' + e.message + '</p><p><strong>File:</strong> ' + e.filename + '</p><p><strong>Line:</strong> ' + e.lineno + ' : <strong>Col:</strong> ' + e.colno + '</p>';
+      b.appendChild(errDiv);
+    }});
+  </script>
 </head>
 <body>
   <div id="km-app"></div>

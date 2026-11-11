@@ -58,21 +58,46 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
     const map: Record<string, { x: number; y: number }> = {};
     const cx = 370;
     const cy = 195;
-    filteredNodes.forEach((n, idx) => {
-      if (idx === 0 || n.type === "local_node") {
-        map[n.id] = { x: cx, y: cy };
-      } else {
-        const count = Math.max(1, filteredNodes.length - 1);
-        const angle = ((idx - 1) / count) * Math.PI * 2 - Math.PI / 5;
-        const radius = count <= 2 ? 140 : 148;
-        map[n.id] = {
-          x: Math.round(cx + Math.cos(angle) * radius * 1.32),
-          y: Math.round(cy + Math.sin(angle) * radius * 0.88),
-        };
-      }
+
+    // Place the single local anchor node strictly at center
+    const localNode =
+      filteredNodes.find((n) => n.type === "local_node") || filteredNodes[0];
+    const peerNodes = filteredNodes.filter((n) => n.id !== localNode?.id);
+
+    if (localNode) {
+      map[localNode.id] = { x: cx, y: cy };
+    }
+
+    // Evenly distribute peer nodes in an orbit ring to prevent any overlapping
+    const count = peerNodes.length;
+    peerNodes.forEach((n, idx) => {
+      const angle =
+        count === 1
+          ? -Math.PI / 4
+          : (idx / Math.max(1, count)) * Math.PI * 2 - Math.PI / 2;
+      const radius = count <= 2 ? 140 : 155;
+      map[n.id] = {
+        x: Math.round(cx + Math.cos(angle) * radius * 1.35),
+        y: Math.round(cy + Math.sin(angle) * radius * 0.85),
+      };
     });
+
     return map;
   }, [filteredNodes]);
+
+  const uniqueDisplayEdges = useMemo(() => {
+    const seen = new Set<string>();
+    const result: TopologyEdge[] = [];
+    for (const edge of edges) {
+      if (edge.source === edge.target) continue;
+      const pairKey = [edge.source, edge.target].sort().join("___");
+      if (!seen.has(pairKey)) {
+        seen.add(pairKey);
+        result.push(edge);
+      }
+    }
+    return result;
+  }, [edges]);
 
   const selectedNode = useMemo(
     () =>
@@ -356,8 +381,8 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                 strokeWidth={1}
               />
 
-              {/* Edges & Animated Packet Streams */}
-              {edges.map((edge, idx) => {
+              {/* Edges & Animated Packet Streams (Deduplicated to prevent badge collisions) */}
+              {uniqueDisplayEdges.map((edge, idx) => {
                 const src = positions[edge.source];
                 const dst = positions[edge.target];
                 if (!src || !dst) return null;
@@ -586,7 +611,7 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                   }}
                 >
                   <span className="km-mono">
-                    did:knowmesh:{selectedNode.id}
+                    did:kyro:{selectedNode.id}
                   </span>
                   <span className="km-badge violet">
                     {selectedNode.type === "local_node"
@@ -744,7 +769,7 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                   </td>
                   <td>
                     <span className="km-mono">
-                      {n.fingerprint ? `${n.fingerprint.slice(0, 18)}…` : "—"}
+                      {n.fingerprint ? `${n.fingerprint.slice(0, 18)}...` : "-"}
                     </span>
                   </td>
                 </tr>
