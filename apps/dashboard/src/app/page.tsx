@@ -159,8 +159,7 @@ export default function KyroConsolePage() {
       );
     } catch (err) {
       setTopBanner(
-        `✕ Could not bootstrap demo state: ${
-          err instanceof Error ? err.message : "Backend error"
+        `✕ Could not bootstrap demo state: ${err instanceof Error ? err.message : "Backend error"
         }`
       );
     }
@@ -339,9 +338,8 @@ export default function KyroConsolePage() {
               <button
                 key={item.id}
                 type="button"
-                className={`km-nav-item ${
-                  activeTab === item.id ? "active" : ""
-                }`}
+                className={`km-nav-item ${activeTab === item.id ? "active" : ""
+                  }`}
                 onClick={() => setActiveTab(item.id)}
               >
                 <span className="km-nav-item-left">
@@ -669,11 +667,10 @@ export default function KyroConsolePage() {
               </span>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 <span
-                  className={`km-badge ${
-                    drawerBundle.verification?.integrity_verified
+                  className={`km-badge ${drawerBundle.verification?.integrity_verified
                       ? "verified"
                       : "error"
-                  }`}
+                    }`}
                 >
                   JCS Digest:{" "}
                   {drawerBundle.verification?.integrity_verified
@@ -681,11 +678,10 @@ export default function KyroConsolePage() {
                     : "Failed"}
                 </span>
                 <span
-                  className={`km-badge ${
-                    drawerBundle.verification?.signature_verified
+                  className={`km-badge ${drawerBundle.verification?.signature_verified
                       ? "verified"
                       : "error"
-                  }`}
+                    }`}
                 >
                   Ed25519:{" "}
                   {drawerBundle.verification?.signature_verified
@@ -693,11 +689,10 @@ export default function KyroConsolePage() {
                     : "Invalid"}
                 </span>
                 <span
-                  className={`km-badge ${
-                    drawerBundle.verification?.signer_recognized
+                  className={`km-badge ${drawerBundle.verification?.signer_recognized
                       ? "verified"
                       : "warning"
-                  }`}
+                    }`}
                 >
                   Signer:{" "}
                   {drawerBundle.verification?.signer_recognized

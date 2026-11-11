@@ -3,11 +3,13 @@
 import React, { useEffect, useRef } from "react";
 
 export interface KnowledgeTransformationSceneProps {
+  theme?: "light" | "dark";
   onExploreOkf?: () => void;
   onReadDocs?: () => void;
 }
 
 export function KnowledgeTransformationScene({
+  theme = "light",
   onExploreOkf,
   onReadDocs,
 }: KnowledgeTransformationSceneProps) {
@@ -51,7 +53,7 @@ export function KnowledgeTransformationScene({
       // 1. Scene - 100% Transparent, Unboxed
       const scene = new THREE.Scene();
 
-      // 2. Camera with Generous Breathing Room
+      // 2. Camera with Generous Breathing Room (centered, no clipping)
       const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 50);
       camera.position.set(0, 0, 9.6);
 
@@ -66,25 +68,47 @@ export function KnowledgeTransformationScene({
       renderer.setSize(width, height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.25;
+      renderer.toneMappingExposure = theme === "light" ? 1.35 : 1.25;
 
-      // 4. Lighting Rig
-      const ambientLight = new THREE.AmbientLight(0x0e1726, 2.5);
+      // 4. Studio Lighting Rig tailored for theme
+      const isLight = theme === "light";
+      const ambientLight = new THREE.AmbientLight(
+        isLight ? 0xffffff : 0x0e1726,
+        isLight ? 2.4 : 2.5
+      );
       scene.add(ambientLight);
 
-      const keyLight = new THREE.DirectionalLight(0x38bdf8, 3.8);
-      keyLight.position.set(-8, 10, 10);
+      // Key light: vibrant royal indigo / cyan highlight
+      const keyLight = new THREE.DirectionalLight(
+        isLight ? 0x6366f1 : 0x38bdf8,
+        isLight ? 4.6 : 3.8
+      );
+      keyLight.position.set(-8, 12, 10);
       scene.add(keyLight);
 
-      const rimLight = new THREE.DirectionalLight(0x06b6d4, 3.2);
-      rimLight.position.set(10, 8, -8);
+      // Rim light: electric magenta / cyan edge definition
+      const rimLight = new THREE.DirectionalLight(
+        isLight ? 0xec4899 : 0x06b6d4,
+        isLight ? 3.8 : 3.2
+      );
+      rimLight.position.set(10, 8, -6);
       scene.add(rimLight);
 
-      const violetLight = new THREE.PointLight(0xa855f7, 2.0, 25);
+      // Accent fill light: warm violet
+      const violetLight = new THREE.PointLight(
+        0xa855f7,
+        isLight ? 3.2 : 2.0,
+        25
+      );
       violetLight.position.set(0, -6, 5);
       scene.add(violetLight);
 
-      const innerCoreLight = new THREE.PointLight(0x38bdf8, 4.5, 12);
+      // Inner glowing core light
+      const innerCoreLight = new THREE.PointLight(
+        isLight ? 0x8b5cf6 : 0x38bdf8,
+        isLight ? 5.0 : 4.5,
+        14
+      );
       innerCoreLight.position.set(0, 0, 0);
       scene.add(innerCoreLight);
 
@@ -214,20 +238,21 @@ export function KnowledgeTransformationScene({
       const sphereGroup = new THREE.Group();
       scene.add(sphereGroup);
 
+      // Materials tailored for light/dark theme
       const strutMaterial = new THREE.MeshStandardMaterial({
-        color: 0x67e8f9,
-        emissive: 0x0284c7,
-        emissiveIntensity: 0.45,
-        metalness: 0.85,
-        roughness: 0.18,
+        color: isLight ? 0x4f46e5 : 0x67e8f9,
+        emissive: isLight ? 0x7c3aed : 0x0284c7,
+        emissiveIntensity: isLight ? 0.35 : 0.45,
+        metalness: isLight ? 0.90 : 0.85,
+        roughness: isLight ? 0.12 : 0.18,
       });
 
       const nodeMaterial = new THREE.MeshStandardMaterial({
-        color: 0x93c5fd,
-        emissive: 0x38bdf8,
-        emissiveIntensity: 0.6,
-        metalness: 0.88,
-        roughness: 0.14,
+        color: isLight ? 0xec4899 : 0x93c5fd,
+        emissive: isLight ? 0xdb2777 : 0x38bdf8,
+        emissiveIntensity: isLight ? 0.65 : 0.6,
+        metalness: isLight ? 0.92 : 0.88,
+        roughness: isLight ? 0.10 : 0.14,
       });
 
       // Instanced Struts
@@ -287,7 +312,7 @@ export function KnowledgeTransformationScene({
       instancedNodes.instanceMatrix.needsUpdate = true;
       sphereGroup.add(instancedNodes);
 
-      // Luminous Line Segments
+      // Luminous Network Overlay
       const lineGeo = new THREE.BufferGeometry();
       const linePositions = new Float32Array(dualEdges.length * 6);
       for (let e = 0; e < dualEdges.length; e++) {
@@ -305,16 +330,16 @@ export function KnowledgeTransformationScene({
         "position",
         new THREE.BufferAttribute(linePositions, 3)
       );
-      const lineMaterial = new THREE.LineBasicMaterial({
-        color: 0x38bdf8,
+      const lineMat = new THREE.LineBasicMaterial({
+        color: isLight ? 0x818cf8 : 0x38bdf8,
         transparent: true,
-        opacity: 0.65,
+        opacity: isLight ? 0.35 : 0.22,
       });
-      const lineSegments = new THREE.LineSegments(lineGeo, lineMaterial);
-      sphereGroup.add(lineSegments);
+      const wireNetwork = new THREE.LineSegments(lineGeo, lineMat);
+      sphereGroup.add(wireNetwork);
 
-      // Data Packet Pulses
-      const particleCount = 48;
+      // Floating Data Packet Particles along edges
+      const particleCount = 28;
       const particleGeo = new THREE.BufferGeometry();
       const particlePositions = new Float32Array(particleCount * 3);
       const particleEdges: {
@@ -322,33 +347,34 @@ export function KnowledgeTransformationScene({
         t: number;
         speed: number;
       }[] = [];
+
       for (let p = 0; p < particleCount; p++) {
-        const randEdge =
-          dualEdges[Math.floor(Math.random() * dualEdges.length)];
-        const prog = Math.random();
+        const edge = dualEdges[Math.floor(Math.random() * dualEdges.length)];
+        const t = Math.random();
         const speed = 0.25 + Math.random() * 0.45;
-        particleEdges.push({ edge: randEdge, t: prog, speed });
-        const vA = dualVerts[randEdge[0]];
-        const vB = dualVerts[randEdge[1]];
-        particlePositions[p * 3 + 0] = vA.x + (vB.x - vA.x) * prog;
-        particlePositions[p * 3 + 1] = vA.y + (vB.y - vA.y) * prog;
-        particlePositions[p * 3 + 2] = vA.z + (vB.z - vA.z) * prog;
+        particleEdges.push({ edge, t, speed });
+        const vA = dualVerts[edge[0]];
+        const vB = dualVerts[edge[1]];
+        particlePositions[p * 3 + 0] = vA.x + (vB.x - vA.x) * t;
+        particlePositions[p * 3 + 1] = vA.y + (vB.y - vA.y) * t;
+        particlePositions[p * 3 + 2] = vA.z + (vB.z - vA.z) * t;
       }
+
       particleGeo.setAttribute(
         "position",
         new THREE.BufferAttribute(particlePositions, 3)
       );
       const particleMaterial = new THREE.PointsMaterial({
-        color: 0x67e8f9,
-        size: 0.12,
+        color: isLight ? 0xf43f5e : 0x67e8f9,
+        size: isLight ? 0.11 : 0.09,
         transparent: true,
         opacity: 0.95,
       });
-      const particlePoints = new THREE.Points(particleGeo, particleMaterial);
-      sphereGroup.add(particlePoints);
+      const particles = new THREE.Points(particleGeo, particleMaterial);
+      sphereGroup.add(particles);
 
-      // Surrounding Ambient Sparkles
-      const sparkleCount = 40;
+      // Orbital Sparkles
+      const sparkleCount = 42;
       const sparkleGeo = new THREE.BufferGeometry();
       const sparklePositions = new Float32Array(sparkleCount * 3);
       for (let s = 0; s < sparkleCount; s++) {
@@ -368,10 +394,10 @@ export function KnowledgeTransformationScene({
       const sparkles = new THREE.Points(
         sparkleGeo,
         new THREE.PointsMaterial({
-          color: 0x93c5fd,
+          color: isLight ? 0x818cf8 : 0x93c5fd,
           size: 0.065,
           transparent: true,
-          opacity: 0.45,
+          opacity: isLight ? 0.55 : 0.45,
         })
       );
       scene.add(sparkles);
@@ -476,7 +502,7 @@ export function KnowledgeTransformationScene({
         } catch (e) {}
       }
     };
-  }, []);
+  }, [theme]);
 
   return (
     <div
@@ -485,7 +511,7 @@ export function KnowledgeTransformationScene({
         position: "relative",
         width: "100%",
         height: "640px",
-        minHeight: "580px",
+        minHeight: "560px",
         background: "transparent",
         display: "flex",
         alignItems: "center",

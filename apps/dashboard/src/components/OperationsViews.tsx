@@ -691,9 +691,8 @@ export function FederationView({
                   </td>
                   <td>
                     <span
-                      className={`km-badge ${
-                        p.identity_verified ? "verified" : "warning"
-                      }`}
+                      className={`km-badge ${p.identity_verified ? "verified" : "warning"
+                        }`}
                     >
                       {p.identity_verified
                         ? `✓ Verified (${p.key_fingerprint.slice(0, 10)}…)`
@@ -899,10 +898,10 @@ export function TrustSecurityView({ bundles }: { bundles: BundleItem[] }) {
         computed_digest: tamperedDigest,
         reasons: [
           "RFC 8785 JCS canonical content digest mismatch: expected " +
-            (parsed.content_digest || "").slice(0, 16) +
-            "… but computed " +
-            tamperedDigest.slice(0, 16) +
-            "…",
+          (parsed.content_digest || "").slice(0, 16) +
+          "… but computed " +
+          tamperedDigest.slice(0, 16) +
+          "…",
           "Ed25519 signature verification failed over mutated payload",
         ],
         epistemic_notice:
@@ -967,9 +966,8 @@ export function TrustSecurityView({ bundles }: { bundles: BundleItem[] }) {
             </div>
             <div style={{ marginTop: 10 }}>
               <span
-                className={`km-badge ${
-                  verifyReport.integrity_verified ? "verified" : "error"
-                }`}
+                className={`km-badge ${verifyReport.integrity_verified ? "verified" : "error"
+                  }`}
               >
                 {verifyReport.integrity_verified
                   ? "✓ SHA-256 Digest Matches Canonical Payload"
@@ -990,9 +988,8 @@ export function TrustSecurityView({ bundles }: { bundles: BundleItem[] }) {
             </div>
             <div style={{ marginTop: 10 }}>
               <span
-                className={`km-badge ${
-                  verifyReport.signature_verified ? "verified" : "error"
-                }`}
+                className={`km-badge ${verifyReport.signature_verified ? "verified" : "error"
+                  }`}
               >
                 {verifyReport.signature_verified
                   ? "✓ RFC 8032 Ed25519 Signature Valid"
@@ -1011,18 +1008,16 @@ export function TrustSecurityView({ bundles }: { bundles: BundleItem[] }) {
             </div>
             <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
               <span
-                className={`km-badge ${
-                  verifyReport.signer_recognized ? "verified" : "warning"
-                }`}
+                className={`km-badge ${verifyReport.signer_recognized ? "verified" : "warning"
+                  }`}
               >
                 {verifyReport.signer_recognized
                   ? "✓ Recognized Node Key"
                   : "⚠ Unrecognized Signer"}
               </span>
               <span
-                className={`km-badge ${
-                  verifyReport.provenance_available ? "verified" : "warning"
-                }`}
+                className={`km-badge ${verifyReport.provenance_available ? "verified" : "warning"
+                  }`}
               >
                 {verifyReport.provenance_available
                   ? "✓ W3C PROV Chain Intact"
@@ -1504,7 +1499,7 @@ export function SettingsView({
           setMembers(m.items);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   async function handleAuthSubmit(e: React.FormEvent) {
@@ -1536,8 +1531,7 @@ export function SettingsView({
       onAuthChanged();
     } catch (err) {
       setMsg(
-        `✕ Authentication error: ${
-          err instanceof Error ? err.message : "Failed"
+        `✕ Authentication error: ${err instanceof Error ? err.message : "Failed"
         }`
       );
     }
@@ -1563,8 +1557,7 @@ export function SettingsView({
       }
     } catch (err) {
       setMsg(
-        `✕ Could not add member: ${
-          err instanceof Error ? err.message : "Error"
+        `✕ Could not add member: ${err instanceof Error ? err.message : "Error"
         }`
       );
     }

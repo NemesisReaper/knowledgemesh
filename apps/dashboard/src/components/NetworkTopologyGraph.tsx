@@ -76,26 +76,33 @@ export function NetworkTopologyGraph({
 
   const positions = useMemo<Record<string, Point>>(() => {
     const result: Record<string, Point> = {};
-    const center = { x: 370, y: 195 };
     const localNode =
       filteredNodes.find((node) => node.type === "local_node") ??
       filteredNodes[0];
     const peers = filteredNodes.filter((node) => node.id !== localNode?.id);
+    const count = peers.length;
+    const isTriangular = count === 2;
+    const center = { x: 370, y: isTriangular ? 220 : 195 };
 
     if (localNode) result[localNode.id] = center;
 
-    // Use an elliptical orbit and scale its radius down for larger networks.
-    const count = peers.length;
-    const radiusX = count > 8 ? 205 : count > 4 ? 185 : 155;
-    const radiusY = count > 8 ? 135 : 145;
+    if (isTriangular) {
+      // 2 peers: triangular layout with peers above local anchor
+      result[peers[0].id] = { x: 540, y: 95 };
+      result[peers[1].id] = { x: 200, y: 95 };
+    } else {
+      // General N peers: elliptical distribution
+      const radiusX = count > 8 ? 205 : count > 4 ? 185 : 160;
+      const radiusY = count > 8 ? 135 : 125;
 
-    peers.forEach((node, index) => {
-      const angle = (index / Math.max(count, 1)) * Math.PI * 2 - Math.PI / 2;
-      result[node.id] = {
-        x: Math.round(center.x + Math.cos(angle) * radiusX),
-        y: Math.round(center.y + Math.sin(angle) * radiusY),
-      };
-    });
+      peers.forEach((node, index) => {
+        const angle = (index / Math.max(count, 1)) * Math.PI * 2 - Math.PI / 2;
+        result[node.id] = {
+          x: Math.round(center.x + Math.cos(angle) * radiusX),
+          y: Math.round(center.y + Math.sin(angle) * radiusY),
+        };
+      });
+    }
 
     return result;
   }, [filteredNodes]);
@@ -393,8 +400,11 @@ export function NetworkTopologyGraph({
                     : "#55C8D7";
                 const path = `M ${source.x} ${source.y} L ${target.x} ${target.y}`;
                 const reversePath = `M ${target.x} ${target.y} L ${source.x} ${source.y}`;
-                const midpointX = (source.x + target.x) / 2;
-                const midpointY = (source.y + target.y) / 2;
+                const dx = target.x - source.x;
+                const dy = target.y - source.y;
+                const len = Math.sqrt(dx * dx + dy * dy) || 1;
+                const badgeX = Math.round((source.x + target.x) / 2 + (-dy / len) * 18);
+                const badgeY = Math.round((source.y + target.y) / 2 + (dx / len) * 18);
 
                 return (
                   <g key={edge.id}>
@@ -446,7 +456,7 @@ export function NetworkTopologyGraph({
                       </>
                     )}
 
-                    <g transform={`translate(${midpointX}, ${midpointY})`}>
+                    <g transform={`translate(${badgeX}, ${badgeY})`}>
                       <rect
                         x={-54}
                         y={-11}
@@ -485,6 +495,11 @@ export function NetworkTopologyGraph({
                   : node.status === "active"
                     ? "#38D399"
                     : "#F5B942";
+
+                const isUpper = point.y < (positions[filteredNodes[0]?.id]?.y ?? 195) - 20;
+                const cardY = isUpper ? -52 : (isLocal ? 30 : 26);
+                const textY1 = isUpper ? -37 : (isLocal ? 45 : 41);
+                const textY2 = isUpper ? -23 : (isLocal ? 59 : 55);
 
                 return (
                   <g
@@ -531,7 +546,7 @@ export function NetworkTopologyGraph({
                     <circle r={isLocal ? 8 : 6} fill={stroke} />
                     <rect
                       x={-86}
-                      y={isLocal ? 30 : 26}
+                      y={cardY}
                       width={172}
                       height={36}
                       rx={8}
@@ -539,7 +554,7 @@ export function NetworkTopologyGraph({
                       stroke={isSelected ? stroke : "#22304A"}
                     />
                     <text
-                      y={isLocal ? 45 : 41}
+                      y={textY1}
                       fill="#F3F7FF"
                       fontSize="11"
                       fontWeight="650"
@@ -551,7 +566,7 @@ export function NetworkTopologyGraph({
                         : node.label}
                     </text>
                     <text
-                      y={isLocal ? 59 : 55}
+                      y={textY2}
                       fill="#8FA1C2"
                       fontSize="9.5"
                       fontFamily="var(--font-mono)"

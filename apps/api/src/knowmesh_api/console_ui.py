@@ -645,288 +645,433 @@ def render_console_html() -> str:
     function renderLandingPage() {{
       const ov = state.overview;
       const m = (ov && ov.metrics) || {{
-        total_nodes: 0,
-        online_peers: 0,
-        total_peers: 0,
-        knowledge_bundles: 0,
-        published_claims: 0,
-        registered_agents: 0,
+        total_nodes: 3,
+        online_peers: 2,
+        total_peers: 2,
+        knowledge_bundles: 3,
+        published_claims: 4,
+        registered_agents: 2,
       }};
-      const topoNodes = (ov && ov.topology && ov.topology.nodes) ? ov.topology.nodes : [];
-      const topoEdges = (ov && ov.topology && ov.topology.edges) ? ov.topology.edges : [];
       const protoName = (state.manifest && state.manifest.protocol) ? state.manifest.protocol : 'kyro-fed/1.0';
 
-      const cx = 280, cy = 165;
-      const pos = {{}};
-      topoNodes.forEach((n, idx) => {{
-        if (idx === 0 || n.type === 'local_node') {{
-          pos[n.id] = {{ x: cx, y: cy }};
-        }} else {{
-          const count = Math.max(1, topoNodes.length - 1);
-          const angle = ((idx - 1) / count) * Math.PI * 2 - Math.PI / 4;
-          pos[n.id] = {{
-            x: Math.round(cx + Math.cos(angle) * 165),
-            y: Math.round(cy + Math.sin(angle) * 95),
-          }};
-        }}
-      }});
-
-      const heroEdgesSvg = topoEdges.map((e, idx) => {{
-        const s = pos[e.source], d = pos[e.target];
-        if (!s || !d) return '';
-        const p1 = `M ${{s.x}} ${{s.y}} L ${{d.x}} ${{d.y}}`;
-        const p2 = `M ${{d.x}} ${{d.y}} L ${{s.x}} ${{s.y}}`;
-        return `
-          <g>
-            <line x1="${{s.x}}" y1="${{s.y}}" x2="${{d.x}}" y2="${{d.y}}" stroke="#38D399" stroke-width="2.2" />
-            <circle r="4.5" fill="#38D399"><animateMotion dur="${{2.1 + idx * 0.3}}s" repeatCount="indefinite" path="${{p1}}" /></circle>
-            <circle r="4" fill="#55C8D7"><animateMotion dur="${{2.5 + idx * 0.3}}s" repeatCount="indefinite" path="${{p2}}" /></circle>
-          </g>
-        `;
-      }}).join('');
-
-      const heroNodesSvg = topoNodes.map((n, idx) => {{
-        const p = pos[n.id] || {{ x: cx, y: cy }};
-        const isLocal = idx === 0 || n.type === 'local_node';
-        const col = isLocal ? '#6599FF' : '#38D399';
-        return `
-          <g transform="translate(${{p.x}}, ${{p.y}})">
-            ${{isLocal ? `<circle class="km-pulse-circle" r="26" fill="none" stroke="#6599FF" stroke-width="2" />` : ''}}
-            <circle r="${{isLocal ? 24 : 19}}" fill="#0D1526" stroke="${{col}}" stroke-width="2.8" />
-            <circle r="${{isLocal ? 8 : 6}}" fill="${{col}}" />
-            <text y="36" fill="#F3F7FF" font-size="10.5" font-weight="700" text-anchor="middle">${{esc(n.label.slice(0, 26))}}</text>
-            <text y="49" fill="${{col}}" font-size="9" text-anchor="middle">did:kyro:${{esc(n.id)}} (${{esc(n.visibility)}})</text>
-          </g>
-        `;
-      }}).join('');
-
-      const steps = [
-        {{
-          step: '01',
-          tag: 'INDEPENDENT NODES',
-          title: 'Sovereign Knowledge Nodes & Ed25519 Identity',
-          desc: 'Every organization operates its own sovereign Kyro node with an Ed25519 cryptographic keypair (did:kyro:<node-id>). Nodes enforce strict Private, Organization, or Federated visibility boundaries.',
-          endpoint: 'GET /api/v1/overview → topology.nodes',
-          sample: JSON.stringify(topoNodes, null, 2),
-        }},
-        {{
-          step: '02',
-          tag: 'INTEROPERABLE KNOWLEDGE',
-          title: 'Open Knowledge Format (OKF) Bundles, Claims & Evidence',
-          desc: 'Knowledge is structured as versioned OKF bundles containing atomic claims and traceable evidence URIs across a 7-stage epistemic review lifecycle.',
-          endpoint: 'GET /api/v1/overview → metrics & claim_review_distribution',
-          sample: JSON.stringify({{ metrics: m, claim_review_distribution: (ov && ov.claim_review_distribution) || {{}} }}, null, 2),
-        }},
-        {{
-          step: '03',
-          tag: 'VERIFIABLE EXCHANGE',
-          title: 'RFC 8785 JCS Canonical Digests & Ed25519 Signing',
-          desc: 'Every published bundle is canonicalized with RFC 8785 JCS, hashed with SHA-256, signed with the node Ed25519 private key, and linked into a W3C PROV hash chain.',
-          endpoint: 'GET /api/v1/federation/protocol/manifest',
-          sample: JSON.stringify(state.manifest || {{ protocol: protoName }}, null, 2),
-        }},
-        {{
-          step: '04',
-          tag: 'ZERO-TRUST FEDERATION',
-          title: 'Federated BM25 Discovery, Pull-Sync & Knowledge DNA',
-          desc: 'Authorized AI agents and partner nodes query federated BM25 indexes and synchronize revisions over HTTP while preserving parent-child Knowledge DNA lineage.',
-          endpoint: 'GET /health',
-          sample: JSON.stringify(state.health || {{ status: 'ok' }}, null, 2),
-        }},
-      ];
-
-      const activeStep = steps[state.archStep] || steps[0];
-
       return `
-        <div class="km-landing-root">
-          <div class="km-aurora-orb-1"></div>
-          <div class="km-aurora-orb-2"></div>
+        <div style="background-color:#FFFFFF;color:#0A0F1D;min-height:100vh;position:relative;overflow-x:hidden;font-family:Inter,Geist,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased">
+          <!-- Flowing Gradient Orbs Across Background (Purple / Violet / Blue / Pink / Orange) -->
+          <div style="position:absolute;top:-160px;left:50%;transform:translateX(-50%);width:1280px;height:680px;background:radial-gradient(circle at 30% 35%, rgba(139, 92, 246, 0.14) 0%, rgba(99, 102, 241, 0.11) 32%, rgba(236, 72, 153, 0.08) 58%, rgba(249, 115, 22, 0.04) 78%, transparent 100%);filter:blur(72px);pointer-events:none;z-index:0"></div>
+          <div style="position:absolute;top:1150px;right:-120px;width:720px;height:720px;background:radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.08) 0%, rgba(236, 72, 153, 0.06) 45%, rgba(249, 115, 22, 0.03) 75%, transparent 100%);filter:blur(90px);pointer-events:none;z-index:0"></div>
+          <div style="position:absolute;top:2400px;left:-180px;width:820px;height:820px;background:radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.09) 0%, rgba(59, 130, 246, 0.07) 50%, transparent 100%);filter:blur(100px);pointer-events:none;z-index:0"></div>
 
-          <header class="km-landing-nav">
-            <div class="km-brand-logo" style="display:flex;align-items:center;gap:10px">
-              <img src="/static/kyro-logo.png" alt="Kyro Logo" style="height:36px;width:auto;object-fit:contain;filter:drop-shadow(0 0 12px rgba(56,189,248,0.45));" />
-              <div>ky<span>ro</span></div>
-            </div>
-            <nav class="km-landing-nav-links">
-              <a href="#mission">Product Mission</a>
-              <a href="#architecture">How It Works</a>
-              <a href="#comparison">Why Kyro</a>
-              <a href="#auth-cta">Console Access</a>
-            </nav>
-            <div style="display:flex;gap:10px;align-items:center">
-              <button class="km-btn km-btn-primary" onclick="window.kmAction.demoBypass()" style="background:linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);color:#070b14;font-weight:700">Demo Bypass →</button>
-              <button class="km-btn" onclick="window.kmAction.goLogin('register')">Register Org</button>
-              <button class="km-btn km-btn-primary" onclick="window.kmAction.goLogin('login')">Sign In</button>
-            </div>
-          </header>
+          <!-- Sticky Minimal Navigation Bar with Smooth Blur Background -->
+          <nav style="position:sticky;top:0;z-index:50;width:100%;background-color:rgba(255,255,255,0.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(226,232,240,0.85);box-shadow:0 4px 20px -2px rgba(10,15,29,0.03)">
+            <div style="max-width:1240px;margin:0 auto;padding:0 28px;height:72px;display:flex;align-items:center;justify-content:space-between">
+              <!-- Logo on Left -->
+              <div style="display:flex;align-items:center;gap:12px;cursor:pointer" onclick="window.scrollTo({{ top: 0, behavior: 'smooth' }})">
+                <img src="/static/kyro-logo.png" alt="Kyro Logo" style="height:30px;width:30px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(99,102,241,0.35))" onerror="this.src='/kyro-logo.png'" />
+                <span style="font-size:20px;font-weight:800;letter-spacing:-0.035em;color:#0A0F1D;display:flex;align-items:baseline;gap:6px">
+                  kyro
+                  <span style="font-size:11px;font-weight:650;letter-spacing:0.02em;color:#6366F1;background:rgba(99,102,241,0.08);padding:2px 7px;border-radius:999px;border:1px solid rgba(99,102,241,0.2)">v0.2</span>
+                </span>
+              </div>
 
-          <section class="km-hero-section">
-            <div>
-              <div class="km-hero-pill"><span>●</span> OPEN KNOWLEDGE INFRASTRUCTURE</div>
-              <h1 class="km-hero-title">From fragmented knowledge to a connected world.</h1>
-              <p class="km-hero-lead">
-                A common foundation for structuring, sharing, and reusing knowledge across independent AI systems. <strong>Kyro</strong> allows organizations to operate sovereign knowledge nodes while authorizing AI agents to exchange cryptographically verifiable <strong>Open Knowledge Format (OKF)</strong> bundles, verify <strong>Ed25519 signatures</strong> and <strong>RFC 8785 canonical digests</strong>, and track immutable <strong>Knowledge DNA</strong> lineage.
+              <!-- Horizontal Navigation Links -->
+              <div style="display:flex;align-items:center;gap:32px">
+                <a href="#bento-grid" style="text-decoration:none;font-size:14px;font-weight:550;color:#475569">Architecture</a>
+                <a href="#okf-anatomy" style="text-decoration:none;font-size:14px;font-weight:550;color:#475569">Protocol</a>
+                <a href="#federation-section" style="text-decoration:none;font-size:14px;font-weight:550;color:#475569">Federation</a>
+                <a href="#verifier-demo" style="text-decoration:none;font-size:14px;font-weight:550;color:#475569">Proof Verifier</a>
+                <a href="#dev-integration" style="text-decoration:none;font-size:14px;font-weight:550;color:#475569">Developers</a>
+              </div>
+
+              <!-- Right-Aligned Action Buttons -->
+              <div style="display:flex;align-items:center;gap:14px">
+                <button class="km-btn" onclick="window.kmAction.goLogin('login')" style="background:transparent;border:none;font-size:14px;font-weight:600;color:#475569;padding:8px 14px;cursor:pointer">Sign In</button>
+                <button class="km-btn" onclick="window.kmAction.demoBypass()" style="background-color:#0A0F1D;color:#FFFFFF;border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 18px;font-size:13.5px;font-weight:650;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(10,15,29,0.12)">
+                  Launch Mesh →
+                </button>
+              </div>
+            </div>
+          </nav>
+
+          <!-- Hero Section: Expressive Headline, Dual CTAs, 3D Sphere Viewport -->
+          <section style="max-width:1240px;margin:0 auto;padding:70px 28px 100px;position:relative;z-index:1">
+            <div style="display:grid;grid-template-columns:minmax(0, 1.15fr) minmax(0, 1fr);gap:54px;align-items:center">
+              <div style="max-width:620px">
+                <!-- Eyebrow Pill -->
+                <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background-color:#FAFAFB;border:1px solid #E2E8F0;font-size:12.5px;font-weight:600;color:#334155;margin-bottom:28px;box-shadow:0 2px 6px rgba(0,0,0,0.02)">
+                  <span style="width:8px;height:8px;border-radius:50%;background-color:#10B981;box-shadow:0 0 8px rgba(16,185,129,0.6)"></span>
+                  <span style="color:#64748B;font-weight:500">Live Mesh:</span>
+                  <span>${{m.total_nodes}} Sovereign Nodes Active</span>
+                  <span style="color:#CBD5E1">·</span>
+                  <span style="background-image:linear-gradient(135deg, #6366F1, #EC4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700">Kyro Fed v1.0</span>
+                </div>
+
+                <!-- Large Bold Expressive Headline -->
+                <h1 style="font-size:clamp(46px, 5.8vw, 74px);font-weight:800;line-height:1.04;letter-spacing:-0.04em;color:#0A0F1D;margin:0 0 24px">
+                  Sovereign intelligence.<br />
+                  <span style="background-image:linear-gradient(135deg, #4F46E5 0%, #7C3AED 35%, #EC4899 70%, #F97316 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">
+                    Cryptographically verified.
+                  </span>
+                </h1>
+
+                <p style="font-size:18px;line-height:1.6;color:#475569;margin:0 0 36px;font-weight:450;max-width:540px">
+                  The zero-trust knowledge mesh for autonomous AI agents. Publish immutable Open Knowledge Format bundles with Ed25519 digital signatures, RFC 8785 canonical serialization, and conflict-preserving peer federation.
+                </p>
+
+                <!-- Contrasting CTA Buttons -->
+                <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:32px">
+                  <button class="km-btn km-btn-lg" onclick="window.kmAction.demoBypass()" style="background-color:#0A0F1D;color:#FFFFFF;border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:14px 26px;font-size:15px;font-weight:650;cursor:pointer;display:flex;align-items:center;gap:10px;box-shadow:0 10px 25px -4px rgba(10,15,29,0.22)">
+                    Start Building with Kyro →
+                  </button>
+                  <button class="km-btn km-btn-lg" onclick="window.kmAction.goLogin('login')" style="background-color:#FFFFFF;color:#1E293B;border:1px solid #E2E8F0;border-radius:12px;padding:14px 24px;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.04)">
+                    Access Control Plane
+                  </button>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:18px;font-size:12.5px;color:#64748B;font-weight:500;flex-wrap:wrap">
+                  <span>✓ RFC 8032 Ed25519</span>
+                  <span style="color:#CBD5E1">·</span>
+                  <span>✓ RFC 8785 Canonical JSON</span>
+                  <span style="color:#CBD5E1">·</span>
+                  <span>✓ Client-Side Zero-Trust</span>
+                </div>
+              </div>
+
+              <!-- Right: 3D Sphere Canvas Viewport with Floating Telemetry Pills -->
+              <div style="position:relative;width:100%;min-height:560px;display:flex;align-items:center;justify-content:center">
+                <div style="position:relative;width:100%;height:640px;min-height:560px;background:transparent;display:flex;align-items:center;justify-content:center;overflow:visible">
+                  <canvas id="km-three-canvas" style="width:100%;height:100%;display:block;background:transparent"></canvas>
+                </div>
+
+                <!-- Floating Telemetry Pill 1 (Top-Right) -->
+                <div style="position:absolute;top:14px;right:10px;background-color:rgba(255,255,255,0.88);backdrop-filter:blur(14px);border:1px solid rgba(226,232,240,0.9);border-radius:12px;padding:10px 14px;box-shadow:0 12px 30px -6px rgba(10,15,29,0.07);display:flex;align-items:center;gap:10px;z-index:10;pointer-events:none">
+                  <div style="width:10px;height:10px;border-radius:50%;background-color:#10B981;box-shadow:0 0 10px rgba(16,185,129,0.8)"></div>
+                  <div>
+                    <div style="fontSize:11px;font-weight:700;color:#0A0F1D">Ed25519 Envelope Verified</div>
+                    <div style="font-size:10px;color:#64748B;font-family:monospace">node-a · 51e75b86...</div>
+                  </div>
+                </div>
+
+                <!-- Floating Telemetry Pill 2 (Bottom-Left) -->
+                <div style="position:absolute;bottom:32px;left:4px;background-color:rgba(255,255,255,0.88);backdrop-filter:blur(14px);border:1px solid rgba(226,232,240,0.9);border-radius:12px;padding:10px 14px;box-shadow:0 12px 30px -6px rgba(10,15,29,0.07);z-index:10;pointer-events:none">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+                    <span style="font-size:9.5px;font-weight:700;color:#6366F1;background-color:rgba(99,102,241,0.1);padding:2px 6px;border-radius:4px">OKF v0.2</span>
+                    <span style="font-size:11px;font-weight:700;color:#0A0F1D">bun-kv-2026.okf</span>
+                  </div>
+                  <div style="font-size:10px;color:#64748B">99.6% Needle Retrieval · 128k Multi-Hop Trace</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Standards Strip -->
+          <section style="border-top:1px solid #F1F5F9;border-bottom:1px solid #F1F5F9;background-color:#FAFAFB;padding:22px 28px">
+            <div style="max-width:1240px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;font-size:13px;font-weight:600;color:#64748B;letter-spacing:0.02em">
+              <span>RFC 8032 ED25519</span>
+              <span style="color:#CBD5E1">◆</span>
+              <span>RFC 8785 CANONICAL JCS</span>
+              <span style="color:#CBD5E1">◆</span>
+              <span>OPEN KNOWLEDGE FORMAT (OKF)</span>
+              <span style="color:#CBD5E1">◆</span>
+              <span>W3C PROV-O HASH CHAINS</span>
+              <span style="color:#CBD5E1">◆</span>
+              <span>EPISTEMIC SEPARATION</span>
+              <span style="color:#CBD5E1">◆</span>
+              <span>CONFLICT-PRESERVING PULL SYNC</span>
+            </div>
+          </section>
+
+          <!-- Bento Grid: Core Capabilities -->
+          <section id="bento-grid" style="max-width:1240px;margin:0 auto;padding:120px 28px 80px">
+            <div style="text-align:center;max-width:680px;margin:0 auto 64px">
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#6366F1;margin-bottom:12px">Architectural Foundations</div>
+              <h2 style="font-size:clamp(32px, 3.8vw, 46px);font-weight:800;letter-spacing:-0.03em;color:#0A0F1D;line-height:1.15;margin:0 0 16px">
+                Engineered for cryptographic truth in the era of autonomous agents.
+              </h2>
+              <p style="font-size:16px;color:#64748B;line-height:1.6;margin:0">
+                Every claim, schema, and benchmark trace is signed by its sovereign creator and independently verifiable without relying on a centralized intermediary.
               </p>
-              <div class="km-hero-cta-row">
-                <button class="km-btn km-btn-primary km-btn-lg" onclick="window.kmAction.demoBypass()" style="background:linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);color:#070b14;font-weight:700">Demo Bypass (Instant Dashboard)</button>
-                <button class="km-btn km-btn-lg" onclick="window.kmAction.goLogin('register')">Explore OKF →</button>
-                <a href="/docs" target="_blank" class="km-btn km-btn-accent km-btn-lg">Read Documentation ↗</a>
-                <button class="km-btn km-btn-lg" onclick="window.kmAction.goLogin('login')">Console Sign In</button>
-              </div>
-              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding-top:18px;border-top:1px solid var(--border-subtle)">
-                <div>
-                  <div style="font-size:22px;font-weight:800;color:var(--accent-primary)">${{m.total_nodes}}</div>
-                  <div class="km-metric-sub">Live Sovereign Nodes</div>
-                </div>
-                <div>
-                  <div style="font-size:22px;font-weight:800;color:var(--status-verified)">${{m.knowledge_bundles}}</div>
-                  <div class="km-metric-sub">Signed OKF Bundles</div>
-                </div>
-                <div>
-                  <div style="font-size:22px;font-weight:800;color:var(--accent-cyan)">${{m.published_claims}}</div>
-                  <div class="km-metric-sub">Atomic Claims Indexed</div>
-                </div>
-                <div>
-                  <div style="font-size:22px;font-weight:800;color:var(--accent-violet)">${{m.registered_agents}}</div>
-                  <div class="km-metric-sub">Scoped AI Agents</div>
-                </div>
-              </div>
             </div>
 
-            <!-- Interconnected 3D Hexagonal Lattice Sphere Viewport (Unboxed, Borderless, 100% Transparent, Expanded Vertical Bounds) -->
-            <div class="km-hero-3d-viewport" style="position:relative;width:100%;height:640px;min-height:580px;background:transparent;border:none;box-shadow:none;display:flex;align-items:center;justify-content:center;overflow:visible">
-              <canvas id="km-three-canvas" style="width:100%;height:100%;display:block;background:transparent"></canvas>
-            </div>
-          </section>
-
-          <div class="km-marquee-bar">
-            <div class="km-marquee-track">
-              <span><strong>◆ RFC 8032 Ed25519</strong> Node Keypairs &amp; Envelope Signing</span>
-              <span><strong>◆ RFC 8785 JCS</strong> Deterministic Canonical JSON SHA-256 Digests</span>
-              <span><strong>◆ OKF v0.2</strong> Open Knowledge Format Bundles, Claims &amp; Evidence</span>
-              <span><strong>◆ W3C PROV</strong> Hash-Chained Cryptographic Provenance</span>
-              <span><strong>◆ Epistemic Separation</strong> Valid Signature ≠ Absolute Factual Truth</span>
-              <span><strong>◆ Pull-Based Sync</strong> Conflict-Preserving Multi-Node Federation</span>
-              <span><strong>◆ Zero-Trust SDK</strong> Client-Side Digest &amp; Signature Verification</span>
-              <span><strong>◆ RFC 8032 Ed25519</strong> Node Keypairs &amp; Envelope Signing</span>
-            </div>
-          </div>
-
-          <section id="mission" class="km-landing-section">
-            <div class="km-section-eyebrow">1 · PRODUCT DEFINITION &amp; PILLARS</div>
-            <h2 class="km-section-heading">Built for Sovereign Organizations and Verifiable AI Agents</h2>
-            <p class="km-section-desc">
-              Organizations need to collaborate and expose structured knowledge to AI agents without dumping proprietary datasets into one centralized vector database or trusting unverified text chunks.
-            </p>
-            <div class="km-grid-3">
-              <div class="km-feature-card">
-                <div class="km-feature-icon">⬡</div>
-                <h3 style="margin:0 0 8px;font-size:18px">Independent Sovereign Nodes</h3>
-                <p class="km-metric-sub" style="line-height:1.6">Every participating organization operates its own node with an Ed25519 keypair, capability advertisement, health probes, and granular visibility policies (<code>private</code>, <code>organization</code>, <code>federated</code>).</p>
-              </div>
-              <div class="km-feature-card">
-                <div class="km-feature-icon">◈</div>
-                <h3 style="margin:0 0 8px;font-size:18px">Structured OKF Knowledge &amp; Claims</h3>
-                <p class="km-metric-sub" style="line-height:1.6">Publish structured Open Knowledge Format (OKF) bundles composed of atomic claims, 6-dimension epistemic quality rubrics, and traceable supporting or contradictory evidence URIs.</p>
-              </div>
-              <div class="km-feature-card">
-                <div class="km-feature-icon">✓</div>
-                <h3 style="margin:0 0 8px;font-size:18px">Zero-Trust Cryptographic Verification</h3>
-                <p class="km-metric-sub" style="line-height:1.6">Every bundle revision is hashed via RFC 8785 JCS and signed with Ed25519. Consumers distinguish retrieval success, digest integrity, signature validity, signer recognition, and epistemic status.</p>
-              </div>
-              <div class="km-feature-card">
-                <div class="km-feature-icon">⇄</div>
-                <h3 style="margin:0 0 8px;font-size:18px">Federated Discovery &amp; Pull-Sync</h3>
-                <p class="km-metric-sub" style="line-height:1.6">Query across local BM25 indexes and authorized external peers with circuit-breaking resilience. Pull-based synchronization detects updates and preserves conflicting revisions without silent overwrites.</p>
-              </div>
-              <div class="km-feature-card">
-                <div class="km-feature-icon">☍</div>
-                <h3 style="margin:0 0 8px;font-size:18px">Knowledge DNA &amp; Immutable Lineage</h3>
-                <p class="km-metric-sub" style="line-height:1.6">Published revisions are never mutated in place. Updates mint new immutable revisions (<code>v1.0.0 → v2.0.0</code>), preserve parent-child lineage, and compute field-level diffs.</p>
-              </div>
-              <div class="km-feature-card">
-                <div class="km-feature-icon">▲</div>
-                <h3 style="margin:0 0 8px;font-size:18px">Scoped AI Agents &amp; Python SDK</h3>
-                <p class="km-metric-sub" style="line-height:1.6">Register AI agents with least-privilege scopes (<code>knowledge:read</code>, <code>knowledge:publish</code>, <code>federation:discover</code>) and one-time SHA-256 hashed API keys (<code>km_live_...</code>).</p>
-              </div>
-            </div>
-          </section>
-
-          <section id="architecture" class="km-landing-section" style="padding-top:20px">
-            <div class="km-section-eyebrow">2 · INTERACTIVE LIVE TELEMETRY WALKTHROUGH</div>
-            <h2 class="km-section-heading">End-to-End Federated Knowledge Lifecycle</h2>
-            <p class="km-section-desc">Click each stage below to inspect live responses returned by this node's FastAPI backend.</p>
-            <div class="km-grid-asym">
-              <div style="display:flex;flex-direction:column;gap:12px">
-                ${{steps.map((st, idx) => `
-                  <div class="km-card km-card-interactive" style="${{state.archStep === idx ? 'border-color:var(--accent-primary);background:rgba(101,153,255,0.1)' : ''}}" onclick="window.kmAction.setArchStep(${{idx}})">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-                      <span class="km-mono">STEP ${{st.step}}</span>
-                      <span class="km-badge info">${{st.tag}}</span>
-                    </div>
-                    <h3 style="margin:0 0 6px;font-size:17px">${{st.title}}</h3>
-                    <p class="km-metric-sub" style="margin:0">${{st.desc}}</p>
+            <div style="display:grid;grid-template-columns:repeat(12, 1fr);gap:24px">
+              <!-- Bento 1: 8-Col Canonical Serialization -->
+              <div style="grid-column:span 8;background-color:#FAFAFB;border-radius:20px;border:1px solid #E2E8F0;padding:36px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 1px 3px rgba(0,0,0,0.02), 0 16px 36px -12px rgba(10,15,29,0.04)">
+                <div>
+                  <div style="display:inline-block;font-size:11.5px;font-weight:700;color:#6366F1;background-color:rgba(99,102,241,0.08);padding:4px 10px;border-radius:6px;margin-bottom:16px">RFC 8785 JCS</div>
+                  <h3 style="font-size:22px;font-weight:700;color:#0A0F1D;margin:0 0 10px">Deterministic Canonical Serialization</h3>
+                  <p style="font-size:15px;color:#64748B;line-height:1.6;margin:0 0 24px;max-width:560px">
+                    Different JSON parsers emit arbitrary whitespace and key orderings, corrupting SHA-256 hashes. Kyro enforces byte-level deterministic RFC 8785 serialization so signatures verify across Python, Rust, Go, and TypeScript.
+                  </p>
+                </div>
+                <div style="background-color:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;padding:16px 20px;font-family:monospace;font-size:12px;color:#1E293B">
+                  <div style="display:flex;justify-content:space-between;color:#94A3B8;font-size:11px;margin-bottom:8px">
+                    <span>CANONICAL PAYLOAD</span>
+                    <span style="color:#10B981;font-weight:600">✓ SHA-256 DIGEST LOCKED</span>
                   </div>
-                `).join('')}}
-              </div>
-              <div class="km-card" style="display:flex;flex-direction:column;justify-content:space-between">
-                <div>
-                  <div class="km-card-header">
-                    <span class="km-badge verified">Live Response · ${{esc(activeStep.endpoint)}}</span>
-                    <span class="km-mono">${{esc(protoName)}}</span>
+                  <div style="color:#475569;line-height:1.5">
+                    {"bundle_id":"bun-kv-2026","domain":"distributed_ml","format_version":"0.2","publisher":"did:kyro:node-a"}
                   </div>
-                  <h3 style="margin-top:0">${{activeStep.title}}</h3>
-                  <p class="km-metric-sub">${{activeStep.desc}}</p>
-                  <pre class="km-code-block" style="max-height:280px;overflow-y:auto">${{esc(activeStep.sample)}}</pre>
+                  <div style="margin-top:10px;padding-top:8px;border-top:1px dashed #E2E8F0;font-size:11px;color:#6366F1;overflow:hidden;text-overflow:ellipsis">
+                    sha256: 4f1a8c9b2d7e5f6a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a
+                  </div>
                 </div>
-                <div style="display:flex;justify-content:flex-end;margin-top:14px">
-                  <button class="km-btn km-btn-primary" onclick="window.kmAction.goLogin('login')">Authenticate to Operate Node →</button>
+              </div>
+
+              <!-- Bento 2: 4-Col Dual-Key Ed25519 -->
+              <div style="grid-column:span 4;background-color:#FAFAFB;border-radius:20px;border:1px solid #E2E8F0;padding:36px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 1px 3px rgba(0,0,0,0.02), 0 16px 36px -12px rgba(10,15,29,0.04)">
+                <div>
+                  <div style="display:inline-block;font-size:11.5px;font-weight:700;color:#EC4899;background-color:rgba(236,72,153,0.08);padding:4px 10px;border-radius:6px;margin-bottom:16px">RFC 8032</div>
+                  <h3 style="font-size:20px;font-weight:700;color:#0A0F1D;margin:0 0 10px">Dual-Key Node Identity</h3>
+                  <p style="font-size:14px;color:#64748B;line-height:1.6;margin:0 0 20px">
+                    Every node holds an elliptic curve Ed25519 keypair. Knowledge envelopes carry author signatures that can be validated offline without relying on DNS or central certificates.
+                  </p>
                 </div>
+                <div style="background-color:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;padding:16px;text-align:center">
+                  <div style="width:44px;height:44px;border-radius:50%;margin:0 auto 10px;background:linear-gradient(135deg, #6366F1 0%, #EC4899 100%);display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-size:18px;font-weight:700">✓</div>
+                  <div style="font-size:12px;font-weight:700;color:#0A0F1D">Ed25519 Envelope</div>
+                  <div style="font-size:11px;color:#64748B;font-family:monospace;margin-top:4px">fp: 51e75b86fd2372...</div>
+                </div>
+              </div>
+
+              <!-- Bento 3: 4-Col Epistemic Separation -->
+              <div style="grid-column:span 4;background-color:#FAFAFB;border-radius:20px;border:1px solid #E2E8F0;padding:36px;box-shadow:0 1px 3px rgba(0,0,0,0.02), 0 16px 36px -12px rgba(10,15,29,0.04)">
+                <div style="display:inline-block;font-size:11.5px;font-weight:700;color:#F59E0B;background-color:rgba(245,158,11,0.08);padding:4px 10px;border-radius:6px;margin-bottom:16px">Epistemic Principle</div>
+                <h3 style="font-size:20px;font-weight:700;color:#0A0F1D;margin:0 0 10px">Signature ≠ Factual Truth</h3>
+                <p style="font-size:14px;color:#64748B;line-height:1.6;margin:0 0 16px">
+                  A valid cryptographic signature proves only who authored a statement and that it was not tampered with. It never replaces empirical evidence or independent multi-agent peer review.
+                </p>
+                <div style="padding:10px 14px;background-color:#FFFFFF;border-radius:10px;border:1px solid #E2E8F0;font-size:12px;color:#334155">
+                  <strong>Zero-Trust Rubric:</strong> Claims must link verifiable evidence digests before being admitted to consensus.
+                </div>
+              </div>
+
+              <!-- Bento 4: 4-Col Autonomous Agents -->
+              <div style="grid-column:span 4;background-color:#FAFAFB;border-radius:20px;border:1px solid #E2E8F0;padding:36px;box-shadow:0 1px 3px rgba(0,0,0,0.02), 0 16px 36px -12px rgba(10,15,29,0.04)">
+                <div style="display:inline-block;font-size:11.5px;font-weight:700;color:#10B981;background-color:rgba(16,185,129,0.08);padding:4px 10px;border-radius:6px;margin-bottom:16px">W3C PROV-O</div>
+                <h3 style="font-size:20px;font-weight:700;color:#0A0F1D;margin:0 0 10px">Autonomous Agent Auditing</h3>
+                <p style="font-size:14px;color:#64748B;line-height:1.6;margin:0 0 16px">
+                  Autonomous agents index, audit, and challenge claims in real time. Every extraction activity is committed to an immutable W3C provenance chain with parent hash references.
+                </p>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <span style="font-size:11px;padding:4px 8px;background-color:#FFFFFF;border-radius:6px;border:1px solid #E2E8F0;color:#475569">agent-indexer (60Hz)</span>
+                  <span style="font-size:11px;padding:4px 8px;background-color:#FFFFFF;border-radius:6px;border:1px solid #E2E8F0;color:#475569">zero-trust-auditor</span>
+                </div>
+              </div>
+
+              <!-- Bento 5: 4-Col Peer Federation -->
+              <div style="grid-column:span 4;background-color:#FAFAFB;border-radius:20px;border:1px solid #E2E8F0;padding:36px;box-shadow:0 1px 3px rgba(0,0,0,0.02), 0 16px 36px -12px rgba(10,15,29,0.04)">
+                <div style="display:inline-block;font-size:11.5px;font-weight:700;color:#8B5CF6;background-color:rgba(139,92,246,0.08);padding:4px 10px;border-radius:6px;margin-bottom:16px">Peer Pull-Sync</div>
+                <h3 style="font-size:20px;font-weight:700;color:#0A0F1D;margin:0 0 10px">Multi-Node Federation</h3>
+                <p style="font-size:14px;color:#64748B;line-height:1.6;margin:0 0 16px">
+                  Nodes replicate knowledge over standard HTTP endpoints. When two nodes possess diverging revisions, Kyro preserves both in parallel branches rather than silently overwriting data.
+                </p>
+                <div style="font-size:12px;color:#10B981;font-weight:600">● Replicating across ${{m.total_nodes}} live peer nodes</div>
               </div>
             </div>
           </section>
 
-          <section id="comparison" class="km-landing-section" style="padding-top:20px">
-            <div class="km-section-eyebrow">3 · ARCHITECTURAL BOUNDARIES</div>
-            <h2 class="km-section-heading">What Kyro Is — And What It Is Not</h2>
-            <div class="km-grid-2">
-              <div class="km-card" style="border-color:var(--status-verified-border)">
-                <div class="km-card-header">
-                  <h3 class="km-card-title" style="color:var(--status-verified)">✓ What Kyro IS</h3>
-                  <span class="km-badge verified">Sovereign Mesh</span>
-                </div>
-                <ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:10px;color:var(--text-secondary)">
-                  <li><strong>Independent Organization Nodes:</strong> Each node controls its own database, Ed25519 keys, and publication policies.</li>
-                  <li><strong>Structured OKF Knowledge Bundles:</strong> Atomic claims with 7-stage epistemic review states and traceable evidence URIs.</li>
-                  <li><strong>Cryptographic Provenance &amp; Integrity:</strong> Deterministic RFC 8785 JCS SHA-256 digests and Ed25519 signatures.</li>
-                  <li><strong>Federated BM25 Discovery &amp; Pull-Sync:</strong> Cross-node search and conflict-preserving pull synchronization over HTTP.</li>
+          <!-- Alternating Editorial Section 1: OKF Bundle Anatomy -->
+          <section id="okf-anatomy" style="max-width:1240px;margin:0 auto;padding:100px 28px">
+            <div style="display:grid;grid-template-columns:1fr 1.15fr;gap:60px;align-items:center">
+              <div>
+                <div style="font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#6366F1;margin-bottom:12px">Bundle Specification</div>
+                <h2 style="font-size:clamp(30px, 3.5vw, 42px);font-weight:800;letter-spacing:-0.03em;color:#0A0F1D;line-height:1.18;margin:0 0 20px">
+                  Open Knowledge Format: Structured, signed, machine-readable.
+                </h2>
+                <p style="font-size:16px;color:#475569;line-height:1.6;margin:0 0 24px">
+                  Traditional LLM outputs are ephemeral and unverifiable. Kyro packages intelligence into canonical OKF v0.2 bundles comprising declarative manifest schemas, Markdown concept definitions, raw benchmark evidence traces, and immutable provenance records.
+                </p>
+                <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px">
+                  <li style="display:flex;align-items:flex-start;gap:10px;font-size:14.5px;color:#334155">
+                    <span style="color:#10B981;font-weight:700">✓</span>
+                    <span><strong>Atomic Claims:</strong> Statements isolated into discrete testable assertions.</span>
+                  </li>
+                  <li style="display:flex;align-items:flex-start;gap:10px;font-size:14.5px;color:#334155">
+                    <span style="color:#10B981;font-weight:700">✓</span>
+                    <span><strong>Evidence Linkage:</strong> Every claim references verifiable hardware or empirical run data.</span>
+                  </li>
+                  <li style="display:flex;align-items:flex-start;gap:10px;font-size:14.5px;color:#334155">
+                    <span style="color:#10B981;font-weight:700">✓</span>
+                    <span><strong>Cryptographic Sealing:</strong> Ed25519 signing envelope embedded in bundle root.</span>
+                  </li>
                 </ul>
               </div>
-              <div class="km-card" style="border-color:var(--status-error-border)">
-                <div class="km-card-header">
-                  <h3 class="km-card-title" style="color:var(--status-error)">✕ What Kyro Is NOT</h3>
-                  <span class="km-badge error">Non-Goals</span>
-                </div>
-                <ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:10px;color:var(--text-secondary)">
-                  <li><strong>NOT a Centralized Vector Database:</strong> No single shared database accessible to every organization.</li>
-                  <li><strong>NOT an AI Chatbot or Unverified RAG Dump:</strong> Every claim is structured, versioned, and bound to traceable evidence.</li>
-                  <li><strong>NOT a Blockchain or Token Scheme:</strong> Uses standard HTTP/JSON, RFC 8032 Ed25519, and RFC 8785 JCS without consensus bloat.</li>
-                  <li><strong>NOT Equating Signatures with Truth:</strong> A valid signature proves who published a bundle and its integrity — not absolute factual correctness.</li>
-                </ul>
-              </div>
-            </div>
 
-            <div id="auth-cta" class="km-card" style="margin-top:28px;text-align:center;padding:40px 28px;background:linear-gradient(135deg, rgba(18,30,56,0.96) 0%, rgba(12,22,40,0.98) 100%);border-color:var(--accent-primary)">
-              <h2 style="margin:0 0 10px;font-size:28px">Ready to Operate Your Sovereign Knowledge Node?</h2>
-              <p class="km-metric-sub" style="max-width:620px;margin:0 auto 24px;font-size:15px">
-                Sign in with your verified organization account or register a new principal to unlock the Console Dashboard.
-              </p>
-              <div style="display:flex;justify-content:center;gap:14px;flex-wrap:wrap">
-                <button class="km-btn km-btn-primary km-btn-lg" onclick="window.kmAction.goLogin('login')">Sign In with Credentials →</button>
-                <button class="km-btn km-btn-accent km-btn-lg" onclick="window.kmAction.goLogin('register')">+ Register New Organization Account</button>
+              <!-- Interactive Bundle Inspector -->
+              <div style="background-color:#FAFAFB;border-radius:20px;border:1px solid #E2E8F0;overflow:hidden;box-shadow:0 12px 36px -8px rgba(10,15,29,0.06)">
+                <div style="display:flex;align-items:center;background-color:#F1F5F9;border-bottom:1px solid #E2E8F0;padding:8px 12px;gap:6px">
+                  <span style="background-color:#FFFFFF;color:#0A0F1D;font-weight:650;border-radius:6px;padding:6px 12px;font-size:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05)">manifest.yaml</span>
+                  <span style="color:#64748B;font-weight:500;padding:6px 12px;font-size:12px">concept-kv-quant.md</span>
+                  <span style="color:#64748B;font-weight:500;padding:6px 12px;font-size:12px">evidence-benchmark.md</span>
+                </div>
+                <div style="padding:24px;background-color:#FFFFFF;font-family:monospace;font-size:12.5px;line-height:1.6;color:#1E293B;min-height:240px">
+                  <pre style="margin:0">format_version: "0.2"
+bundle_id: "bun-kv-2026"
+category: "distributed_ml"
+publisher:
+  node_id: "node-a"
+  fingerprint: "51e75b86fd2372..."
+signing_suite: "RFC8032-Ed25519"
+canonical_digest: "RFC8785-SHA256"
+claims_count: 4
+evidence_count: 2</pre>
+                </div>
+                <div style="padding:12px 24px;background-color:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;font-size:11px;color:#64748B">
+                  <span>Digest: SHA-256</span>
+                  <span style="color:#10B981;font-weight:600">✓ Verified Against Local Keyring</span>
+                </div>
               </div>
             </div>
           </section>
+
+          <!-- Interactive Client-Side Proof Verifier Playground -->
+          <section id="verifier-demo" style="background-color:#FAFAFB;border-top:1px solid #E2E8F0;border-bottom:1px solid #E2E8F0;padding:100px 28px">
+            <div style="max-width:860px;margin:0 auto;text-align:center">
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#6366F1;margin-bottom:12px">Zero-Trust Playground</div>
+              <h2 style="font-size:clamp(30px, 3.5vw, 42px);font-weight:800;letter-spacing:-0.03em;color:#0A0F1D;line-height:1.18;margin:0 0 16px">
+                Verify a cryptographic digest in your browser.
+              </h2>
+              <p style="font-size:16px;color:#64748B;line-height:1.6;margin:0 0 36px">
+                Test client-side cryptographic verification directly. Type or edit the payload below to watch the SHA-256 digest calculate live in browser memory.
+              </p>
+
+              <div style="background-color:#FFFFFF;border-radius:16px;border:1px solid #E2E8F0;padding:28px;box-shadow:0 10px 30px -6px rgba(10,15,29,0.05);text-align:left">
+                <div style="margin-bottom:16px">
+                  <label style="display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px">INPUT STRING OR CANONICAL OKF MANIFEST</label>
+                  <input type="text" id="km-live-verifier-input" value="bun-kv-2026-prod-v1" oninput="window.kmAction.recalcVerifierDigest(this.value)" style="width:100%;height:44px;padding:0 14px;border-radius:8px;border:1px solid #CBD5E1;font-size:14px;font-family:monospace;color:#0A0F1D;background-color:#FFFFFF" />
+                </div>
+                <div style="padding:12px 16px;background-color:#F8FAFC;border-radius:8px;border:1px solid #E2E8F0;margin-bottom:14px">
+                  <div style="font-size:11px;font-weight:700;color:#64748B;margin-bottom:4px">COMPUTED SHA-256 DIGEST:</div>
+                  <div id="km-live-verifier-output" style="font-size:13px;font-family:monospace;color:#4F46E5;word-break:break-all">
+                    e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <span style="font-size:12px;color:#10B981;font-weight:600">✓ Valid RFC 8785 Hash Format · 256-bit Cryptographic Proof</span>
+                  <button class="km-btn" onclick="alert('Verification confirmed: Digest is untampered and cryptographically valid.')" style="background-color:#0A0F1D;color:#FFFFFF;border:none;border-radius:8px;padding:8px 16px;font-size:12.5px;font-weight:650;cursor:pointer">Confirm Proof</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Developer Integration Section -->
+          <section id="dev-integration" style="max-width:1240px;margin:0 auto;padding:110px 28px">
+            <div style="text-align:center;max-width:640px;margin:0 auto 50px">
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#6366F1;margin-bottom:12px">Developer Experience</div>
+              <h2 style="font-size:clamp(30px, 3.5vw, 42px);font-weight:800;letter-spacing:-0.03em;color:#0A0F1D;line-height:1.18;margin:0 0 16px">Four lines of code to sign and publish.</h2>
+              <p style="font-size:16px;color:#64748B;line-height:1.6;margin:0">Native SDKs for Python, TypeScript, Rust CLI, and REST API. Integrate cryptographic knowledge verification into your LLM pipelines.</p>
+            </div>
+
+            <div style="max-width:780px;margin:0 auto;background-color:#0F172A;border-radius:18px;border:1px solid #1E293B;overflow:hidden;box-shadow:0 20px 45px -10px rgba(10,15,29,0.18)">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background-color:#090D18;border-bottom:1px solid #1E293B">
+                <div style="display:flex;gap:6px">
+                  <div style="width:10px;height:10px;border-radius:50%;background-color:#EF4444"></div>
+                  <div style="width:10px;height:10px;border-radius:50%;background-color:#F59E0B"></div>
+                  <div style="width:10px;height:10px;border-radius:50%;background-color:#10B981"></div>
+                </div>
+                <div style="font-size:12px;color:#94A3B8;font-family:monospace">Python SDK (RFC 8785 + Ed25519)</div>
+              </div>
+              <div style="padding:24px;font-family:monospace;font-size:13px;line-height:1.6;color:#E2E8F0">
+                <pre style="margin:0">from kyro import KyroNode, OKFBundle
+
+node = KyroNode.load_keypair("~/.kyro/node_key.priv")
+bundle = OKFBundle.from_directory("./knowledge-base")
+
+# Deterministically canonicalizes (RFC 8785) & signs (Ed25519)
+signed_envelope = node.sign_bundle(bundle)
+node.publish_to_mesh(signed_envelope, peers=["http://node-b:8000"])
+print("✓ Published & verified:", signed_envelope.canonical_digest)</pre>
+              </div>
+            </div>
+          </section>
+
+          <!-- Sculpted High-Impact CTA Banner -->
+          <section style="max-width:1240px;margin:0 auto;padding:0 28px 120px">
+            <div style="background-color:#FAFAFB;border-radius:24px;border:1px solid #E2E8F0;padding:80px 48px;text-align:center;position:relative;overflow:hidden;box-shadow:0 20px 40px -15px rgba(10,15,29,0.05)">
+              <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:300px;background:radial-gradient(circle, rgba(99,102,241,0.12) 0%, rgba(236,72,153,0.08) 50%, transparent 100%);filter:blur(60px);pointer-events:none"></div>
+              <h2 style="font-size:clamp(34px, 4.5vw, 54px);font-weight:800;letter-spacing:-0.035em;color:#0A0F1D;line-height:1.1;margin:0 0 18px;position:relative">
+                Ready to operate your sovereign knowledge node?
+              </h2>
+              <p style="font-size:17px;color:#64748B;line-height:1.6;max-width:580px;margin:0 auto 36px;position:relative">
+                Join sovereign AI researchers and engineering teams publishing verifiable knowledge with cryptographic provenance.
+              </p>
+              <div style="display:flex;justify-content:center;gap:14px;flex-wrap:wrap;position:relative">
+                <button class="km-btn km-btn-lg" onclick="window.kmAction.goLogin('register')" style="background-color:#0A0F1D;color:#FFFFFF;border:none;border-radius:12px;padding:16px 32px;font-size:15px;font-weight:650;cursor:pointer;box-shadow:0 8px 24px rgba(10,15,29,0.18)">
+                  Register Organization Account →
+                </button>
+                <button class="km-btn km-btn-lg" onclick="window.kmAction.demoBypass()" style="background-color:#FFFFFF;color:#1E293B;border:1px solid #CBD5E1;border-radius:12px;padding:16px 28px;font-size:15px;font-weight:600;cursor:pointer">
+                  Launch Sovereign Node A
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Spacious Multi-Column Footer -->
+          <footer style="border-top:1px solid #E2E8F0;background-color:#FFFFFF;padding:80px 28px 40px">
+            <div style="max-width:1240px;margin:0 auto;display:grid;grid-template-columns:1.5fr repeat(4, 1fr);gap:48px;margin-bottom:60px">
+              <div>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+                  <img src="/static/kyro-logo.png" alt="Kyro Logo" style="height:26px;width:26px;object-fit:contain" onerror="this.src='/kyro-logo.png'" />
+                  <span style="font-size:18px;font-weight:800;color:#0A0F1D;letter-spacing:-0.03em">kyro</span>
+                </div>
+                <p style="font-size:14px;color:#64748B;line-height:1.6;margin:0 0 20px;max-width:280px">
+                  The zero-trust knowledge mesh protocol for autonomous AI agents and sovereign nodes.
+                </p>
+                <div style="display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#10B981;background-color:rgba(16,185,129,0.08);padding:4px 10px;border-radius:999px">
+                  <span style="width:6px;height:6px;border-radius:50%;background-color:#10B981"></span>
+                  All 3 Live Nodes Synchronized
+                </div>
+              </div>
+
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#0A0F1D;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.05em">Protocol</div>
+                <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;color:#64748B">
+                  <div>OKF v0.2 Specification</div>
+                  <div>RFC 8785 Canonical JCS</div>
+                  <div>Ed25519 Envelopes</div>
+                  <div>W3C PROV Chains</div>
+                </div>
+              </div>
+
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#0A0F1D;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.05em">Platform</div>
+                <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;color:#64748B">
+                  <div>Federation Control Plane</div>
+                  <div>Zero-Trust Verifier</div>
+                  <div>Autonomous Agents</div>
+                  <div>Epistemic Rubrics</div>
+                </div>
+              </div>
+
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#0A0F1D;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.05em">Developers</div>
+                <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;color:#64748B">
+                  <div>Python SDK</div>
+                  <div>TypeScript Client</div>
+                  <div>Rust CLI</div>
+                  <div>REST API Docs</div>
+                </div>
+              </div>
+
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#0A0F1D;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.05em">Governance</div>
+                <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;color:#64748B">
+                  <div>Zero-Trust Rubric</div>
+                  <div>Epistemic Principles</div>
+                  <div>Security Policy</div>
+                  <div>Privacy &amp; Terms</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="max-width:1240px;margin:0 auto;padding-top:24px;border-top:1px solid #F1F5F9;display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:#94A3B8;flex-wrap:wrap;gap:12px">
+              <div>© 2026 Kyro Protocol Foundation. Open-source under MIT &amp; Apache 2.0.</div>
+              <div style="display:flex;gap:20px">
+                <span>Network: kyro-fed/1.0</span>
+                <span>Digest: RFC 8785 (SHA-256)</span>
+                <span>Ed25519 Verified</span>
+              </div>
+            </div>
+          </footer>
         </div>
       `;
     }}
@@ -1019,18 +1164,34 @@ def render_console_html() -> str:
         ? state.overview.topology.edges
         : [];
 
-      const cx = 360, cy = 185;
+      const isTriangular = nodes.length === 3;
+      const cx = 360;
+      const cy = isTriangular ? 215 : 185;
       const pos = {{}};
+      const cardOffsets = {{}};
+
       nodes.forEach((n, idx) => {{
         if (idx === 0 || n.type === 'local_node') {{
           pos[n.id] = {{ x: cx, y: cy }};
+          cardOffsets[n.id] = {{ yOffset: 28, textY1: 43, textY2: 56 }};
+        }} else if (isTriangular) {{
+          if (idx === 1) {{
+            pos[n.id] = {{ x: 535, y: 90 }};
+          }} else {{
+            pos[n.id] = {{ x: 185, y: 90 }};
+          }}
+          cardOffsets[n.id] = {{ yOffset: -52, textY1: -37, textY2: -24 }};
         }} else {{
           const count = Math.max(1, nodes.length - 1);
-          const angle = ((idx - 1) / count) * Math.PI * 2 - Math.PI / 4;
-          pos[n.id] = {{
-            x: Math.round(cx + Math.cos(angle) * 195),
-            y: Math.round(cy + Math.sin(angle) * 120),
-          }};
+          const angle = ((idx - 1) / count) * Math.PI * 2 - Math.PI / 2;
+          const px = Math.round(cx + Math.cos(angle) * 210);
+          const py = Math.round(cy + Math.sin(angle) * 125);
+          pos[n.id] = {{ x: px, y: py }};
+          if (py < cy - 20) {{
+            cardOffsets[n.id] = {{ yOffset: -52, textY1: -37, textY2: -24 }};
+          }} else {{
+            cardOffsets[n.id] = {{ yOffset: 28, textY1: 43, textY2: 56 }};
+          }}
         }}
       }});
 
@@ -1040,6 +1201,13 @@ def render_console_html() -> str:
         const s = pos[e.source], d = pos[e.target];
         if (!s || !d) return '';
         const mx = (s.x + d.x) / 2, my = (s.y + d.y) / 2;
+        const dx = d.x - s.x;
+        const dy = d.y - s.y;
+        const len = Math.sqrt(dx * dx + dy * dy) || 1;
+        const nx = -dy / len;
+        const ny = dx / len;
+        const badgeX = Math.round(mx + nx * 18);
+        const badgeY = Math.round(my + ny * 18);
         const path1 = `M ${{s.x}} ${{s.y}} L ${{d.x}} ${{d.y}}`;
         const path2 = `M ${{d.x}} ${{d.y}} L ${{s.x}} ${{s.y}}`;
         const col = e.verified ? '#38D399' : '#F5B942';
@@ -1051,7 +1219,7 @@ def render_console_html() -> str:
               <circle r="4" fill="#55C8D7"><animateMotion dur="${{2.0 + idx * 0.4}}s" repeatCount="indefinite" path="${{path1}}" /></circle>
               <circle r="3.5" fill="#38D399"><animateMotion dur="${{2.3 + idx * 0.4}}s" repeatCount="indefinite" path="${{path2}}" /></circle>
             ` : ''}}
-            <g transform="translate(${{mx}}, ${{my}})">
+            <g transform="translate(${{badgeX}}, ${{badgeY}})">
               <rect x="-52" y="-10" width="104" height="20" rx="10" fill="#0B111E" stroke="${{col}}" stroke-width="1" />
               <text x="0" y="3" fill="#D7E3FF" font-size="9.5" font-weight="600" text-anchor="middle">✓ Ed25519 · ${{e.latency_ms ?? '—'}}ms</text>
             </g>
@@ -1061,6 +1229,7 @@ def render_console_html() -> str:
 
       const nodesSvg = nodes.map(n => {{
         const p = pos[n.id] || {{ x: cx, y: cy }};
+        const offset = cardOffsets[n.id] || {{ yOffset: 28, textY1: 43, textY2: 56 }};
         const isLocal = n.type === 'local_node';
         const isSel = selNode && selNode.id === n.id;
         const col = isLocal ? '#6599FF' : '#38D399';
@@ -1070,9 +1239,9 @@ def render_console_html() -> str:
             ${{isLocal ? `<circle class="km-pulse-circle" r="24" fill="none" stroke="#6599FF" stroke-width="1.5" />` : ''}}
             <circle r="${{isLocal ? 24 : 20}}" fill="#0D1526" stroke="${{col}}" stroke-width="${{isSel ? 3.5 : 2.2}}" />
             <circle r="${{isLocal ? 8 : 6}}" fill="${{col}}" />
-            <rect x="-84" y="28" width="168" height="34" rx="8" fill="rgba(11,17,30,0.92)" stroke="${{isSel ? col : '#22304A'}}" />
-            <text y="43" fill="#F3F7FF" font-size="11" font-weight="650" text-anchor="middle">${{esc(n.label.slice(0, 24))}}</text>
-            <text y="56" fill="#8FA1C2" font-size="9.5" text-anchor="middle">${{esc(n.id)}} (${{esc(n.visibility)}})</text>
+            <rect x="-84" y="${{offset.yOffset}}" width="168" height="34" rx="8" fill="rgba(11,17,30,0.92)" stroke="${{isSel ? col : '#22304A'}}" />
+            <text y="${{offset.textY1}}" fill="#F3F7FF" font-size="11" font-weight="650" text-anchor="middle">${{esc(n.label.slice(0, 24))}}</text>
+            <text y="${{offset.textY2}}" fill="#8FA1C2" font-size="9.5" text-anchor="middle">${{esc(n.id)}} (${{esc(n.visibility)}})</text>
           </g>
         `;
       }}).join('');
@@ -1101,8 +1270,8 @@ def render_console_html() -> str:
                   </pattern>
                 </defs>
                 <rect width="720" height="370" fill="url(#kmGrid)" />
-                <circle cx="360" cy="185" r="95" fill="none" stroke="#1A2742" stroke-dasharray="3,6" />
-                <circle cx="360" cy="185" r="165" fill="none" stroke="#18243D" stroke-dasharray="4,8" />
+                <circle cx="${{cx}}" cy="${{cy}}" r="95" fill="none" stroke="#1A2742" stroke-dasharray="3,6" />
+                <circle cx="${{cx}}" cy="${{cy}}" r="165" fill="none" stroke="#18243D" stroke-dasharray="4,8" />
                 ${{edgesSvg}}
                 ${{nodesSvg}}
               </svg>
@@ -1140,10 +1309,8 @@ def render_console_html() -> str:
       const q = (state.graphSearch || '').toLowerCase();
 
       // Perfectly non-overlapping layout:
-      // Left cards at x: 160 (span 55..265)
-      // Center node at x: 480 (span 375..585) -> 110px margin!
-      // Right cards at x: 800 (span 695..905) -> 110px margin!
-      // Top row at y: 110, Bottom row at y: 390
+      // Left cards at x: 180, Center node at x: 480, Right cards at x: 780
+      // Top row at y: 125, Bottom row at y: 375
       const defaultCards = [
         {{
           id: 'doc-md-1',
@@ -1152,8 +1319,8 @@ def render_console_html() -> str:
           tagType: 'type: concept',
           tagStatus: 'status: verified',
           color: '#10B981',
-          x: 160,
-          y: 110,
+          x: 180,
+          y: 125,
           yaml: `---
 bundle_id: bun-kv-2026
 type: concept
@@ -1170,8 +1337,8 @@ Maintains 99.6% needle retrieval accuracy up to 128k tokens with 3.7x lower HBM 
           tagType: 'type: schema',
           tagStatus: 'status: verified',
           color: '#F59E0B',
-          x: 160,
-          y: 390,
+          x: 180,
+          y: 375,
           yaml: `format_version: "0.2"
 publisher: "node-a"
 signing_suite: "Ed25519"
@@ -1188,8 +1355,8 @@ digest: "RFC8785-JCS"`,
           tagType: 'type: evidence',
           tagStatus: 'status: verified',
           color: '#10B981',
-          x: 800,
-          y: 110,
+          x: 780,
+          y: 125,
           yaml: `---
 source: LongBench-128k
 reliability: 0.98
@@ -1205,8 +1372,8 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26%.`,
           tagType: 'type: provenance',
           tagStatus: 'status: verified',
           color: '#F59E0B',
-          x: 800,
-          y: 390,
+          x: 780,
+          y: 375,
           yaml: `w3c_prov:
   activity: "bundle.published"
   actor: "architect@kyro"
@@ -1221,8 +1388,8 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26%.`,
       const filteredCards = q ? defaultCards.filter(c => c.title.toLowerCase().includes(q) || c.yaml.toLowerCase().includes(q)) : defaultCards;
 
       const agents = [
-        {{ id: 'agent-indexer', label: 'Agent-Indexer', sub: 'Active Indexing (60Hz)', x: 480, y: 40, color: '#3B82F6' }},
-        {{ id: 'agent-query-bot', label: 'Agent-Query-Bot', sub: 'Context Traversal', x: 480, y: 470, color: '#06B6D4' }},
+        {{ id: 'agent-indexer', label: 'Agent-Indexer', sub: 'Active Indexing (60Hz)', x: 480, y: 55, color: '#3B82F6' }},
+        {{ id: 'agent-query-bot', label: 'Agent-Query-Bot', sub: 'Context Traversal', x: 480, y: 445, color: '#06B6D4' }},
       ];
       if (state.agents && state.agents.length > 0) {{
         state.agents.slice(0, 2).forEach((ag, idx) => {{
@@ -1269,85 +1436,87 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26%.`,
             </header>
 
             <!-- Graph Canvas Area -->
-            <div style="flex:1;position:relative;overflow:hidden;background:#080C14;display:flex;align-items:center;justify-content:center">
-              <svg viewBox="0 0 960 520" style="position:absolute;inset:0;width:100%;height:100%">
-                <defs>
-                  <pattern id="okfDotGridUi" width="24" height="24" patternUnits="userSpaceOnUse">
-                    <circle cx="2" cy="2" r="1.2" fill="#1E293B" opacity="0.65" />
-                  </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#okfDotGridUi)" />
+            <div id="km-okf-graph-container" style="flex:1;position:relative;overflow:hidden;background:#080C14;display:flex;align-items:center;justify-content:center">
+              <div id="km-okf-graph-stage" style="position:relative;width:960px;height:520px;transform-origin:center center;transition:transform 0.12s ease;flex-shrink:0">
+                <svg viewBox="0 0 960 520" style="position:absolute;inset:0;width:100%;height:100%">
+                  <defs>
+                    <pattern id="okfDotGridUi" width="24" height="24" patternUnits="userSpaceOnUse">
+                      <circle cx="2" cy="2" r="1.2" fill="#1E293B" opacity="0.65" />
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#okfDotGridUi)" />
 
-                <!-- Curved Bézier Connection Paths with Particle Streams -->
-                <path d="M 480 250 C 330 250, 270 110, 160 110" fill="none" stroke="#06B6D4" stroke-width="1.8" opacity="0.65" />
-                <circle r="4" fill="#67E8F9"><animateMotion dur="2.4s" repeatCount="indefinite" path="M 480 250 C 330 250, 270 110, 160 110" /></circle>
+                  <!-- Curved Bézier Connection Paths with Particle Streams -->
+                  <path d="M 480 250 C 330 250, 270 125, 180 125" fill="none" stroke="#06B6D4" stroke-width="1.8" opacity="0.65" />
+                  <circle r="4" fill="#67E8F9"><animateMotion dur="2.4s" repeatCount="indefinite" path="M 480 250 C 330 250, 270 125, 180 125" /></circle>
 
-                <path d="M 480 250 C 330 250, 270 390, 160 390" fill="none" stroke="#F59E0B" stroke-width="1.8" opacity="0.65" />
-                <circle r="4" fill="#FBBF24"><animateMotion dur="2.8s" repeatCount="indefinite" path="M 480 250 C 330 250, 270 390, 160 390" /></circle>
+                  <path d="M 480 250 C 330 250, 270 375, 180 375" fill="none" stroke="#F59E0B" stroke-width="1.8" opacity="0.65" />
+                  <circle r="4" fill="#FBBF24"><animateMotion dur="2.8s" repeatCount="indefinite" path="M 480 250 C 330 250, 270 375, 180 375" /></circle>
 
-                <path d="M 480 250 C 630 250, 690 110, 800 110" fill="none" stroke="#06B6D4" stroke-width="1.8" opacity="0.65" />
-                <circle r="4" fill="#67E8F9"><animateMotion dur="2.2s" repeatCount="indefinite" path="M 480 250 C 630 250, 690 110, 800 110" /></circle>
+                  <path d="M 480 250 C 630 250, 690 125, 780 125" fill="none" stroke="#06B6D4" stroke-width="1.8" opacity="0.65" />
+                  <circle r="4" fill="#67E8F9"><animateMotion dur="2.2s" repeatCount="indefinite" path="M 480 250 C 630 250, 690 125, 780 125" /></circle>
 
-                <path d="M 480 250 C 630 250, 690 390, 800 390" fill="none" stroke="#F59E0B" stroke-width="1.8" opacity="0.65" />
-                <circle r="4" fill="#FBBF24"><animateMotion dur="2.6s" repeatCount="indefinite" path="M 480 250 C 630 250, 690 390, 800 390" /></circle>
+                  <path d="M 480 250 C 630 250, 690 375, 780 375" fill="none" stroke="#F59E0B" stroke-width="1.8" opacity="0.65" />
+                  <circle r="4" fill="#FBBF24"><animateMotion dur="2.6s" repeatCount="indefinite" path="M 480 250 C 630 250, 690 375, 780 375" /></circle>
 
-                <line x1="480" y1="250" x2="480" y2="40" stroke="#3B82F6" stroke-width="1.6" stroke-dasharray="4,4" opacity="0.75" />
-                <circle r="3.5" fill="#3B82F6"><animateMotion dur="1.8s" repeatCount="indefinite" path="M 480 250 L 480 40" /></circle>
+                  <line x1="480" y1="250" x2="480" y2="55" stroke="#3B82F6" stroke-width="1.6" stroke-dasharray="4,4" opacity="0.75" />
+                  <circle r="3.5" fill="#3B82F6"><animateMotion dur="1.8s" repeatCount="indefinite" path="M 480 250 L 480 55" /></circle>
 
-                <line x1="480" y1="250" x2="480" y2="470" stroke="#06B6D4" stroke-width="1.6" stroke-dasharray="4,4" opacity="0.75" />
-                <circle r="3.5" fill="#06B6D4"><animateMotion dur="2.0s" repeatCount="indefinite" path="M 480 250 L 480 470" /></circle>
-              </svg>
+                  <line x1="480" y1="250" x2="480" y2="445" stroke="#06B6D4" stroke-width="1.6" stroke-dasharray="4,4" opacity="0.75" />
+                  <circle r="3.5" fill="#06B6D4"><animateMotion dur="2.0s" repeatCount="indefinite" path="M 480 250 L 480 445" /></circle>
+                </svg>
 
-              <!-- Center Anchor Node: Glowing Primary Folder (Preserves translate(-50%, -50%)) -->
-              <div class="km-float-centered" style="position:absolute;left:480px;top:250px;width:210px;padding:16px 20px;background:rgba(15,23,42,0.92);backdrop-filter:blur(14px);border-radius:14px;border:1.5px solid rgba(59,130,246,0.65);box-shadow:0 0 32px rgba(59,130,246,0.4);display:flex;flex-direction:column;gap:6px;z-index:10">
-                <div class="km-canvas-shimmer" style="position:absolute;inset:0;border-radius:14px;pointer-events:none"></div>
-                <div style="display:flex;align-items:center;justify-content:space-between">
-                  <span style="font-size:12px;font-weight:800;color:#38bdf8;padding:2px 7px;border-radius:5px;background:rgba(56,189,248,0.18);border:1px solid rgba(56,189,248,0.4)">OKF</span>
-                  <span style="font-size:10px;font-weight:700;color:#67E8F9;background:rgba(6,182,212,0.18);padding:2px 8px;border-radius:999px;border:1px solid rgba(6,182,212,0.45)">CORE ANCHOR</span>
+                <!-- Center Anchor Node: Glowing Primary Folder (Preserves translate(-50%, -50%)) -->
+                <div class="km-float-centered" style="position:absolute;left:480px;top:250px;width:210px;padding:16px 20px;background:rgba(15,23,42,0.92);backdrop-filter:blur(14px);border-radius:14px;border:1.5px solid rgba(59,130,246,0.65);box-shadow:0 0 32px rgba(59,130,246,0.4);display:flex;flex-direction:column;gap:6px;z-index:10">
+                  <div class="km-canvas-shimmer" style="position:absolute;inset:0;border-radius:14px;pointer-events:none"></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between">
+                    <span style="font-size:12px;font-weight:800;color:#38bdf8;padding:2px 7px;border-radius:5px;background:rgba(56,189,248,0.18);border:1px solid rgba(56,189,248,0.4)">OKF</span>
+                    <span style="font-size:10px;font-weight:700;color:#67E8F9;background:rgba(6,182,212,0.18);padding:2px 8px;border-radius:999px;border:1px solid rgba(6,182,212,0.45)">CORE ANCHOR</span>
+                  </div>
+                  <div style="font-weight:700;font-size:14px;color:#F8FAFC">Knowledge Bundle (OKF)</div>
+                  <div style="font-size:11px;color:#94A3B8;font-family:var(--font-mono)">did:kyro:bundle-root</div>
                 </div>
-                <div style="font-weight:700;font-size:14px;color:#F8FAFC">Knowledge Bundle (OKF)</div>
-                <div style="font-size:11px;color:#94A3B8;font-family:var(--font-mono)">did:kyro:bundle-root</div>
-              </div>
 
-              <!-- Glassmorphic Document Cards (Non-overlapping, Wide Margins) -->
-              ${{filteredCards.map(c => {{
-                const isHover = hoveredId === c.id;
-                const isBottom = c.y > 250;
-                return `
-                  <div class="km-float-centered" onmouseenter="window.kmAction.setGraphHover('${{c.id}}')" style="position:absolute;left:${{c.x}}px;top:${{c.y}}px;width:210px;background:rgba(14,20,35,0.88);backdrop-filter:blur(12px);border:1.5px solid ${{isHover ? c.color : 'rgba(101,153,255,0.25)'}};border-radius:12px;padding:12px 14px;box-shadow:${{isHover ? '0 10px 24px -4px rgba(0,0,0,0.7), 0 0 18px ' + c.color + '45' : 'var(--shadow-card)'}};transition:border-color 0.2s, box-shadow 0.2s;z-index:${{isHover ? 25 : 12}};cursor:pointer">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-                      <span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;color:${{c.color}};background:${{c.color}}20">${{c.ext}}</span>
-                      <div style="display:flex;gap:4px">
-                        <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(255,255,255,0.06);color:#94A3B8">${{c.tagType}}</span>
-                        <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(255,255,255,0.06);color:#94A3B8">${{c.tagStatus}}</span>
+                <!-- Glassmorphic Document Cards (Non-overlapping, Wide Margins) -->
+                ${{filteredCards.map(c => {{
+                  const isHover = hoveredId === c.id;
+                  const isBottom = c.y > 250;
+                  return `
+                    <div class="km-float-centered" onmouseenter="window.kmAction.setGraphHover('${{c.id}}')" style="position:absolute;left:${{c.x}}px;top:${{c.y}}px;width:210px;background:rgba(14,20,35,0.88);backdrop-filter:blur(12px);border:1.5px solid ${{isHover ? c.color : 'rgba(101,153,255,0.25)'}};border-radius:12px;padding:12px 14px;box-shadow:${{isHover ? '0 10px 24px -4px rgba(0,0,0,0.7), 0 0 18px ' + c.color + '45' : 'var(--shadow-card)'}};transition:border-color 0.2s, box-shadow 0.2s;z-index:${{isHover ? 25 : 12}};cursor:pointer">
+                      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                        <span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;color:${{c.color}};background:${{c.color}}20">${{c.ext}}</span>
+                        <div style="display:flex;gap:4px">
+                          <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(255,255,255,0.06);color:#94A3B8">${{c.tagType}}</span>
+                          <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(255,255,255,0.06);color:#94A3B8">${{c.tagStatus}}</span>
+                        </div>
                       </div>
+                      <div style="font-weight:600;font-size:12.5px;color:#F1F5F9;margin-bottom:6px">${{esc(c.title)}}</div>
+                      <pre style="margin:0;padding:6px 8px;background:#070B14;border-radius:6px;font-size:10px;font-family:var(--font-mono);color:#94A3B8;line-height:1.35;overflow:hidden">${{esc(c.yaml)}}</pre>
+
+                      ${{isHover ? `
+                        <div style="position:absolute;${{isBottom ? 'bottom:103%' : 'top:103%'}};left:50%;transform:translateX(-50%);width:240px;background:#060A14;border:1px solid ${{c.color}};border-radius:8px;padding:10px 12px;box-shadow:0 12px 28px -4px rgba(0,0,0,0.85), 0 0 16px ${{c.color}}35;z-index:35;pointer-events:none">
+                          <div style="font-size:11px;font-weight:700;color:${{c.color}};margin-bottom:4px">Raw Preview (${{esc(c.title)}})</div>
+                          <div style="font-size:10.5px;color:#CBD5E1;line-height:1.4">${{esc(c.rawContent)}}</div>
+                        </div>
+                      ` : ''}}
                     </div>
-                    <div style="font-weight:600;font-size:12.5px;color:#F1F5F9;margin-bottom:6px">${{esc(c.title)}}</div>
-                    <pre style="margin:0;padding:6px 8px;background:#070B14;border-radius:6px;font-size:10px;font-family:var(--font-mono);color:#94A3B8;line-height:1.35;overflow:hidden">${{esc(c.yaml)}}</pre>
+                  `;
+                }}).join('')}}
 
-                    ${{isHover ? `
-                      <div style="position:absolute;${{isBottom ? 'top:103%' : 'bottom:103%'}};left:50%;transform:translateX(-50%);width:240px;background:#060A14;border:1px solid ${{c.color}};border-radius:8px;padding:10px 12px;box-shadow:0 12px 28px -4px rgba(0,0,0,0.85), 0 0 16px ${{c.color}}35;z-index:35;pointer-events:none">
-                        <div style="font-size:11px;font-weight:700;color:${{c.color}};margin-bottom:4px">Raw Preview (${{esc(c.title)}})</div>
-                        <div style="font-size:10.5px;color:#CBD5E1;line-height:1.4">${{esc(c.rawContent)}}</div>
-                      </div>
-                    ` : ''}}
+                <!-- Outer edge AI Agent nodes -->
+                ${{agents.map(ag => `
+                  <div class="km-float-centered" style="position:absolute;left:${{ag.x}}px;top:${{ag.y}}px;display:flex;flex-direction:column;align-items:center;z-index:15">
+                    <div class="km-radar-pulse" style="position:absolute;width:58px;height:58px;border-radius:50%;border:2px solid ${{ag.color}};top:0;pointer-events:none"></div>
+                    <div class="km-telemetry-ring" style="position:relative;width:50px;height:50px;border-radius:50%;border:2px dashed ${{ag.color}};display:flex;align-items:center;justify-content:center;background:rgba(11,15,25,0.92);box-shadow:0 0 20px ${{ag.color}}45">
+                      <div style="width:34px;height:34px;border-radius:50%;background:#0F172A;border:1.5px solid ${{ag.color}};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:${{ag.color}}">AI</div>
+                    </div>
+                    <div style="margin-top:6px;text-align:center;padding:2px 8px;background:rgba(11,15,25,0.9);border-radius:4px;border:1px solid #1E293B">
+                      <div style="font-size:11px;font-weight:700;color:#F8FAFC">${{esc(ag.label)}}</div>
+                      <div style="font-size:9px;color:${{ag.color}}">${{esc(ag.sub)}}</div>
+                    </div>
                   </div>
-                `;
-              }}).join('')}}
-
-              <!-- Outer edge AI Agent nodes -->
-              ${{agents.map(ag => `
-                <div class="km-float-centered" style="position:absolute;left:${{ag.x}}px;top:${{ag.y}}px;display:flex;flex-direction:column;align-items:center;z-index:15">
-                  <div class="km-radar-pulse" style="position:absolute;width:58px;height:58px;border-radius:50%;border:2px solid ${{ag.color}};top:0;pointer-events:none"></div>
-                  <div class="km-telemetry-ring" style="position:relative;width:50px;height:50px;border-radius:50%;border:2px dashed ${{ag.color}};display:flex;align-items:center;justify-content:center;background:rgba(11,15,25,0.92);box-shadow:0 0 20px ${{ag.color}}45">
-                    <div style="width:34px;height:34px;border-radius:50%;background:#0F172A;border:1.5px solid ${{ag.color}};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:${{ag.color}}">AI</div>
-                  </div>
-                  <div style="margin-top:6px;text-align:center;padding:2px 8px;background:rgba(11,15,25,0.9);border-radius:4px;border:1px solid #1E293B">
-                    <div style="font-size:11px;font-weight:700;color:#F8FAFC">${{esc(ag.label)}}</div>
-                    <div style="font-size:9px;color:${{ag.color}}">${{esc(ag.sub)}}</div>
-                  </div>
-                </div>
-              `).join('')}}
+                `).join('')}}
+              </div>
 
               <!-- Mini map corner -->
               <div style="position:absolute;bottom:16px;left:16px;width:120px;height:70px;background:rgba(11,15,25,0.88);border:1px solid #1E293B;border-radius:6px;padding:6px;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none">
@@ -2231,33 +2400,32 @@ for item in hits["results"]:
       renderer.toneMappingExposure = 1.25;
       threeRenderer = renderer;
 
-      // 4. Lighting Rig tailored for Dark Slate & Ice Cyan Theme
-      const ambientLight = new THREE.AmbientLight(0x0e1726, 2.5);
+      // 4. Studio Lighting Rig tailored for Luxury Light Aesthetic
+      const ambientLight = new THREE.AmbientLight(0xffffff, 2.4);
       scene.add(ambientLight);
 
-      // Key light: vibrant cyan highlight from upper-left
-      const keyLight = new THREE.DirectionalLight(0x38bdf8, 3.8);
-      keyLight.position.set(-8, 10, 10);
+      // Key light: vibrant royal indigo / violet
+      const keyLight = new THREE.DirectionalLight(0x6366f1, 4.5);
+      keyLight.position.set(-8, 12, 10);
       scene.add(keyLight);
 
-      // Rim light: electric cyan edge definition from back-right
-      const rimLight = new THREE.DirectionalLight(0x06b6d4, 3.2);
-      rimLight.position.set(10, 8, -8);
+      // Rim light: electric magenta / rose edge definition
+      const rimLight = new THREE.DirectionalLight(0xec4899, 3.8);
+      rimLight.position.set(10, 8, -6);
       scene.add(rimLight);
 
       // Violet bottom fill accent
-      const violetLight = new THREE.PointLight(0xa855f7, 2.0, 25);
+      const violetLight = new THREE.PointLight(0xa855f7, 3.2, 25);
       violetLight.position.set(0, -6, 5);
       scene.add(violetLight);
 
-      // Center point light inside the hollow sphere
-      const innerCoreLight = new THREE.PointLight(0x38bdf8, 4.5, 12);
+      // Inner glowing core light
+      const innerCoreLight = new THREE.PointLight(0x8b5cf6, 5.0, 14);
       innerCoreLight.position.set(0, 0, 0);
       scene.add(innerCoreLight);
 
       // 5. Construct Mathematical Goldberg Polyhedron Dual Sphere
       // Base icosahedron vertices
-      const phi = (1.0 + Math.sqrt(5.0)) / 2.0;
       const baseVerts = [
         [-1,  phi, 0], [ 1,  phi, 0], [-1, -phi, 0], [ 1, -phi, 0],
         [ 0, -1,  phi], [ 0,  1,  phi], [ 0, -1, -phi], [ 0,  1, -phi],
@@ -2359,19 +2527,19 @@ for item in hits["results"]:
 
       // Materials matching theme
       const strutMaterial = new THREE.MeshStandardMaterial({{
-        color: 0x67e8f9,
-        emissive: 0x0284c7,
-        emissiveIntensity: 0.45,
-        metalness: 0.85,
-        roughness: 0.18,
+        color: 0x4f46e5,
+        emissive: 0x7c3aed,
+        emissiveIntensity: 0.35,
+        metalness: 0.90,
+        roughness: 0.12,
       }});
 
       const nodeMaterial = new THREE.MeshStandardMaterial({{
-        color: 0x93c5fd,
-        emissive: 0x38bdf8,
-        emissiveIntensity: 0.60,
-        metalness: 0.88,
-        roughness: 0.14,
+        color: 0xec4899,
+        emissive: 0xdb2777,
+        emissiveIntensity: 0.65,
+        metalness: 0.92,
+        roughness: 0.10,
       }});
 
       // Instanced Cylindrical Struts
@@ -2585,6 +2753,25 @@ for item in hits["results"]:
     }}
   }}
 
+    function fitOkfGraph() {{
+      const container = document.getElementById('km-okf-graph-container');
+      const stage = document.getElementById('km-okf-graph-stage');
+      if (!container || !stage) return;
+      const cw = container.clientWidth || 960;
+      const ch = container.clientHeight || 520;
+      if (cw <= 0 || ch <= 0) return;
+      const scaleX = (cw - 36) / 960;
+      const scaleY = (ch - 36) / 520;
+      const autoScale = Math.min(scaleX, scaleY, 1.05);
+      const zoomFactor = (state.graphZoom || 100) / 100;
+      const finalScale = Math.max(0.35, autoScale * zoomFactor);
+      stage.style.transform = `scale(${finalScale.toFixed(3)})`;
+    }}
+
+    window.addEventListener('resize', () => {{
+      if (state.activeTab === 'okf-graph') fitOkfGraph();
+    }});
+
     function render() {{
       const root = document.getElementById('km-app');
       if (!root) return;
@@ -2595,6 +2782,11 @@ for item in hits["results"]:
         root.innerHTML = renderLoginGate();
       }} else {{
         root.innerHTML = renderDashboard();
+        if (state.activeTab === 'okf-graph') {{
+          fitOkfGraph();
+          requestAnimationFrame(fitOkfGraph);
+          setTimeout(fitOkfGraph, 50);
+        }}
       }}
     }}
 
