@@ -2578,11 +2578,13 @@ for item in hits["results"]:
         renderer.render(scene, camera);
         threeAnimId = requestAnimationFrame(animate);
         window.__threeReady = true;
-      }} catch (err) {{
-        console.error("3D Sphere Init Error:", err);
-        window.__threeError = err.message + ' \\n' + err.stack;
       }}
+      threeAnimId = requestAnimationFrame(animate);
+    }} catch (err) {{
+      console.error("3D Sphere Init Error:", err);
+      window.__threeError = err.message + ' \\n' + err.stack;
     }}
+  }}
 
     function render() {{
       const root = document.getElementById('km-app');
