@@ -488,7 +488,7 @@ export function ReputationBountiesView({ nodes }: { nodes: NodeItem[] }) {
           return (
             <div key={n.node_id} className="km-card">
               <div className="km-card-header" style={{ marginBottom: 8 }}>
-                <span className="km-mono">did:knowmesh:{n.node_id}</span>
+                <span className="km-mono">did:kyro:{n.node_id}</span>
                 <span className="km-badge verified">
                   Trust Index: {Math.round(repScore * 100)}%
                 </span>

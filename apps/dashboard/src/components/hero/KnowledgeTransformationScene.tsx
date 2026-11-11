@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 
 export interface KnowledgeTransformationSceneProps {
   onExploreOkf?: () => void;
@@ -13,9 +13,6 @@ export function KnowledgeTransformationScene({
 }: KnowledgeTransformationSceneProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [phaseDisplay, setPhaseDisplay] = useState<string>(
-    "Interconnected 3D Lattice Sphere · Left-to-Right Rotation"
-  );
 
   useEffect(() => {
     let animId: number | null = null;
@@ -32,7 +29,8 @@ export function KnowledgeTransformationScene({
       script.onload = () => callback();
       script.onerror = () => {
         const cdn = document.createElement("script");
-        cdn.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+        cdn.src =
+          "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
         cdn.onload = () => callback();
         document.head.appendChild(cdn);
       };
@@ -47,17 +45,15 @@ export function KnowledgeTransformationScene({
       const container = containerRef.current;
       if (!canvas || !container) return;
 
-      const width = container.clientWidth || 700;
-      const height = container.clientHeight || 520;
+      const width = Math.max(container.clientWidth || 700, 360);
+      const height = Math.max(container.clientHeight || 640, 560);
 
-      // 1. Scene & Atmosphere matching KnowMesh theme
+      // 1. Scene - 100% Transparent, Unboxed
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x070b14);
-      scene.fog = new THREE.Fog(0x070b14, 10, 26);
 
-      // 2. Camera
-      const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 50);
-      camera.position.set(0, 0, 10.5);
+      // 2. Camera with Generous Breathing Room
+      const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 50);
+      camera.position.set(0, 0, 8.8);
 
       // 3. WebGL Renderer
       renderer = new THREE.WebGLRenderer({
@@ -66,117 +62,185 @@ export function KnowledgeTransformationScene({
         alpha: true,
         powerPreference: "high-performance",
       });
+      renderer.setClearColor(0x000000, 0);
       renderer.setSize(width, height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.15;
+      renderer.toneMappingExposure = 1.25;
 
       // 4. Lighting Rig
-      const ambientLight = new THREE.AmbientLight(0x0e1726, 1.8);
+      const ambientLight = new THREE.AmbientLight(0x0e1726, 2.5);
       scene.add(ambientLight);
 
-      const keyLight = new THREE.DirectionalLight(0x38bdf8, 3.2);
+      const keyLight = new THREE.DirectionalLight(0x38bdf8, 3.8);
       keyLight.position.set(-8, 10, 10);
       scene.add(keyLight);
 
-      const rimLight = new THREE.DirectionalLight(0x06b6d4, 2.6);
-      rimLight.position.set(9, 6, -7);
+      const rimLight = new THREE.DirectionalLight(0x06b6d4, 3.2);
+      rimLight.position.set(10, 8, -8);
       scene.add(rimLight);
 
       const violetLight = new THREE.PointLight(0xa855f7, 2.0, 25);
-      violetLight.position.set(0, -6, 4);
+      violetLight.position.set(0, -6, 5);
       scene.add(violetLight);
 
-      const innerCoreLight = new THREE.PointLight(0x38bdf8, 3.0, 9);
+      const innerCoreLight = new THREE.PointLight(0x38bdf8, 4.5, 12);
       innerCoreLight.position.set(0, 0, 0);
       scene.add(innerCoreLight);
 
-      // 5. Build Interconnected 3D Sphere
-      const SPHERE_RADIUS = 3.15;
-      const STRUT_RADIUS = 0.042;
-      const NODE_RADIUS = 0.072;
+      // 5. Build Interconnected Goldberg Polyhedron Dual Sphere (Hexagonal Voids)
+      const phi = (1.0 + Math.sqrt(5.0)) / 2.0;
+      const baseVerts = [
+        [-1, phi, 0],
+        [1, phi, 0],
+        [-1, -phi, 0],
+        [1, -phi, 0],
+        [0, -1, phi],
+        [0, 1, phi],
+        [0, -1, -phi],
+        [0, 1, -phi],
+        [phi, 0, -1],
+        [phi, 0, 1],
+        [-phi, 0, -1],
+        [-phi, 0, 1],
+      ];
+      const baseFaces = [
+        [0, 11, 5],
+        [0, 5, 1],
+        [0, 1, 7],
+        [0, 7, 10],
+        [0, 10, 11],
+        [1, 5, 9],
+        [5, 11, 4],
+        [11, 10, 2],
+        [10, 7, 6],
+        [7, 1, 8],
+        [3, 9, 4],
+        [3, 4, 2],
+        [3, 2, 6],
+        [3, 6, 8],
+        [3, 8, 9],
+        [4, 9, 5],
+        [2, 4, 11],
+        [6, 2, 10],
+        [8, 6, 7],
+        [9, 8, 1],
+      ];
 
-      const baseGeo = new THREE.IcosahedronGeometry(SPHERE_RADIUS, 2);
-      const posAttr = baseGeo.attributes.position;
-      const indexAttr = baseGeo.index;
-
-      const uniqueVerts: any[] = [];
-      const vertMap = new Map();
-      function getVertIndex(x: number, y: number, z: number) {
-        const key = x.toFixed(3) + "," + y.toFixed(3) + "," + z.toFixed(3);
-        if (vertMap.has(key)) return vertMap.get(key);
-        const idx = uniqueVerts.length;
-        uniqueVerts.push(new THREE.Vector3(x, y, z));
-        vertMap.set(key, idx);
-        return idx;
+      const pVerts: any[] = [];
+      for (let i = 0; i < baseVerts.length; i++) {
+        const b = baseVerts[i];
+        const len = Math.sqrt(b[0] * b[0] + b[1] * b[1] + b[2] * b[2]);
+        pVerts.push(new THREE.Vector3(b[0] / len, b[1] / len, b[2] / len));
       }
 
-      const edgeSet = new Set();
-      const uniqueEdges: [number, number][] = [];
-
-      for (let i = 0; i < indexAttr.count; i += 3) {
-        const ia = indexAttr.getX(i);
-        const ib = indexAttr.getX(i + 1);
-        const ic = indexAttr.getX(i + 2);
-
-        const va = getVertIndex(posAttr.getX(ia), posAttr.getY(ia), posAttr.getZ(ia));
-        const vb = getVertIndex(posAttr.getX(ib), posAttr.getY(ib), posAttr.getZ(ib));
-        const vc = getVertIndex(posAttr.getX(ic), posAttr.getY(ic), posAttr.getZ(ic));
-
-        const addEdge = (u: number, v: number) => {
-          const min = Math.min(u, v);
-          const max = Math.max(u, v);
-          const k = min + "_" + max;
-          if (!edgeSet.has(k)) {
-            edgeSet.add(k);
-            uniqueEdges.push([min, max]);
-          }
-        };
-
-        addEdge(va, vb);
-        addEdge(vb, vc);
-        addEdge(vc, va);
+      let pFaces = baseFaces;
+      for (let step = 0; step < 2; step++) {
+        const midCache = new Map<string, number>();
+        function getMid(i1: number, i2: number): number {
+          const k = Math.min(i1, i2) + "_" + Math.max(i1, i2);
+          if (midCache.has(k)) return midCache.get(k)!;
+          const v1 = pVerts[i1];
+          const v2 = pVerts[i2];
+          const mx = (v1.x + v2.x) * 0.5;
+          const my = (v1.y + v2.y) * 0.5;
+          const mz = (v1.z + v2.z) * 0.5;
+          const len = Math.sqrt(mx * mx + my * my + mz * mz);
+          const idx = pVerts.length;
+          pVerts.push(new THREE.Vector3(mx / len, my / len, mz / len));
+          midCache.set(k, idx);
+          return idx;
+        }
+        const nextFaces: number[][] = [];
+        for (let f = 0; f < pFaces.length; f++) {
+          const tri = pFaces[f];
+          const a = getMid(tri[0], tri[1]);
+          const b = getMid(tri[1], tri[2]);
+          const c = getMid(tri[2], tri[0]);
+          nextFaces.push([tri[0], a, c]);
+          nextFaces.push([tri[1], b, a]);
+          nextFaces.push([tri[2], c, b]);
+          nextFaces.push([a, b, c]);
+        }
+        pFaces = nextFaces;
       }
 
-      // Organic Voronoi-cellular tangential perturbation
-      for (let i = 0; i < uniqueVerts.length; i++) {
-        const v = uniqueVerts[i];
-        const norm = v.clone().normalize();
-        const tangentDisplacement = new THREE.Vector3(
-          Math.sin(i * 1.95 + 0.4),
-          Math.cos(i * 2.65 + 0.9),
-          Math.sin(i * 3.35 + 1.3)
-        )
-          .cross(norm)
-          .multiplyScalar(0.24);
-        v.add(tangentDisplacement).normalize().multiplyScalar(SPHERE_RADIUS);
+      // Shrunk to perfectly balanced scale (no clipping / out-of-bounds)
+      const SPHERE_RADIUS = 2.45;
+      const STRUT_RADIUS = 0.038;
+      const NODE_RADIUS = 0.062;
+
+      const dualVerts: any[] = [];
+      for (let f = 0; f < pFaces.length; f++) {
+        const tri = pFaces[f];
+        const v0 = pVerts[tri[0]];
+        const v1 = pVerts[tri[1]];
+        const v2 = pVerts[tri[2]];
+        const cx = (v0.x + v1.x + v2.x) / 3.0;
+        const cy = (v0.y + v1.y + v2.y) / 3.0;
+        const cz = (v0.z + v1.z + v2.z) / 3.0;
+        const len = Math.sqrt(cx * cx + cy * cy + cz * cz);
+        dualVerts.push(
+          new THREE.Vector3(
+            (cx / len) * SPHERE_RADIUS,
+            (cy / len) * SPHERE_RADIUS,
+            (cz / len) * SPHERE_RADIUS
+          )
+        );
       }
 
-      // Crystalline Ice-Cyan Physical Material
-      const latticeMaterial = new THREE.MeshPhysicalMaterial({
-        color: 0x7dd3fc,
-        emissive: 0x0284c7,
-        emissiveIntensity: 0.22,
-        roughness: 0.12,
-        metalness: 0.28,
-        transmission: 0.6,
-        thickness: 0.5,
-        transparent: true,
-        opacity: 0.92,
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.08,
-        ior: 1.52,
+      const edgeToFaces = new Map<string, number[]>();
+      for (let f = 0; f < pFaces.length; f++) {
+        const tri = pFaces[f];
+        const pairs = [
+          [Math.min(tri[0], tri[1]), Math.max(tri[0], tri[1])],
+          [Math.min(tri[1], tri[2]), Math.max(tri[1], tri[2])],
+          [Math.min(tri[2], tri[0]), Math.max(tri[2], tri[0])],
+        ];
+        for (let p = 0; p < 3; p++) {
+          const k = pairs[p][0] + "_" + pairs[p][1];
+          if (!edgeToFaces.has(k)) edgeToFaces.set(k, []);
+          edgeToFaces.get(k)!.push(f);
+        }
+      }
+
+      const dualEdges: [number, number][] = [];
+      edgeToFaces.forEach((fList) => {
+        if (fList.length === 2) {
+          dualEdges.push([fList[0], fList[1]]);
+        }
       });
 
       const sphereGroup = new THREE.Group();
       scene.add(sphereGroup);
 
-      // Instanced Struts (cylinders)
-      const cylinderUnitGeo = new THREE.CylinderGeometry(STRUT_RADIUS, STRUT_RADIUS, 1.0, 10);
+      const strutMaterial = new THREE.MeshStandardMaterial({
+        color: 0x67e8f9,
+        emissive: 0x0284c7,
+        emissiveIntensity: 0.45,
+        metalness: 0.85,
+        roughness: 0.18,
+      });
+
+      const nodeMaterial = new THREE.MeshStandardMaterial({
+        color: 0x93c5fd,
+        emissive: 0x38bdf8,
+        emissiveIntensity: 0.6,
+        metalness: 0.88,
+        roughness: 0.14,
+      });
+
+      // Instanced Struts
+      const cylinderUnitGeo = new THREE.CylinderGeometry(
+        STRUT_RADIUS,
+        STRUT_RADIUS,
+        1.0,
+        10
+      );
       const instancedStruts = new THREE.InstancedMesh(
         cylinderUnitGeo,
-        latticeMaterial,
-        uniqueEdges.length
+        strutMaterial,
+        dualEdges.length
       );
       instancedStruts.castShadow = true;
       instancedStruts.receiveShadow = true;
@@ -184,12 +248,14 @@ export function KnowledgeTransformationScene({
       const dummy = new THREE.Object3D();
       const upVector = new THREE.Vector3(0, 1, 0);
 
-      for (let e = 0; e < uniqueEdges.length; e++) {
-        const [idxA, idxB] = uniqueEdges[e];
-        const vA = uniqueVerts[idxA];
-        const vB = uniqueVerts[idxB];
+      for (let e = 0; e < dualEdges.length; e++) {
+        const [idxA, idxB] = dualEdges[e];
+        const vA = dualVerts[idxA];
+        const vB = dualVerts[idxB];
 
-        const midpoint = new THREE.Vector3().addVectors(vA, vB).multiplyScalar(0.5);
+        const midpoint = new THREE.Vector3()
+          .addVectors(vA, vB)
+          .multiplyScalar(0.5);
         const dir = new THREE.Vector3().subVectors(vB, vA);
         const len = dir.length();
         dir.normalize();
@@ -203,25 +269,16 @@ export function KnowledgeTransformationScene({
       instancedStruts.instanceMatrix.needsUpdate = true;
       sphereGroup.add(instancedStruts);
 
-      // Instanced Nodes (spheres at intersections)
-      const sphereUnitGeo = new THREE.SphereGeometry(NODE_RADIUS, 14, 14);
-      const nodeMaterial = new THREE.MeshPhysicalMaterial({
-        color: 0x93c5fd,
-        emissive: 0x38bdf8,
-        emissiveIntensity: 0.35,
-        roughness: 0.1,
-        metalness: 0.35,
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.05,
-      });
+      // Instanced Nodes
+      const sphereUnitGeo = new THREE.SphereGeometry(NODE_RADIUS, 12, 12);
       const instancedNodes = new THREE.InstancedMesh(
         sphereUnitGeo,
         nodeMaterial,
-        uniqueVerts.length
+        dualVerts.length
       );
 
-      for (let n = 0; n < uniqueVerts.length; n++) {
-        dummy.position.copy(uniqueVerts[n]);
+      for (let n = 0; n < dualVerts.length; n++) {
+        dummy.position.copy(dualVerts[n]);
         dummy.quaternion.set(0, 0, 0, 1);
         dummy.scale.set(1.0, 1.0, 1.0);
         dummy.updateMatrix();
@@ -230,149 +287,179 @@ export function KnowledgeTransformationScene({
       instancedNodes.instanceMatrix.needsUpdate = true;
       sphereGroup.add(instancedNodes);
 
-      // Internal Suspended Core
-      const innerWireGeo = new THREE.IcosahedronGeometry(1.1, 1);
-      const innerWireMat = new THREE.MeshBasicMaterial({
+      // Luminous Line Segments
+      const lineGeo = new THREE.BufferGeometry();
+      const linePositions = new Float32Array(dualEdges.length * 6);
+      for (let e = 0; e < dualEdges.length; e++) {
+        const [idxA, idxB] = dualEdges[e];
+        const vA = dualVerts[idxA];
+        const vB = dualVerts[idxB];
+        linePositions[e * 6 + 0] = vA.x;
+        linePositions[e * 6 + 1] = vA.y;
+        linePositions[e * 6 + 2] = vA.z;
+        linePositions[e * 6 + 3] = vB.x;
+        linePositions[e * 6 + 4] = vB.y;
+        linePositions[e * 6 + 5] = vB.z;
+      }
+      lineGeo.setAttribute(
+        "position",
+        new THREE.BufferAttribute(linePositions, 3)
+      );
+      const lineMaterial = new THREE.LineBasicMaterial({
         color: 0x38bdf8,
-        wireframe: true,
         transparent: true,
-        opacity: 0.35,
+        opacity: 0.65,
       });
-      const innerWireMesh = new THREE.Mesh(innerWireGeo, innerWireMat);
-      sphereGroup.add(innerWireMesh);
+      const lineSegments = new THREE.LineSegments(lineGeo, lineMaterial);
+      sphereGroup.add(lineSegments);
 
-      const innerGlowGeo = new THREE.SphereGeometry(0.35, 24, 24);
-      const innerGlowMat = new THREE.MeshStandardMaterial({
-        color: 0x38bdf8,
-        emissive: 0x0284c7,
-        emissiveIntensity: 1.5,
-        roughness: 0.2,
-      });
-      const innerGlowMesh = new THREE.Mesh(innerGlowGeo, innerGlowMat);
-      sphereGroup.add(innerGlowMesh);
-
-      // Streaming Data Particles along the lattice
-      const particleCount = 40;
+      // Data Packet Pulses
+      const particleCount = 48;
       const particleGeo = new THREE.BufferGeometry();
       const particlePositions = new Float32Array(particleCount * 3);
-      const particleEdges: number[] = [];
-      const particleProgress = new Float32Array(particleCount);
-      const particleSpeeds = new Float32Array(particleCount);
-
+      const particleEdges: {
+        edge: [number, number];
+        t: number;
+        speed: number;
+      }[] = [];
       for (let p = 0; p < particleCount; p++) {
-        particleEdges.push(Math.floor(Math.random() * uniqueEdges.length));
-        particleProgress[p] = Math.random();
-        particleSpeeds[p] = 0.25 + Math.random() * 0.45;
+        const randEdge =
+          dualEdges[Math.floor(Math.random() * dualEdges.length)];
+        const prog = Math.random();
+        const speed = 0.25 + Math.random() * 0.45;
+        particleEdges.push({ edge: randEdge, t: prog, speed });
+        const vA = dualVerts[randEdge[0]];
+        const vB = dualVerts[randEdge[1]];
+        particlePositions[p * 3 + 0] = vA.x + (vB.x - vA.x) * prog;
+        particlePositions[p * 3 + 1] = vA.y + (vB.y - vA.y) * prog;
+        particlePositions[p * 3 + 2] = vA.z + (vB.z - vA.z) * prog;
       }
-      particleGeo.setAttribute("position", new THREE.BufferAttribute(particlePositions, 3));
+      particleGeo.setAttribute(
+        "position",
+        new THREE.BufferAttribute(particlePositions, 3)
+      );
       const particleMaterial = new THREE.PointsMaterial({
-        color: 0x38bdf8,
-        size: 0.12,
+        color: 0x67e8f9,
+        size: 0.16,
         transparent: true,
         opacity: 0.95,
       });
       const particlePoints = new THREE.Points(particleGeo, particleMaterial);
       sphereGroup.add(particlePoints);
 
-      // Ambient Sparkles in surrounding space
-      const sparkleCount = 50;
+      // Surrounding Ambient Sparkles
+      const sparkleCount = 40;
       const sparkleGeo = new THREE.BufferGeometry();
       const sparklePositions = new Float32Array(sparkleCount * 3);
       for (let s = 0; s < sparkleCount; s++) {
-        sparklePositions[s * 3] = (Math.random() - 0.5) * 14.0;
-        sparklePositions[s * 3 + 1] = (Math.random() - 0.5) * 10.0;
-        sparklePositions[s * 3 + 2] = (Math.random() - 0.5) * 8.0;
+        const rad = 2.8 + Math.random() * 1.8;
+        const theta = Math.random() * Math.PI * 2;
+        const phiAngle = Math.acos(Math.random() * 2 - 1);
+        sparklePositions[s * 3 + 0] =
+          rad * Math.sin(phiAngle) * Math.cos(theta);
+        sparklePositions[s * 3 + 1] =
+          rad * Math.sin(phiAngle) * Math.sin(theta);
+        sparklePositions[s * 3 + 2] = rad * Math.cos(phiAngle);
       }
-      sparkleGeo.setAttribute("position", new THREE.BufferAttribute(sparklePositions, 3));
+      sparkleGeo.setAttribute(
+        "position",
+        new THREE.BufferAttribute(sparklePositions, 3)
+      );
       const sparkles = new THREE.Points(
         sparkleGeo,
         new THREE.PointsMaterial({
-          color: 0x8bbcff,
-          size: 0.07,
+          color: 0x93c5fd,
+          size: 0.08,
           transparent: true,
-          opacity: 0.35,
+          opacity: 0.45,
         })
       );
       scene.add(sparkles);
 
-      // Interactive Cursor Tracking
-      let cursorX = 0,
-        cursorY = 0;
-      let targetTiltX = 0,
-        targetTiltZ = 0;
-      let cursorVelX = 0,
-        lastClientX = 0;
+      // Cursor Gyro Interaction
+      let targetTiltX = 0;
+      let targetTiltY = 0;
+      let currentTiltX = 0;
+      let currentTiltY = 0;
+      let cursorVelX = 0;
+      let lastPointerX = 0;
 
-      const onMouseMove = (e: MouseEvent) => {
+      function onPointerMove(e: MouseEvent) {
+        if (!canvas) return;
         const rect = canvas.getBoundingClientRect();
-        cursorX = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-        cursorY = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+        const cx = (e.clientX - rect.left) / rect.width;
+        const cy = (e.clientY - rect.top) / rect.height;
+        const cursorX = (cx - 0.5) * 2;
+        const cursorY = (cy - 0.5) * 2;
 
-        const dx = e.clientX - lastClientX;
-        lastClientX = e.clientX;
-        cursorVelX = dx * 0.0015;
-      };
+        targetTiltY = cursorX * 0.45;
+        targetTiltX = -cursorY * 0.35;
 
-      const onMouseLeave = () => {
-        cursorX = 0;
-        cursorY = 0;
-      };
+        const dx = cursorX - lastPointerX;
+        lastPointerX = cursorX;
+        cursorVelX = dx * 0.003;
+      }
 
-      canvas.addEventListener("mousemove", onMouseMove);
-      canvas.addEventListener("mouseleave", onMouseLeave);
+      function onTouchMove(e: TouchEvent) {
+        if (e.touches.length > 0) {
+          onPointerMove(e.touches[0] as unknown as MouseEvent);
+        }
+      }
 
-      const onResize = () => {
-        if (!container || !renderer || !camera) return;
-        const w = container.clientWidth || 700;
-        const h = container.clientHeight || 520;
-        camera.aspect = w / h;
+      window.addEventListener("mousemove", onPointerMove, { passive: true });
+      window.addEventListener("touchmove", onTouchMove, { passive: true });
+
+      function onResize() {
+        if (!canvas || !container) return;
+        const nw = Math.max(container.clientWidth || 700, 360);
+        const nh = Math.max(container.clientHeight || 640, 560);
+        camera.aspect = nw / nh;
         camera.updateProjectionMatrix();
-        renderer.setSize(w, h);
-      };
+        renderer.setSize(nw, nh);
+      }
       window.addEventListener("resize", onResize);
 
-      // 6. Animation Loop: Left-to-Right Continuous Rotation + Cursor Gyro Reaction
+      let lastTime = performance.now();
+      const baseRotationSpeed = 0.0042; // Continuous Left-to-Right rotation
+
       function animate(now: number) {
         if (!canvasRef.current) return;
+        const dt = Math.min((now - lastTime) / 1000, 0.05);
+        lastTime = now;
 
-        // Continuous Rotation: Left to Right (+Y rotation moves front face left to right)
-        const baseSpeed = 0.0065;
-        sphereGroup.rotation.y += baseSpeed + cursorVelX;
-        cursorVelX *= 0.94; // damping inertia
+        // Smooth continuous left-to-right rotation on Y-axis
+        cursorVelX *= 0.94;
+        sphereGroup.rotation.y += baseRotationSpeed + cursorVelX;
 
-        // Interactive Cursor Tilt
-        targetTiltX = cursorY * 0.55;
-        targetTiltZ = -cursorX * 0.4;
-        sphereGroup.rotation.x += (targetTiltX - sphereGroup.rotation.x) * 0.06;
-        sphereGroup.rotation.z += (targetTiltZ - sphereGroup.rotation.z) * 0.06;
+        // Smooth Gyro tilt
+        currentTiltX += (targetTiltX - currentTiltX) * 0.06;
+        currentTiltY += (targetTiltY - currentTiltY) * 0.06;
+        sphereGroup.rotation.x = currentTiltX;
+        sphereGroup.rotation.z = -currentTiltY * 0.35;
 
-        // Internal core counter-rotation & pulsation
-        innerWireMesh.rotation.y -= 0.012;
-        innerWireMesh.rotation.x += 0.006;
-        innerCoreLight.intensity = 2.4 + Math.sin(now * 0.003) * 0.8;
+        // Subtle zero-gravity breathing
+        sphereGroup.position.y = Math.sin(now * 0.0014) * 0.08;
 
-        // Animate data flow particles along edges
-        const pArr = particlePoints.geometry.attributes.position.array;
+        // Packet progression along edges
+        const posAttrP = particleGeo.attributes.position;
+        const arr = posAttrP.array as Float32Array;
         for (let p = 0; p < particleCount; p++) {
-          particleProgress[p] = (particleProgress[p] + particleSpeeds[p] * 0.014) % 1.0;
-          const edge = uniqueEdges[particleEdges[p]];
-          const vA = uniqueVerts[edge[0]];
-          const vB = uniqueVerts[edge[1]];
-          const pr = particleProgress[p];
-
-          pArr[p * 3] = vA.x + (vB.x - vA.x) * pr;
-          pArr[p * 3 + 1] = vA.y + (vB.y - vA.y) * pr;
-          pArr[p * 3 + 2] = vA.z + (vB.z - vA.z) * pr;
+          const item = particleEdges[p];
+          item.t += dt * item.speed;
+          if (item.t >= 1.0) {
+            item.t = 0.0;
+            item.edge =
+              dualEdges[Math.floor(Math.random() * dualEdges.length)];
+          }
+          const vA = dualVerts[item.edge[0]];
+          const vB = dualVerts[item.edge[1]];
+          arr[p * 3 + 0] = vA.x + (vB.x - vA.x) * item.t;
+          arr[p * 3 + 1] = vA.y + (vB.y - vA.y) * item.t;
+          arr[p * 3 + 2] = vA.z + (vB.z - vA.z) * item.t;
         }
-        particlePoints.geometry.attributes.position.needsUpdate = true;
+        posAttrP.needsUpdate = true;
 
-        // Sparkles gentle rotation
-        sparkles.rotation.y = now * 0.00015;
-
-        // Parallax Camera gliding
-        camera.position.x += (cursorX * 0.55 - camera.position.x) * 0.05;
-        camera.position.y += (-cursorY * 0.35 - camera.position.y) * 0.05;
-        camera.lookAt(0, 0, 0);
+        sparkles.rotation.y -= 0.001;
 
         renderer.render(scene, camera);
         animId = requestAnimationFrame(animate);
@@ -383,7 +470,11 @@ export function KnowledgeTransformationScene({
 
     return () => {
       if (animId) cancelAnimationFrame(animId);
-      if (renderer) renderer.dispose();
+      if (renderer) {
+        try {
+          renderer.dispose();
+        } catch (e) {}
+      }
     };
   }, []);
 
@@ -393,55 +484,24 @@ export function KnowledgeTransformationScene({
       style={{
         position: "relative",
         width: "100%",
-        height: "100%",
-        minHeight: 520,
-        overflow: "hidden",
+        height: "640px",
+        minHeight: "580px",
+        background: "transparent",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "visible",
       }}
     >
       <canvas
         ref={canvasRef}
         style={{
-          display: "block",
           width: "100%",
           height: "100%",
+          display: "block",
+          background: "transparent",
         }}
       />
-      <div
-        style={{
-          position: "absolute",
-          top: 14,
-          left: 18,
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 8,
-          padding: "5px 14px",
-          background: "rgba(11, 18, 32, 0.85)",
-          backdropFilter: "blur(8px)",
-          borderRadius: 999,
-          border: "1px solid rgba(56, 189, 248, 0.45)",
-          fontSize: 11.5,
-          color: "#38bdf8",
-          fontWeight: 600,
-          zIndex: 10,
-          pointerEvents: "none",
-        }}
-      >
-        <span style={{ color: "#38D399" }}>●</span> <span>{phaseDisplay}</span>
-      </div>
-
-      <div className="km-okf-center-badge">
-        <span className="km-okf-pill">KNOWMESH</span>
-        <span style={{ fontSize: 9.5, color: "#94A3B8", letterSpacing: "0.06em" }}>
-          INTERCONNECTED 3D SPHERE
-        </span>
-      </div>
-
-      <div className="km-zone-label km-zone-left">
-        ◄ ROTATING LEFT TO RIGHT
-      </div>
-      <div className="km-zone-label km-zone-right">
-        CURSOR-RESPONSIVE GYRO ►
-      </div>
     </div>
   );
 }

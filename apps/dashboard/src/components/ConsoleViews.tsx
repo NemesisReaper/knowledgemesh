@@ -502,7 +502,7 @@ export function NodesView({
         <div>
           <h1 className="km-page-title">Independent Knowledge Nodes</h1>
           <p className="km-page-subtitle">
-            Each KnowMesh node maintains its own Ed25519 cryptographic identity, publication visibility policy, and sovereign data boundary.
+            Each Kyro node maintains its own Ed25519 cryptographic identity, publication visibility policy, and sovereign data boundary.
           </p>
         </div>
         <button
@@ -541,7 +541,7 @@ export function NodesView({
             onClick={() => setSelectedNodeId(n.node_id)}
           >
             <div className="km-card-header" style={{ marginBottom: 8 }}>
-              <span className="km-mono">did:knowmesh:{n.node_id}</span>
+              <span className="km-mono">did:kyro:{n.node_id}</span>
               <div style={{ display: "flex", gap: 6 }}>
                 <span className={`km-badge ${n.visibility}`}>
                   {n.visibility}
@@ -807,8 +807,8 @@ export function NodesView({
               <div className="km-field">
                 <span className="km-label">Node Decentralized Identifier</span>
                 <CopySnippet
-                  text={`did:knowmesh:${activeNode.node_id}`}
-                  label={`did:knowmesh:${activeNode.node_id}`}
+                  text={`did:kyro:${activeNode.node_id}`}
+                  label={`did:kyro:${activeNode.node_id}`}
                 />
               </div>
               <div className="km-field">
@@ -1080,7 +1080,7 @@ export function KnowledgeView({
       "Cryptographic Ed25519 signatures and canonical OKF digests prevent undetected payload tampering across federated nodes.",
     claim_status: "supported",
     claim_confidence: 0.95,
-    evidence_title: "RFC 8032 & KnowMesh OKF Specification",
+    evidence_title: "RFC 8032 & Kyro OKF Specification",
     evidence_uri: "https://rfc-editor.org/rfc/rfc8032",
     evidence_desc:
       "Deterministic canonical JSON serialization and Ed25519 verification test vectors.",
@@ -1305,7 +1305,7 @@ export function KnowledgeView({
             record_id: `prov-${Date.now()}`,
             subject_id: `${generatedId}@${wizardForm.version}`,
             action: "bundle.published",
-            actor_id: "architect@knowmesh.org",
+            actor_id: "architect@kyro.org",
             node_id: wizardForm.node_id,
             occurred_at: new Date().toISOString(),
             previous_hash: null,
@@ -1392,7 +1392,7 @@ export function KnowledgeView({
             record_id: `prov-${Date.now()}`,
             subject_id: `${prev.bundle_id}@${nextRev}`,
             action: "bundle.revision_published",
-            actor_id: "architect@knowmesh.org",
+            actor_id: "architect@kyro.org",
             node_id: prev.publisher_node_id,
             occurred_at: new Date().toISOString(),
             previous_hash: prev.provenance[0]?.record_hash || null,

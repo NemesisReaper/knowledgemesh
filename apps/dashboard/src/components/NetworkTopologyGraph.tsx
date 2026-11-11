@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export interface TopologyNode {
   id: string;
@@ -31,88 +31,115 @@ interface Props {
   onSelectNode?: (node: TopologyNode) => void;
 }
 
-export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
-  const [zoom, setZoom] = useState<number>(1);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+type Point = { x: number; y: number };
+
+export function NetworkTopologyGraph({
+  nodes,
+  edges,
+  onSelectNode,
+}: Props) {
+  const [zoom, setZoom] = useState(1);
+  const [statusFilter, setStatusFilter] = useState("all");
   const [simulationMode, setSimulationMode] = useState<
     "idle" | "query_fanout" | "pull_sync"
-  >("query_fanout");
-  const [showTable, setShowTable] = useState<boolean>(false);
-  const [copiedFp, setCopiedFp] = useState<boolean>(false);
+  >("idle");
+  const [showTable, setShowTable] = useState(false);
+  const [copiedFp, setCopiedFp] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(
-    nodes[0]?.id || null
+    nodes[0]?.id ?? null
   );
 
+  const filteredNodes = useMemo(
+    () =>
+      statusFilter === "all"
+        ? nodes
+        : nodes.filter((node) => node.status === statusFilter),
+    [nodes, statusFilter]
+  );
+
+  // Keep selection valid when data or filters change.
   useEffect(() => {
-    if (!selectedId && nodes[0]?.id) {
-      setSelectedId(nodes[0].id);
+    if (!filteredNodes.length) {
+      setSelectedId(null);
+      return;
     }
-  }, [nodes, selectedId]);
 
-  const filteredNodes = useMemo(() => {
-    if (statusFilter === "all") return nodes;
-    return nodes.filter((n) => n.status === statusFilter);
-  }, [nodes, statusFilter]);
+    if (!filteredNodes.some((node) => node.id === selectedId)) {
+      setSelectedId(filteredNodes[0].id);
+    }
+  }, [filteredNodes, selectedId]);
 
-  const positions = useMemo(() => {
-    const map: Record<string, { x: number; y: number }> = {};
-    const cx = 370;
-    const cy = 195;
+  const selectedNode =
+    filteredNodes.find((node) => node.id === selectedId) ??
+    filteredNodes[0] ??
+    null;
 
-    // Place the single local anchor node strictly at center
+  const positions = useMemo<Record<string, Point>>(() => {
+    const result: Record<string, Point> = {};
+    const center = { x: 370, y: 195 };
     const localNode =
-      filteredNodes.find((n) => n.type === "local_node") || filteredNodes[0];
-    const peerNodes = filteredNodes.filter((n) => n.id !== localNode?.id);
+      filteredNodes.find((node) => node.type === "local_node") ??
+      filteredNodes[0];
+    const peers = filteredNodes.filter((node) => node.id !== localNode?.id);
 
-    if (localNode) {
-      map[localNode.id] = { x: cx, y: cy };
-    }
+    if (localNode) result[localNode.id] = center;
 
-    // Evenly distribute peer nodes in an orbit ring to prevent any overlapping
-    const count = peerNodes.length;
-    peerNodes.forEach((n, idx) => {
-      const angle =
-        count === 1
-          ? -Math.PI / 4
-          : (idx / Math.max(1, count)) * Math.PI * 2 - Math.PI / 2;
-      const radius = count <= 2 ? 140 : 155;
-      map[n.id] = {
-        x: Math.round(cx + Math.cos(angle) * radius * 1.35),
-        y: Math.round(cy + Math.sin(angle) * radius * 0.85),
+    // Use an elliptical orbit and scale its radius down for larger networks.
+    const count = peers.length;
+    const radiusX = count > 8 ? 205 : count > 4 ? 185 : 155;
+    const radiusY = count > 8 ? 135 : 145;
+
+    peers.forEach((node, index) => {
+      const angle = (index / Math.max(count, 1)) * Math.PI * 2 - Math.PI / 2;
+      result[node.id] = {
+        x: Math.round(center.x + Math.cos(angle) * radiusX),
+        y: Math.round(center.y + Math.sin(angle) * radiusY),
       };
     });
 
-    return map;
+    return result;
   }, [filteredNodes]);
 
+  // Treat links as undirected for display and prevent duplicate visual lines.
   const uniqueDisplayEdges = useMemo(() => {
     const seen = new Set<string>();
-    const result: TopologyEdge[] = [];
-    for (const edge of edges) {
-      if (edge.source === edge.target) continue;
-      const pairKey = [edge.source, edge.target].sort().join("___");
-      if (!seen.has(pairKey)) {
-        seen.add(pairKey);
-        result.push(edge);
-      }
-    }
-    return result;
+    return edges.filter((edge) => {
+      if (edge.source === edge.target) return false;
+      const key = [edge.source, edge.target].sort().join("::");
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   }, [edges]);
 
-  const selectedNode = useMemo(
+  const selectedNodeEdges = useMemo(
     () =>
-      filteredNodes.find((n) => n.id === selectedId) ||
-      filteredNodes[0] ||
-      null,
-    [filteredNodes, selectedId]
+      selectedNode
+        ? edges.filter(
+          (edge) =>
+            edge.source === selectedNode.id ||
+            edge.target === selectedNode.id
+        )
+        : [],
+    [edges, selectedNode]
   );
 
-  const selectedNodeEdges = useMemo(() => {
-    if (!selectedNode) return [];
-    return edges.filter(
-      (e) => e.source === selectedNode.id || e.target === selectedNode.id
-    );
-  }, [edges, selectedNode]);
+  const handleSelectNode = (node: TopologyNode) => {
+    setSelectedId(node.id);
+    onSelectNode?.(node);
+  };
+
+  const copyFingerprint = async () => {
+    if (!selectedNode?.fingerprint) return;
+
+    try {
+      await navigator.clipboard.writeText(selectedNode.fingerprint);
+      setCopiedFp(true);
+      window.setTimeout(() => setCopiedFp(false), 1400);
+    } catch {
+      setCopiedFp(false);
+    }
+  };
 
   return (
     <div
@@ -122,16 +149,24 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
     >
       <div className="km-card-header">
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              flexWrap: "wrap",
+            }}
+          >
             <h3 className="km-card-title">
               Federated Knowledge Mesh Topology
             </h3>
             <span className="km-badge verified">
-              ● Live Telemetry ({nodes.length} Nodes · {edges.length} Peer Links)
+              {nodes.length} Nodes · {edges.length} Peer Links
             </span>
           </div>
           <div className="km-metric-sub" style={{ marginTop: 3 }}>
-            Live sovereign Ed25519 node identities, peer trust handshakes, and pull-sync channels from backend registry
+            Node identities, peer trust handshakes, and federation channels
+            reported by the backend registry
           </div>
         </div>
 
@@ -145,12 +180,12 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
         >
           <button
             type="button"
-            className={`km-btn km-btn-sm ${
-              simulationMode === "query_fanout" ? "km-btn-accent" : ""
-            }`}
+            className={`km-btn km-btn-sm ${simulationMode === "query_fanout" ? "km-btn-accent" : ""
+              }`}
+            aria-pressed={simulationMode === "query_fanout"}
             onClick={() =>
-              setSimulationMode((m) =>
-                m === "query_fanout" ? "idle" : "query_fanout"
+              setSimulationMode((mode) =>
+                mode === "query_fanout" ? "idle" : "query_fanout"
               )
             }
           >
@@ -158,12 +193,12 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
           </button>
           <button
             type="button"
-            className={`km-btn km-btn-sm ${
-              simulationMode === "pull_sync" ? "km-btn-primary" : ""
-            }`}
+            className={`km-btn km-btn-sm ${simulationMode === "pull_sync" ? "km-btn-primary" : ""
+              }`}
+            aria-pressed={simulationMode === "pull_sync"}
             onClick={() =>
-              setSimulationMode((m) =>
-                m === "pull_sync" ? "idle" : "pull_sync"
+              setSimulationMode((mode) =>
+                mode === "pull_sync" ? "idle" : "pull_sync"
               )
             }
           >
@@ -174,7 +209,7 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
             className="km-select"
             style={{ width: 145, padding: "5px 8px", fontSize: 12 }}
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(event) => setStatusFilter(event.target.value)}
           >
             <option value="all">All Statuses ({nodes.length})</option>
             <option value="active">Active Only</option>
@@ -183,20 +218,18 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
           <button
             type="button"
             className="km-btn km-btn-sm"
-            onClick={() =>
-              setZoom((z) => Math.min(1.45, +(z + 0.15).toFixed(2)))
-            }
+            onClick={() => setZoom((value) => Math.min(1.45, +(value + 0.15).toFixed(2)))}
             title="Zoom in"
+            aria-label="Zoom in"
           >
             +
           </button>
           <button
             type="button"
             className="km-btn km-btn-sm"
-            onClick={() =>
-              setZoom((z) => Math.max(0.75, +(z - 0.15).toFixed(2)))
-            }
+            onClick={() => setZoom((value) => Math.max(0.75, +(value - 0.15).toFixed(2)))}
             title="Zoom out"
+            aria-label="Zoom out"
           >
             −
           </button>
@@ -210,7 +243,8 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
           <button
             type="button"
             className="km-btn km-btn-sm"
-            onClick={() => setShowTable((s) => !s)}
+            onClick={() => setShowTable((value) => !value)}
+            aria-expanded={showTable}
           >
             {showTable ? "Hide Table" : "Matrix View"}
           </button>
@@ -231,19 +265,23 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
             No Nodes Registered in Current Filter
           </div>
           <div className="km-metric-sub">
-            Register a knowledge node in the &ldquo;My Nodes&rdquo; tab or connect a peer in &ldquo;Federation & Peers&rdquo; to populate the live mesh topology.
+            Register a knowledge node in the &ldquo;My Nodes&rdquo; tab or
+            connect a peer in &ldquo;Federation &amp; Peers&rdquo; to populate
+            the network topology.
           </div>
         </div>
       ) : (
         <div
+          className="km-topology-layout"
           style={{
             display: "grid",
-            gridTemplateColumns: selectedNode ? "1.65fr 1fr" : "1fr",
+            gridTemplateColumns: selectedNode
+              ? "minmax(0, 1.65fr) minmax(260px, 1fr)"
+              : "1fr",
             gap: 18,
             alignItems: "stretch",
           }}
         >
-          {/* Interactive SVG Canvas */}
           <div
             style={{
               background:
@@ -272,61 +310,15 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                 color: "var(--text-secondary)",
               }}
             >
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 5,
-                }}
-              >
-                <span
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: "50%",
-                    background: "#6599FF",
-                  }}
-                />
-                Local Anchor Node
-              </span>
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 5,
-                }}
-              >
-                <span
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: "50%",
-                    background: "#38D399",
-                  }}
-                />
-                Ed25519 Verified Peer
-              </span>
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 5,
-                }}
-              >
-                <span
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: "50%",
-                    background: "#F5B942",
-                  }}
-                />
-                Pending Handshake
-              </span>
+              <Legend color="#6599FF" label="Local Anchor Node" />
+              <Legend color="#38D399" label="Verified Peer" />
+              <Legend color="#F5B942" label="Pending Handshake" />
             </div>
 
             <svg
               viewBox="0 0 740 390"
+              role="img"
+              aria-label="Interactive diagram of local and federated knowledge nodes"
               style={{
                 width: "100%",
                 height: 380,
@@ -338,7 +330,7 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
             >
               <defs>
                 <pattern
-                  id="kmGrid"
+                  id="kmTopologyGrid"
                   width="36"
                   height="36"
                   patternUnits="userSpaceOnUse"
@@ -350,18 +342,27 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                     strokeWidth="0.75"
                   />
                 </pattern>
-                <radialGradient id="nodeGlowPrimary" cx="50%" cy="50%" r="50%">
+                <radialGradient
+                  id="kmNodeGlowPrimary"
+                  cx="50%"
+                  cy="50%"
+                  r="50%"
+                >
                   <stop offset="0%" stopColor="#6599FF" stopOpacity="0.42" />
                   <stop offset="100%" stopColor="#6599FF" stopOpacity="0" />
                 </radialGradient>
-                <radialGradient id="nodeGlowVerified" cx="50%" cy="50%" r="50%">
+                <radialGradient
+                  id="kmNodeGlowVerified"
+                  cx="50%"
+                  cy="50%"
+                  r="50%"
+                >
                   <stop offset="0%" stopColor="#38D399" stopOpacity="0.35" />
                   <stop offset="100%" stopColor="#38D399" stopOpacity="0" />
                 </radialGradient>
               </defs>
 
-              <rect width="740" height="390" fill="url(#kmGrid)" />
-
+              <rect width="740" height="390" fill="url(#kmTopologyGrid)" />
               <circle
                 cx={370}
                 cy={195}
@@ -369,7 +370,6 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                 fill="none"
                 stroke="#1A2742"
                 strokeDasharray="3,6"
-                strokeWidth={1}
               />
               <circle
                 cx={370}
@@ -378,50 +378,49 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                 fill="none"
                 stroke="#18243D"
                 strokeDasharray="4,8"
-                strokeWidth={1}
               />
 
-              {/* Edges & Animated Packet Streams (Deduplicated to prevent badge collisions) */}
-              {uniqueDisplayEdges.map((edge, idx) => {
-                const src = positions[edge.source];
-                const dst = positions[edge.target];
-                if (!src || !dst) return null;
-                const isVerifiedLink = edge.verified && edge.approved;
-                const strokeColor = isVerifiedLink
+              {uniqueDisplayEdges.map((edge, index) => {
+                const source = positions[edge.source];
+                const target = positions[edge.target];
+                if (!source || !target) return null;
+
+                const verified = edge.verified && edge.approved;
+                const stroke = verified
                   ? "#38D399"
                   : edge.status === "pending"
-                  ? "#F5B942"
-                  : "#55C8D7";
-                const mx = (src.x + dst.x) / 2;
-                const my = (src.y + dst.y) / 2;
-                const pathD = `M ${src.x} ${src.y} L ${dst.x} ${dst.y}`;
-                const reversePathD = `M ${dst.x} ${dst.y} L ${src.x} ${src.y}`;
+                    ? "#F5B942"
+                    : "#55C8D7";
+                const path = `M ${source.x} ${source.y} L ${target.x} ${target.y}`;
+                const reversePath = `M ${target.x} ${target.y} L ${source.x} ${source.y}`;
+                const midpointX = (source.x + target.x) / 2;
+                const midpointY = (source.y + target.y) / 2;
 
                 return (
                   <g key={edge.id}>
-                    {isVerifiedLink && (
+                    {verified && (
                       <line
-                        x1={src.x}
-                        y1={src.y}
-                        x2={dst.x}
-                        y2={dst.y}
-                        stroke={strokeColor}
+                        x1={source.x}
+                        y1={source.y}
+                        x2={target.x}
+                        y2={target.y}
+                        stroke={stroke}
                         strokeWidth={6}
                         opacity={0.12}
                       />
                     )}
                     <line
-                      x1={src.x}
-                      y1={src.y}
-                      x2={dst.x}
-                      y2={dst.y}
-                      stroke={strokeColor}
+                      x1={source.x}
+                      y1={source.y}
+                      x2={target.x}
+                      y2={target.y}
+                      stroke={stroke}
                       strokeWidth={2.2}
                       strokeDasharray={edge.approved ? undefined : "6,5"}
                       opacity={0.85}
                     />
 
-                    {simulationMode !== "idle" && isVerifiedLink && (
+                    {simulationMode !== "idle" && verified && (
                       <>
                         <circle
                           r={4}
@@ -432,22 +431,22 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                           }
                         >
                           <animateMotion
-                            dur={`${2.1 + idx * 0.35}s`}
+                            dur={`${2.1 + index * 0.35}s`}
                             repeatCount="indefinite"
-                            path={pathD}
+                            path={path}
                           />
                         </circle>
                         <circle r={3.5} fill="#38D399">
                           <animateMotion
-                            dur={`${2.4 + idx * 0.3}s`}
+                            dur={`${2.4 + index * 0.3}s`}
                             repeatCount="indefinite"
-                            path={reversePathD}
+                            path={reversePath}
                           />
                         </circle>
                       </>
                     )}
 
-                    <g transform={`translate(${mx}, ${my})`}>
+                    <g transform={`translate(${midpointX}, ${midpointY})`}>
                       <rect
                         x={-54}
                         y={-11}
@@ -455,7 +454,7 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                         height={20}
                         rx={10}
                         fill="#0B111E"
-                        stroke={strokeColor}
+                        stroke={stroke}
                         strokeWidth={1}
                         opacity={0.95}
                       />
@@ -467,7 +466,7 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                         fontWeight="600"
                         textAnchor="middle"
                       >
-                        {edge.verified ? "✓ Ed25519" : edge.status}
+                        {edge.verified ? "✓ Verified" : edge.status}
                         {edge.latency_ms !== null
                           ? ` · ${edge.latency_ms}ms`
                           : ""}
@@ -477,25 +476,31 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                 );
               })}
 
-              {/* Nodes */}
               {filteredNodes.map((node) => {
-                const pos = positions[node.id] || { x: 370, y: 195 };
+                const point = positions[node.id] ?? { x: 370, y: 195 };
                 const isLocal = node.type === "local_node";
                 const isSelected = selectedNode?.id === node.id;
-                const strokeColor = isLocal
+                const stroke = isLocal
                   ? "#6599FF"
                   : node.status === "active"
-                  ? "#38D399"
-                  : "#F5B942";
+                    ? "#38D399"
+                    : "#F5B942";
 
                 return (
                   <g
                     key={node.id}
-                    transform={`translate(${pos.x}, ${pos.y})`}
-                    style={{ cursor: "pointer" }}
-                    onClick={() => {
-                      setSelectedId(node.id);
-                      onSelectNode?.(node);
+                    transform={`translate(${point.x}, ${point.y})`}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Select node ${node.label}`}
+                    aria-pressed={isSelected}
+                    style={{ cursor: "pointer", outline: "none" }}
+                    onClick={() => handleSelectNode(node)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        handleSelectNode(node);
+                      }
                     }}
                   >
                     {isSelected && (
@@ -503,8 +508,8 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                         r={44}
                         fill={
                           isLocal
-                            ? "url(#nodeGlowPrimary)"
-                            : "url(#nodeGlowVerified)"
+                            ? "url(#kmNodeGlowPrimary)"
+                            : "url(#kmNodeGlowVerified)"
                         }
                       />
                     )}
@@ -517,15 +522,13 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                         strokeWidth={1.5}
                       />
                     )}
-
                     <circle
                       r={isLocal ? 24 : 20}
                       fill="#0D1526"
-                      stroke={strokeColor}
+                      stroke={stroke}
                       strokeWidth={isSelected ? 3.5 : 2.2}
                     />
-                    <circle r={isLocal ? 8 : 6} fill={strokeColor} />
-
+                    <circle r={isLocal ? 8 : 6} fill={stroke} />
                     <rect
                       x={-86}
                       y={isLocal ? 30 : 26}
@@ -533,8 +536,7 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                       height={36}
                       rx={8}
                       fill="rgba(11, 17, 30, 0.92)"
-                      stroke={isSelected ? strokeColor : "#22304A"}
-                      strokeWidth={1}
+                      stroke={isSelected ? stroke : "#22304A"}
                     />
                     <text
                       y={isLocal ? 45 : 41}
@@ -542,6 +544,7 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                       fontSize="11"
                       fontWeight="650"
                       textAnchor="middle"
+                      pointerEvents="none"
                     >
                       {node.label.length > 25
                         ? `${node.label.slice(0, 24)}…`
@@ -553,6 +556,7 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                       fontSize="9.5"
                       fontFamily="var(--font-mono)"
                       textAnchor="middle"
+                      pointerEvents="none"
                     >
                       {node.id} · {node.visibility}
                     </text>
@@ -562,9 +566,9 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
             </svg>
           </div>
 
-          {/* Selected Node Detailed Inspector Panel */}
           {selectedNode && (
-            <div
+            <aside
+              aria-label="Selected node details"
               style={{
                 background: "var(--bg-secondary)",
                 border: "1px solid var(--border-default)",
@@ -572,8 +576,8 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                 padding: 18,
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "space-between",
                 gap: 14,
+                minWidth: 0,
               }}
             >
               <div>
@@ -582,6 +586,8 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
+                    gap: 8,
+                    flexWrap: "wrap",
                     marginBottom: 10,
                   }}
                 >
@@ -610,9 +616,7 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                     marginBottom: 14,
                   }}
                 >
-                  <span className="km-mono">
-                    did:kyro:{selectedNode.id}
-                  </span>
+                  <span className="km-mono">did:kyro:{selectedNode.id}</span>
                   <span className="km-badge violet">
                     {selectedNode.type === "local_node"
                       ? "Local Anchor"
@@ -623,7 +627,7 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                 <div className="km-field">
                   <span className="km-label">HTTP Federation Endpoint</span>
                   <div className="km-mono" style={{ wordBreak: "break-all" }}>
-                    {selectedNode.endpoint}
+                    {selectedNode.endpoint || "Not provided"}
                   </div>
                 </div>
 
@@ -633,24 +637,19 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
+                      gap: 8,
                       marginBottom: 5,
                     }}
                   >
                     <span className="km-label" style={{ marginBottom: 0 }}>
-                      Ed25519 Public Key Fingerprint (SHA-256)
+                      Public Key Fingerprint (SHA-256)
                     </span>
                     {selectedNode.fingerprint && (
                       <button
                         type="button"
                         className="km-btn km-btn-sm"
                         style={{ padding: "2px 7px", fontSize: 11 }}
-                        onClick={() => {
-                          navigator.clipboard?.writeText(
-                            selectedNode.fingerprint
-                          );
-                          setCopiedFp(true);
-                          setTimeout(() => setCopiedFp(false), 1400);
-                        }}
+                        onClick={copyFingerprint}
                       >
                         {copiedFp ? "Copied" : "Copy"}
                       </button>
@@ -697,6 +696,7 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                               display: "flex",
                               justifyContent: "space-between",
                               alignItems: "center",
+                              gap: 8,
                               padding: "6px 10px",
                               background: "var(--bg-elevated)",
                               borderRadius: "var(--radius-sm)",
@@ -708,11 +708,14 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                               ⇄ <span className="km-mono">{peerId}</span>
                             </span>
                             <span
-                              className={`km-badge ${
-                                edge.verified ? "verified" : "warning"
-                              }`}
+                              className={`km-badge ${edge.verified && edge.approved
+                                  ? "verified"
+                                  : "warning"
+                                }`}
                             >
-                              {edge.verified ? "Verified" : edge.status}
+                              {edge.verified && edge.approved
+                                ? "Verified"
+                                : edge.status}
                             </span>
                           </div>
                         );
@@ -721,7 +724,7 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                   )}
                 </div>
               </div>
-            </div>
+            </aside>
           )}
         </div>
       )}
@@ -740,36 +743,38 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
                 <th>Endpoint</th>
                 <th>Visibility</th>
                 <th>Status</th>
-                <th>Ed25519 Fingerprint</th>
+                <th>Public Key Fingerprint</th>
               </tr>
             </thead>
             <tbody>
-              {filteredNodes.map((n) => (
+              {filteredNodes.map((node) => (
                 <tr
-                  key={n.id}
-                  className={selectedNode?.id === n.id ? "selected-row" : ""}
-                  onClick={() => setSelectedId(n.id)}
+                  key={node.id}
+                  className={
+                    selectedNode?.id === node.id ? "selected-row" : ""
+                  }
+                  onClick={() => handleSelectNode(node)}
                   style={{ cursor: "pointer" }}
                 >
+                  <td><span className="km-mono">{node.id}</span></td>
+                  <td style={{ fontWeight: 600 }}>{node.label}</td>
+                  <td>{node.type}</td>
+                  <td><span className="km-mono">{node.endpoint}</span></td>
                   <td>
-                    <span className="km-mono">{n.id}</span>
-                  </td>
-                  <td style={{ fontWeight: 600 }}>{n.label}</td>
-                  <td>{n.type}</td>
-                  <td>
-                    <span className="km-mono">{n.endpoint}</span>
-                  </td>
-                  <td>
-                    <span className={`km-badge ${n.visibility}`}>
-                      {n.visibility}
+                    <span className={`km-badge ${node.visibility}`}>
+                      {node.visibility}
                     </span>
                   </td>
                   <td>
-                    <span className={`km-badge ${n.status}`}>{n.status}</span>
+                    <span className={`km-badge ${node.status}`}>
+                      {node.status}
+                    </span>
                   </td>
                   <td>
                     <span className="km-mono">
-                      {n.fingerprint ? `${n.fingerprint.slice(0, 18)}...` : "-"}
+                      {node.fingerprint
+                        ? `${node.fingerprint.slice(0, 18)}…`
+                        : "—"}
                     </span>
                   </td>
                 </tr>
@@ -779,5 +784,22 @@ export function NetworkTopologyGraph({ nodes, edges, onSelectNode }: Props) {
         </div>
       )}
     </div>
+  );
+}
+
+function Legend({ color, label }: { color: string; label: string }) {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+      <span
+        aria-hidden="true"
+        style={{
+          width: 8,
+          height: 8,
+          borderRadius: "50%",
+          background: color,
+        }}
+      />
+      {label}
+    </span>
   );
 }

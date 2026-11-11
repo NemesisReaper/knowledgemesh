@@ -490,7 +490,7 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
               Knowledge Bundle (OKF)
             </div>
             <div style={{ fontSize: "11px", color: "#94A3B8", fontFamily: "var(--font-mono)" }}>
-              did:knowmesh:bundle-root
+              did:kyro:bundle-root
             </div>
           </div>
 

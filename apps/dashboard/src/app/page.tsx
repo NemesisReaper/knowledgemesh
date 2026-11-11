@@ -39,7 +39,7 @@ import {
 } from "../components/ResearchViews";
 import { OKFGraphWorkspace } from "../components/OKFGraphWorkspace";
 
-export default function KnowMeshConsolePage() {
+export default function KyroConsolePage() {
   const [stage, setStage] = useState<"landing" | "login" | "dashboard">(
     "landing"
   );
@@ -304,10 +304,10 @@ export default function KnowMeshConsolePage() {
       >
         <div className="km-brand-bar">
           <div className="km-brand-logo">
-            <span className="km-brand-glyph">KM</span>
+            <span className="km-brand-glyph">KY</span>
             {!sidebarCollapsed && (
               <div>
-                know<span>mesh</span>
+                ky<span>ro</span>
               </div>
             )}
           </div>
@@ -543,7 +543,7 @@ export default function KnowMeshConsolePage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="km-card-header">
-              <h3 className="km-card-title">KnowMesh Quick Command Palette</h3>
+              <h3 className="km-card-title">Kyro Quick Command Palette</h3>
               <button
                 type="button"
                 className="km-btn km-btn-sm"

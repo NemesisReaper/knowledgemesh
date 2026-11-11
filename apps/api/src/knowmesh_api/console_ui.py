@@ -745,7 +745,7 @@ def render_console_html() -> str:
           <header class="km-landing-nav">
             <div class="km-brand-logo">
               <span class="km-brand-glyph">KY</span>
-              <div>know<span>mesh</span></div>
+              <div>ky<span>ro</span></div>
               <span class="km-badge info" style="margin-left:8px">${{esc(protoName)}}</span>
             </div>
             <nav class="km-landing-nav-links">
@@ -794,8 +794,8 @@ def render_console_html() -> str:
               </div>
             </div>
 
-            <!-- Interconnected 3D Hexagonal Lattice Sphere Viewport (Unboxed, Borderless, 100% Transparent) -->
-            <div class="km-hero-3d-viewport" style="position:relative;width:100%;height:520px;background:transparent;border:none;box-shadow:none;display:flex;align-items:center;justify-content:center;overflow:visible">
+            <!-- Interconnected 3D Hexagonal Lattice Sphere Viewport (Unboxed, Borderless, 100% Transparent, Expanded Vertical Bounds) -->
+            <div class="km-hero-3d-viewport" style="position:relative;width:100%;height:640px;min-height:580px;background:transparent;border:none;box-shadow:none;display:flex;align-items:center;justify-content:center;overflow:visible">
               <canvas id="km-three-canvas" style="width:100%;height:100%;display:block;background:transparent"></canvas>
             </div>
           </section>
@@ -949,7 +949,7 @@ def render_console_html() -> str:
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
                 <div class="km-brand-logo">
                   <span class="km-brand-glyph">KY</span>
-                  <div>know<span>mesh</span></div>
+                  <div>ky<span>ro</span></div>
                 </div>
                 <span class="km-badge verified">Sovereign Mesh Identity</span>
               </div>
@@ -1155,8 +1155,14 @@ def render_console_html() -> str:
           color: '#10B981',
           x: 160,
           y: 110,
-          yaml: '---\nbundle_id: bun-kv-2026\ntype: concept\nstatus: verified\nconfidence: 0.996\n---',
-          rawContent: '# INT4 KV-Cache Group Quantization\nMaintains 99.6% needle retrieval accuracy up to 128k tokens with 3.7x lower HBM footprint.',
+          yaml: `---
+bundle_id: bun-kv-2026
+type: concept
+status: verified
+confidence: 0.996
+---`,
+          rawContent: `# INT4 KV-Cache Group Quantization
+Maintains 99.6% needle retrieval accuracy up to 128k tokens with 3.7x lower HBM footprint.`,
         }},
         {{
           id: 'doc-yaml-1',
@@ -1167,8 +1173,14 @@ def render_console_html() -> str:
           color: '#F59E0B',
           x: 160,
           y: 390,
-          yaml: 'format_version: "0.2"\npublisher: "node-a"\nsigning_suite: "Ed25519"\ndigest: "RFC8785-JCS"',
-          rawContent: 'bundle_specification:\n  okf_version: "0.2"\n  canonical_serialization: "rfc8785"\n  hash_algorithm: "sha256"',
+          yaml: `format_version: "0.2"
+publisher: "node-a"
+signing_suite: "Ed25519"
+digest: "RFC8785-JCS"`,
+          rawContent: `bundle_specification:
+  okf_version: "0.2"
+  canonical_serialization: "rfc8785"
+  hash_algorithm: "sha256"`,
         }},
         {{
           id: 'doc-md-2',
@@ -1179,8 +1191,13 @@ def render_console_html() -> str:
           color: '#10B981',
           x: 800,
           y: 110,
-          yaml: '---\nsource: LongBench-128k\nreliability: 0.98\nhardware: 8xH100 SXM5\n---',
-          rawContent: '### LongBench-128k Multi-Hop Empirical Trace\nNsight profiling confirms memory bandwidth saturation drops from 94% to 26%.',
+          yaml: `---
+source: LongBench-128k
+reliability: 0.98
+hardware: 8xH100 SXM5
+---`,
+          rawContent: `### LongBench-128k Multi-Hop Empirical Trace
+Nsight profiling confirms memory bandwidth saturation drops from 94% to 26%.`,
         }},
         {{
           id: 'doc-yaml-2',
@@ -1191,8 +1208,14 @@ def render_console_html() -> str:
           color: '#F59E0B',
           x: 800,
           y: 390,
-          yaml: 'w3c_prov:\n  activity: "bundle.published"\n  actor: "architect@kyro"\n  parent_hash: "00000000"',
-          rawContent: 'provenance_chain:\n  generation: 1\n  hash_chain: "sha256:4f1a8c9b2d..."\n  immutable_head: true',
+          yaml: `w3c_prov:
+  activity: "bundle.published"
+  actor: "architect@kyro"
+  parent_hash: "00000000"`,
+          rawContent: `provenance_chain:
+  generation: 1
+  hash_chain: "sha256:4f1a8c9b2d..."
+  immutable_head: true`,
         }},
       ];
 
@@ -2102,7 +2125,7 @@ for item in hits["results"]:
             <div class="km-brand-bar">
               <div class="km-brand-logo">
                 <span class="km-brand-glyph">KY</span>
-                ${{!state.sidebarCollapsed ? '<div>know<span>mesh</span></div>' : ''}}
+                ${{!state.sidebarCollapsed ? '<div>ky<span>ro</span></div>' : ''}}
               </div>
               <button class="km-btn km-btn-sm" onclick="window.kmAction.toggleSidebar()">${{state.sidebarCollapsed ? '»' : '«'}}</button>
             </div>
@@ -2164,35 +2187,36 @@ for item in hits["results"]:
     let threePointer = {{ x: 0, y: 0 }};
 
     function initTransformationSceneThree() {{
-      if (threeAnimId) {{
-        cancelAnimationFrame(threeAnimId);
-        threeAnimId = null;
-      }}
-      if (threeRenderer) {{
-        try {{ threeRenderer.dispose(); }} catch(e) {{}}
-        threeRenderer = null;
-      }}
+      try {{
+        if (threeAnimId) {{
+          cancelAnimationFrame(threeAnimId);
+          threeAnimId = null;
+        }}
+        if (threeRenderer) {{
+          try {{ threeRenderer.dispose(); }} catch(e) {{}}
+          threeRenderer = null;
+        }}
 
-      const canvas = document.getElementById('km-three-canvas');
-      if (!canvas) return;
+        const canvas = document.getElementById('km-three-canvas');
+        if (!canvas) return;
 
-      if (typeof THREE === 'undefined') {{
-        setTimeout(initTransformationSceneThree, 80);
-        return;
-      }}
+        if (typeof THREE === 'undefined') {{
+          setTimeout(initTransformationSceneThree, 80);
+          return;
+        }}
 
-      const parent = canvas.parentElement;
-      const width = Math.max((parent ? parent.clientWidth : 700) || 700, 360);
-      const height = Math.max((parent ? parent.clientHeight : 520) || 520, 460);
+        const parent = canvas.parentElement;
+        const width = Math.max((parent ? parent.clientWidth : 700) || 700, 360);
+        const height = Math.max((parent ? parent.clientHeight : 520) || 520, 460);
 
-      // 1. Scene - Completely Transparent (No background, No opaque fog)
-      const scene = new THREE.Scene();
-      threeScene = scene;
+        // 1. Scene - Completely Transparent (No background, No opaque fog)
+        const scene = new THREE.Scene();
+        threeScene = scene;
 
-      // 2. Perspective Camera (Centered & Perfectly Framed)
-      const camera = new THREE.PerspectiveCamera(44, width / height, 0.1, 50);
-      camera.position.set(0, 0, 8.4);
-      threeCamera = camera;
+        // 2. Perspective Camera (Centered with Generous Framing)
+        const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 50);
+        camera.position.set(0, 0, 8.8);
+        threeCamera = camera;
 
       // 3. High-Performance Transparent WebGL Renderer
       const renderer = new THREE.WebGLRenderer({{
@@ -2286,11 +2310,11 @@ for item in hits["results"]:
         pFaces = nextFaces;
       }}
 
-      // DUAL GRAPH COMPUTATION (Goldberg Polyhedron):
-      // Each primal triangular face becomes a dual vertex at its centroid, normalized to exact sphere radius.
-      const SPHERE_RADIUS = 3.20;
-      const STRUT_RADIUS = 0.046;
-      const NODE_RADIUS = 0.076;
+        // DUAL GRAPH COMPUTATION (Goldberg Polyhedron):
+        // Scaled to fit perfectly within bounds with no clipping
+        const SPHERE_RADIUS = 2.35;
+        const STRUT_RADIUS = 0.036;
+        const NODE_RADIUS = 0.058;
 
       const dualVerts = [];
       for (let f = 0; f < pFaces.length; f++) {{
@@ -2447,7 +2471,7 @@ for item in hits["results"]:
       const sparkleGeo = new THREE.BufferGeometry();
       const sparklePositions = new Float32Array(sparkleCount * 3);
       for (let s = 0; s < sparkleCount; s++) {{
-        const rad = 3.6 + Math.random() * 2.5;
+        const rad = 2.8 + Math.random() * 1.8;
         const theta = Math.random() * Math.PI * 2;
         const phiAngle = Math.acos((Math.random() * 2) - 1);
         sparklePositions[s * 3 + 0] = rad * Math.sin(phiAngle) * Math.cos(theta);
@@ -2553,9 +2577,11 @@ for item in hits["results"]:
 
         renderer.render(scene, camera);
         threeAnimId = requestAnimationFrame(animate);
+        window.__threeReady = true;
+      }} catch (err) {{
+        console.error("3D Sphere Init Error:", err);
+        window.__threeError = err.message + ' \\n' + err.stack;
       }}
-
-      threeAnimId = requestAnimationFrame(animate);
     }}
 
     function render() {{

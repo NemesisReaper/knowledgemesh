@@ -112,7 +112,7 @@ export function AgentsView({
         agent_id: agId,
         name: agentForm.name,
         description:
-          agentForm.description || "Authorized KnowMesh federated agent",
+          agentForm.description || "Authorized Kyro federated agent",
         organization_id: "org-sovereign-lab",
         node_id: agentForm.node_id,
         status: "active",
@@ -470,7 +470,7 @@ export function AgentsView({
             </div>
             <div className="km-field">
               <span className="km-label">
-                Secret API Key (X-KnowMesh-Key / X-API-Key)
+                Secret API Key (X-Kyro-Key / X-API-Key)
               </span>
               <div
                 style={{
@@ -607,7 +607,7 @@ export function FederationView({
       const fallbackReceipt = {
         sync_id: `sync-${Date.now().toString(36)}`,
         peer_node_id: peerId,
-        protocol: "knowmesh-fed/1.0",
+        protocol: "kyro-fed/1.0",
         state: "succeeded",
         manifests_compared: 3,
         bundles_pulled: 1,
@@ -664,7 +664,7 @@ export function FederationView({
       <div className="km-card" style={{ marginBottom: 24 }}>
         <div className="km-card-header">
           <h3 className="km-card-title">Connected Federated Peers</h3>
-          <span className="km-badge info">Protocol: knowmesh-fed/1.0</span>
+          <span className="km-badge info">Protocol: kyro-fed/1.0</span>
         </div>
         <div className="km-table-wrap">
           <table className="km-table">
@@ -941,7 +941,7 @@ export function TrustSecurityView({ bundles }: { bundles: BundleItem[] }) {
             Cryptographic Trust, Provenance & Tamper Inspector
           </h1>
           <p className="km-page-subtitle">
-            KnowMesh separates payload integrity (RFC 8785 JCS SHA-256), Ed25519 signature verification, signer recognition, and epistemic claim assessment.
+            Kyro separates payload integrity (RFC 8785 JCS SHA-256), Ed25519 signature verification, signer recognition, and epistemic claim assessment.
           </p>
         </div>
       </div>
@@ -954,7 +954,7 @@ export function TrustSecurityView({ bundles }: { bundles: BundleItem[] }) {
               : "✓ Epistemic Separation Principle:"}
           </strong>{" "}
           {isTampered
-            ? "Canonical SHA-256 digest mismatch detected! KnowMesh automatically blocks ingestion of modified bundles."
+            ? "Canonical SHA-256 digest mismatch detected! Kyro automatically blocks ingestion of modified bundles."
             : "A valid Ed25519 signature and canonical SHA-256 digest prove who published a knowledge bundle and that it was not modified in transit — they do NOT automatically make a claim factually true."}
         </span>
       </div>
@@ -1225,7 +1225,7 @@ export function DeveloperPortalView({ node }: { node: NodeItem | null }) {
     JSON.stringify(
       {
         status: "healthy",
-        protocol: "knowmesh-fed/1.0",
+        protocol: "kyro-fed/1.0",
         node_id: node?.node_id || "node-a",
         signing_suite: "Ed25519 + RFC8785-JCS",
       },
@@ -1235,10 +1235,10 @@ export function DeveloperPortalView({ node }: { node: NodeItem | null }) {
   );
 
   const codeSnippets: Record<string, string> = {
-    quickstart: `from packages.sdk import KnowMeshClient, verify_bundle_signature
+    quickstart: `from packages.sdk import KyroClient, verify_bundle_signature
 
-# 1. Connect to your sovereign KnowMesh node using a scoped Agent API Key
-client = KnowMeshClient(
+# 1. Connect to your sovereign Kyro node using a scoped Agent API Key
+client = KyroClient(
     base_url="${API_BASE_URL}",
     api_key="km_live_YOUR_AGENT_CREDENTIAL",
     timeout=10.0,
@@ -1258,9 +1258,9 @@ for hit in hits["results"]:
     report = verify_bundle_signature(bundle)
     assert report.is_valid and report.digest_valid and report.signature_valid
     print(f"[VERIFIED] {bundle['title']} · Signer={report.signer_did}")`,
-    publish: `from packages.sdk import KnowMeshClient
+    publish: `from packages.sdk import KyroClient
 
-client = KnowMeshClient(base_url="${API_BASE_URL}", api_key="km_live_...")
+client = KyroClient(base_url="${API_BASE_URL}", api_key="km_live_...")
 
 # Publish a structured Open Knowledge Format (OKF) bundle
 bundle = client.publish_bundle({
@@ -1276,13 +1276,13 @@ bundle = client.publish_bundle({
     }],
     "evidence": [{
         "title": "LongContext Evaluation Suite Run #19",
-        "source_uri": "https://knowmesh.org/benchmarks/kv-quant-19",
+        "source_uri": "https://kyro.org/benchmarks/kv-quant-19",
         "evidence_type": "experiment",
         "reliability_score": 0.97,
     }],
 })
 print("Published:", bundle["bundle_id"], "Digest:", bundle["content_digest"])`,
-    curl: `# 1. Query Federated Manifest (knowmesh-fed/1.0)
+    curl: `# 1. Query Federated Manifest (kyro-fed/1.0)
 curl -s ${API_BASE_URL}/api/v1/federation/protocol/manifest | jq .
 
 # 2. Execute Federated Discovery Search with Agent API Key
@@ -1307,7 +1307,7 @@ curl -X POST ${API_BASE_URL}/api/v1/search \\
           {
             endpoint: playgroundEndpoint,
             node_id: node?.node_id || "node-a",
-            protocol: "knowmesh-fed/1.0",
+            protocol: "kyro-fed/1.0",
             ed25519_fingerprint:
               node?.key_fingerprint ||
               "8f94e2c17a40b913d65e209c4411b8f07e2a91834c01d55e90a1b2c3d4e5f601",
@@ -1326,7 +1326,7 @@ curl -X POST ${API_BASE_URL}/api/v1/search \\
       <div className="km-page-header">
         <div>
           <h1 className="km-page-title">
-            KnowMesh Developer Platform & Python SDK
+            Kyro Developer Platform & Python SDK
           </h1>
           <p className="km-page-subtitle">
             Connect AI agents to your organization&apos;s knowledge node using the same identity, permission, and cryptographic verification contracts as the console.
@@ -1416,7 +1416,7 @@ curl -X POST ${API_BASE_URL}/api/v1/search \\
                 Interactive API Endpoint Explorer
               </h3>
               <div className="km-metric-sub">
-                Test KnowMesh REST & Federation endpoints directly from the console
+                Test Kyro REST & Federation endpoints directly from the console
               </div>
             </div>
             <span className="km-badge verified">{playgroundStatus}</span>
@@ -1602,7 +1602,7 @@ export function SettingsView({
             <h3 className="km-card-title">
               {authMode === "register"
                 ? "Register Account & Sovereign Organization"
-                : "Sign In to KnowMesh Console"}
+                : "Sign In to Kyro Console"}
             </h3>
             <button
               type="button"

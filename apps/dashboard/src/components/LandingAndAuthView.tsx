@@ -52,7 +52,7 @@ export function LandingPageView({
       step: "01",
       title: "Sovereign Knowledge Nodes & Ed25519 Identity",
       tag: "INDEPENDENT NODES",
-      desc: "Every organization operates its own sovereign KnowMesh node with an Ed25519 cryptographic keypair (did:knowmesh:<node-id>). Nodes enforce strict Private, Organization, or Federated visibility boundaries — private data is never exposed to public indexes or unauthorized peers.",
+      desc: "Every organization operates its own sovereign Kyro node with an Ed25519 cryptographic keypair (did:kyro:<node-id>). Nodes enforce strict Private, Organization, or Federated visibility boundaries — private data is never exposed to public indexes or unauthorized peers.",
       endpoint: "GET /api/v1/nodes",
       liveSample:
         liveNodes.length > 0
@@ -81,7 +81,7 @@ export function LandingPageView({
       step: "03",
       title: "RFC 8785 JCS Canonical Digests & Ed25519 Signing",
       tag: "VERIFIABLE EXCHANGE",
-      desc: "When publishing a bundle, KnowMesh serializes the canonical OKF payload using RFC 8785 JSON Canonicalization Scheme (JCS), computes a deterministic SHA-256 content digest, signs the envelope with the node's Ed25519 private key, and appends a W3C PROV hash-chained provenance event.",
+      desc: "When publishing a bundle, Kyro serializes the canonical OKF payload using RFC 8785 JSON Canonicalization Scheme (JCS), computes a deterministic SHA-256 content digest, signs the envelope with the node's Ed25519 private key, and appends a W3C PROV hash-chained provenance event.",
       endpoint: "GET /api/v1/federation/protocol/manifest",
       liveSample: manifest
         ? JSON.stringify(manifest, null, 2)
@@ -93,9 +93,9 @@ export function LandingPageView({
       tag: "ZERO-TRUST FEDERATION",
       desc: "Authorized AI agents and partner nodes discover knowledge across the mesh via federated BM25 search and pull-based synchronization. Every pulled revision is cryptographically verified prior to ingestion, while Knowledge DNA preserves immutable revision history and parent-child diffs.",
       endpoint: "POST /api/v1/search",
-      liveSample: `from packages.sdk import KnowMeshClient, verify_bundle_signature
+      liveSample: `from packages.sdk import KyroClient, verify_bundle_signature
 
-client = KnowMeshClient(base_url="${API_BASE_URL}", api_key="<YOUR_ISSUED_AGENT_KEY>")
+client = KyroClient(base_url="${API_BASE_URL}", api_key="<YOUR_ISSUED_AGENT_KEY>")
 hits = client.search(query="*", scope="federated")
 for item in hits["results"]:
     bundle = client.get_bundle(item["bundle_id"])
@@ -128,19 +128,19 @@ for item in hits["results"]:
       {/* Top Sticky Navigation */}
       <header className="km-landing-nav">
         <div className="km-brand-logo">
-          <span className="km-brand-glyph">KM</span>
+          <span className="km-brand-glyph">KY</span>
           <div>
-            know<span>mesh</span>
+            ky<span>ro</span>
           </div>
           <span className="km-badge info" style={{ marginLeft: 8 }}>
-            {String(manifest?.protocol || "knowmesh-fed/1.0")}
+            {String(manifest?.protocol || "kyro-fed/1.0")}
           </span>
         </div>
 
         <nav className="km-landing-nav-links">
           <a href="#mission">Product Mission</a>
           <a href="#architecture">How It Works</a>
-          <a href="#comparison">Why KnowMesh</a>
+          <a href="#comparison">Why Kyro</a>
           <a href="#cryptography">Zero-Trust Auth</a>
         </nav>
 
@@ -172,7 +172,7 @@ for item in hits["results"]:
             From fragmented knowledge to a connected world.
           </h1>
           <p className="km-hero-lead">
-            A common foundation for structuring, sharing, and reusing knowledge across independent AI systems. <strong>KnowMesh</strong> allows organizations to maintain independent knowledge nodes while authorizing AI agents to exchange cryptographically verifiable <strong>Open Knowledge Format (OKF)</strong> bundles, verify <strong>Ed25519 signatures</strong> and <strong>RFC 8785 canonical digests</strong>, and track immutable <strong>Knowledge DNA</strong> lineage.
+            A common foundation for structuring, sharing, and reusing knowledge across independent AI systems. <strong>Kyro</strong> allows organizations to maintain independent knowledge nodes while authorizing AI agents to exchange cryptographically verifiable <strong>Open Knowledge Format (OKF)</strong> bundles, verify <strong>Ed25519 signatures</strong> and <strong>RFC 8785 canonical digests</strong>, and track immutable <strong>Knowledge DNA</strong> lineage.
           </p>
 
           <div className="km-hero-cta-row">
@@ -386,7 +386,7 @@ for item in hits["results"]:
           End-to-End Federated Knowledge Lifecycle
         </h2>
         <p className="km-section-desc">
-          Click each protocol stage below to inspect the live backend wire contracts and cryptographic guarantees powering KnowMesh.
+          Click each protocol stage below to inspect the live backend wire contracts and cryptographic guarantees powering Kyro.
         </p>
 
         <div className="km-grid-asym">
@@ -442,7 +442,7 @@ for item in hits["results"]:
                   Live Endpoint · {archSteps[activeArchStep].endpoint}
                 </span>
                 <span className="km-mono">
-                  {String(manifest?.protocol || "knowmesh-fed/1.0")}
+                  {String(manifest?.protocol || "kyro-fed/1.0")}
                 </span>
               </div>
               <h3 style={{ marginTop: 0 }}>
@@ -474,7 +474,7 @@ for item in hits["results"]:
         </div>
       </section>
 
-      {/* Section 3: What KnowMesh IS vs What KnowMesh IS NOT */}
+      {/* Section 3: What Kyro IS vs What Kyro IS NOT */}
       <section
         id="comparison"
         className="km-landing-section"
@@ -482,7 +482,7 @@ for item in hits["results"]:
       >
         <div className="km-section-eyebrow">3 · ARCHITECTURAL BOUNDARIES</div>
         <h2 className="km-section-heading">
-          What KnowMesh Is — And What It Is Not
+          What Kyro Is — And What It Is Not
         </h2>
 
         <div className="km-grid-2">
@@ -495,7 +495,7 @@ for item in hits["results"]:
                 className="km-card-title"
                 style={{ color: "var(--status-verified)" }}
               >
-                ✓ What KnowMesh IS
+                ✓ What Kyro IS
               </h3>
               <span className="km-badge verified">Sovereign Mesh</span>
             </div>
@@ -533,7 +533,7 @@ for item in hits["results"]:
                 className="km-card-title"
                 style={{ color: "var(--status-error)" }}
               >
-                ✕ What KnowMesh Is NOT
+                ✕ What Kyro Is NOT
               </h3>
               <span className="km-badge error">Non-Goals</span>
             </div>
@@ -787,9 +787,9 @@ export function LoginGateView({
             }}
           >
             <div className="km-brand-logo">
-              <span className="km-brand-glyph">KM</span>
+              <span className="km-brand-glyph">KY</span>
               <div>
-                know<span>mesh</span>
+                ky<span>ro</span>
               </div>
             </div>
             <span className="km-badge verified">Sovereign Mesh Identity</span>
