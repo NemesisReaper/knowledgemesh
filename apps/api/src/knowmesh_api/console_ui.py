@@ -746,7 +746,6 @@ def render_console_html() -> str:
             <div class="km-brand-logo" style="display:flex;align-items:center;gap:10px">
               <img src="/static/kyro-logo.png" alt="Kyro Logo" style="height:36px;width:auto;object-fit:contain;filter:drop-shadow(0 0 12px rgba(56,189,248,0.45));" />
               <div>ky<span>ro</span></div>
-              <span class="km-badge info" style="margin-left:8px">${{esc(protoName)}}</span>
             </div>
             <nav class="km-landing-nav-links">
               <a href="#mission">Product Mission</a>
@@ -755,9 +754,9 @@ def render_console_html() -> str:
               <a href="#auth-cta">Console Access</a>
             </nav>
             <div style="display:flex;gap:10px;align-items:center">
-              <button class="km-btn km-btn-primary" onclick="window.kmAction.demoBypass()" style="background:linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);color:#070b14;font-weight:700">🚀 Demo Bypass →</button>
+              <button class="km-btn km-btn-primary" onclick="window.kmAction.demoBypass()" style="background:linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);color:#070b14;font-weight:700">Demo Bypass →</button>
               <button class="km-btn" onclick="window.kmAction.goLogin('register')">Register Org</button>
-              <button class="km-btn km-btn-primary" onclick="window.kmAction.goLogin('login')">🔐 Sign In</button>
+              <button class="km-btn km-btn-primary" onclick="window.kmAction.goLogin('login')">Sign In</button>
             </div>
           </header>
 
@@ -769,10 +768,10 @@ def render_console_html() -> str:
                 A common foundation for structuring, sharing, and reusing knowledge across independent AI systems. <strong>Kyro</strong> allows organizations to operate sovereign knowledge nodes while authorizing AI agents to exchange cryptographically verifiable <strong>Open Knowledge Format (OKF)</strong> bundles, verify <strong>Ed25519 signatures</strong> and <strong>RFC 8785 canonical digests</strong>, and track immutable <strong>Knowledge DNA</strong> lineage.
               </p>
               <div class="km-hero-cta-row">
-                <button class="km-btn km-btn-primary km-btn-lg" onclick="window.kmAction.demoBypass()" style="background:linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);color:#070b14;font-weight:700">🚀 Demo Bypass (Instant Dashboard)</button>
+                <button class="km-btn km-btn-primary km-btn-lg" onclick="window.kmAction.demoBypass()" style="background:linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);color:#070b14;font-weight:700">Demo Bypass (Instant Dashboard)</button>
                 <button class="km-btn km-btn-lg" onclick="window.kmAction.goLogin('register')">Explore OKF →</button>
                 <a href="/docs" target="_blank" class="km-btn km-btn-accent km-btn-lg">Read Documentation ↗</a>
-                <button class="km-btn km-btn-lg" onclick="window.kmAction.goLogin('login')">🔐 Console Sign In</button>
+                <button class="km-btn km-btn-lg" onclick="window.kmAction.goLogin('login')">Console Sign In</button>
               </div>
               <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding-top:18px;border-top:1px solid var(--border-subtle)">
                 <div>
@@ -826,12 +825,12 @@ def render_console_html() -> str:
                 <p class="km-metric-sub" style="line-height:1.6">Every participating organization operates its own node with an Ed25519 keypair, capability advertisement, health probes, and granular visibility policies (<code>private</code>, <code>organization</code>, <code>federated</code>).</p>
               </div>
               <div class="km-feature-card">
-                <div class="km-feature-icon">❖</div>
+                <div class="km-feature-icon">◈</div>
                 <h3 style="margin:0 0 8px;font-size:18px">Structured OKF Knowledge &amp; Claims</h3>
                 <p class="km-metric-sub" style="line-height:1.6">Publish structured Open Knowledge Format (OKF) bundles composed of atomic claims, 6-dimension epistemic quality rubrics, and traceable supporting or contradictory evidence URIs.</p>
               </div>
               <div class="km-feature-card">
-                <div class="km-feature-icon">🛡</div>
+                <div class="km-feature-icon">✓</div>
                 <h3 style="margin:0 0 8px;font-size:18px">Zero-Trust Cryptographic Verification</h3>
                 <p class="km-metric-sub" style="line-height:1.6">Every bundle revision is hashed via RFC 8785 JCS and signed with Ed25519. Consumers distinguish retrieval success, digest integrity, signature validity, signer recognition, and epistemic status.</p>
               </div>
@@ -841,12 +840,12 @@ def render_console_html() -> str:
                 <p class="km-metric-sub" style="line-height:1.6">Query across local BM25 indexes and authorized external peers with circuit-breaking resilience. Pull-based synchronization detects updates and preserves conflicting revisions without silent overwrites.</p>
               </div>
               <div class="km-feature-card">
-                <div class="km-feature-icon">🧬</div>
+                <div class="km-feature-icon">☍</div>
                 <h3 style="margin:0 0 8px;font-size:18px">Knowledge DNA &amp; Immutable Lineage</h3>
                 <p class="km-metric-sub" style="line-height:1.6">Published revisions are never mutated in place. Updates mint new immutable revisions (<code>v1.0.0 → v2.0.0</code>), preserve parent-child lineage, and compute field-level diffs.</p>
               </div>
               <div class="km-feature-card">
-                <div class="km-feature-icon">🤖</div>
+                <div class="km-feature-icon">▲</div>
                 <h3 style="margin:0 0 8px;font-size:18px">Scoped AI Agents &amp; Python SDK</h3>
                 <p class="km-metric-sub" style="line-height:1.6">Register AI agents with least-privilege scopes (<code>knowledge:read</code>, <code>knowledge:publish</code>, <code>federation:discover</code>) and one-time SHA-256 hashed API keys (<code>km_live_...</code>).</p>
               </div>
@@ -923,7 +922,7 @@ def render_console_html() -> str:
                 Sign in with your verified organization account or register a new principal to unlock the Console Dashboard.
               </p>
               <div style="display:flex;justify-content:center;gap:14px;flex-wrap:wrap">
-                <button class="km-btn km-btn-primary km-btn-lg" onclick="window.kmAction.goLogin('login')">🔐 Sign In with Credentials →</button>
+                <button class="km-btn km-btn-primary km-btn-lg" onclick="window.kmAction.goLogin('login')">Sign In with Credentials →</button>
                 <button class="km-btn km-btn-accent km-btn-lg" onclick="window.kmAction.goLogin('register')">+ Register New Organization Account</button>
               </div>
             </div>
@@ -968,7 +967,7 @@ def render_console_html() -> str:
                   <div style="font-size:13px;font-weight:700;color:#38bdf8">Quick Testing &amp; Evaluation</div>
                   <div style="font-size:11.5px;color:#94a3b8">Bypass manual credentials and access the full live dashboard instantly.</div>
                 </div>
-                <button type="button" class="km-btn km-btn-primary" onclick="window.kmAction.demoBypass()" style="white-space:nowrap;background:linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);color:#070b14;font-weight:700">🚀 Demo Bypass →</button>
+                <button type="button" class="km-btn km-btn-primary" onclick="window.kmAction.demoBypass()" style="white-space:nowrap;background:linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);color:#070b14;font-weight:700">Demo Bypass →</button>
               </div>
 
               ${{state.authError ? `<div class="km-notice error" style="margin-bottom:16px"><span>✕ ${{esc(state.authError)}}</span></div>` : ''}}
@@ -993,7 +992,7 @@ def render_console_html() -> str:
                   </div>
                 ` : ''}}
                 <button type="submit" class="km-btn km-btn-primary km-btn-lg" style="width:100%;margin-top:6px" ${{state.authLoading ? 'disabled' : ''}}>
-                  ${{state.authLoading ? 'Verifying with Backend…' : (isLogin ? '🔓 Authenticate &amp; Open Dashboard →' : 'Create Account &amp; Open Dashboard →')}}
+                  ${{state.authLoading ? 'Verifying with Backend…' : (isLogin ? 'Authenticate &amp; Open Dashboard →' : 'Create Account &amp; Open Dashboard →')}}
                 </button>
               </form>
 
@@ -1239,10 +1238,10 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26%.`,
               KY
             </div>
             <button class="km-btn km-btn-sm" title="Dashboard Overview" onclick="window.kmAction.setTab('overview')" style="width:44px;height:44px;padding:0;display:flex;align-items:center;justify-content:center;font-size:18px;color:#64748B;background:transparent;border:none">⊞</button>
-            <button class="km-btn km-btn-sm" title="Repositories / Bundles" onclick="window.kmAction.setTab('knowledge')" style="width:44px;height:44px;padding:0;display:flex;align-items:center;justify-content:center;font-size:18px;color:#64748B;background:transparent;border:none">📁</button>
-            <button class="km-btn km-btn-sm" title="Knowledge Graph (Active)" style="width:44px;height:44px;padding:0;display:flex;align-items:center;justify-content:center;font-size:18px;color:#06B6D4;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.5);border-radius:10px">🕸</button>
-            <button class="km-btn km-btn-sm" title="Agents" onclick="window.kmAction.setTab('agents')" style="width:44px;height:44px;padding:0;display:flex;align-items:center;justify-content:center;font-size:18px;color:#64748B;background:transparent;border:none">🤖</button>
-            <button class="km-btn km-btn-sm" title="Settings" onclick="window.kmAction.setTab('settings')" style="width:44px;height:44px;padding:0;display:flex;align-items:center;justify-content:center;font-size:18px;color:#64748B;background:transparent;border:none">⚙</button>
+            <button class="km-btn km-btn-sm" title="Repositories / Bundles" onclick="window.kmAction.setTab('knowledge')" style="width:44px;height:44px;padding:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#64748B;background:transparent;border:none">⊞</button>
+            <button class="km-btn km-btn-sm" title="Knowledge Graph (Active)" style="width:44px;height:44px;padding:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#06B6D4;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.5);border-radius:10px">☍</button>
+            <button class="km-btn km-btn-sm" title="Agents" onclick="window.kmAction.setTab('agents')" style="width:44px;height:44px;padding:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#64748B;background:transparent;border:none">▲</button>
+            <button class="km-btn km-btn-sm" title="Settings" onclick="window.kmAction.setTab('settings')" style="width:44px;height:44px;padding:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#64748B;background:transparent;border:none">⎈</button>
           </aside>
 
           <!-- Main workspace canvas -->
@@ -1264,7 +1263,7 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26%.`,
               <div style="display:flex;align-items:center;gap:10px">
                 <button class="km-btn km-btn-sm" onclick="alert('Git Synchronization: Repository knowledge tree is synchronized with commit HEAD.')">Sync Git</button>
                 <button class="km-btn km-btn-sm" onclick="alert('Export Bundle: Canonical RFC 8785 JCS payload downloaded.')">Export Bundle</button>
-                <button class="km-btn km-btn-sm km-btn-primary" onclick="alert('Deploy: Verified OKF knowledge published to federated mesh.')">Deploy 🚀</button>
+                <button class="km-btn km-btn-sm km-btn-primary" onclick="alert('Deploy: Verified OKF knowledge published to federated mesh.')">Deploy</button>
                 <div style="width:34px;height:34px;border-radius:50%;background:#1E293B;border:1.5px solid #06B6D4;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#F8FAFC;margin-left:4px">KY</div>
               </div>
             </header>
@@ -1303,7 +1302,7 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26%.`,
               <div class="km-float-centered" style="position:absolute;left:480px;top:250px;width:210px;padding:16px 20px;background:rgba(15,23,42,0.92);backdrop-filter:blur(14px);border-radius:14px;border:1.5px solid rgba(59,130,246,0.65);box-shadow:0 0 32px rgba(59,130,246,0.4);display:flex;flex-direction:column;gap:6px;z-index:10">
                 <div class="km-canvas-shimmer" style="position:absolute;inset:0;border-radius:14px;pointer-events:none"></div>
                 <div style="display:flex;align-items:center;justify-content:space-between">
-                  <span style="font-size:20px">📦</span>
+                  <span style="font-size:12px;font-weight:800;color:#38bdf8;padding:2px 7px;border-radius:5px;background:rgba(56,189,248,0.18);border:1px solid rgba(56,189,248,0.4)">OKF</span>
                   <span style="font-size:10px;font-weight:700;color:#67E8F9;background:rgba(6,182,212,0.18);padding:2px 8px;border-radius:999px;border:1px solid rgba(6,182,212,0.45)">CORE ANCHOR</span>
                 </div>
                 <div style="font-weight:700;font-size:14px;color:#F8FAFC">Knowledge Bundle (OKF)</div>
@@ -1341,7 +1340,7 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26%.`,
                 <div class="km-float-centered" style="position:absolute;left:${{ag.x}}px;top:${{ag.y}}px;display:flex;flex-direction:column;align-items:center;z-index:15">
                   <div class="km-radar-pulse" style="position:absolute;width:58px;height:58px;border-radius:50%;border:2px solid ${{ag.color}};top:0;pointer-events:none"></div>
                   <div class="km-telemetry-ring" style="position:relative;width:50px;height:50px;border-radius:50%;border:2px dashed ${{ag.color}};display:flex;align-items:center;justify-content:center;background:rgba(11,15,25,0.92);box-shadow:0 0 20px ${{ag.color}}45">
-                    <div style="width:34px;height:34px;border-radius:50%;background:#0F172A;border:1.5px solid ${{ag.color}};display:flex;align-items:center;justify-content:center;font-size:15px">🤖</div>
+                    <div style="width:34px;height:34px;border-radius:50%;background:#0F172A;border:1.5px solid ${{ag.color}};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:${{ag.color}}">AI</div>
                   </div>
                   <div style="margin-top:6px;text-align:center;padding:2px 8px;background:rgba(11,15,25,0.9);border-radius:4px;border:1px solid #1E293B">
                     <div style="font-size:11px;font-weight:700;color:#F8FAFC">${{esc(ag.label)}}</div>
@@ -1367,7 +1366,7 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26%.`,
                 <button class="km-btn km-btn-sm" onclick="window.kmAction.setGraphZoom(-15)" style="padding:2px 8px">-</button>
                 <span style="font-size:11px;font-family:var(--font-mono);color:#94A3B8;min-width:40px;text-align:center">${{zoom}}%</span>
                 <button class="km-btn km-btn-sm" onclick="window.kmAction.setGraphZoom(15)" style="padding:2px 8px">+</button>
-                <button class="km-btn km-btn-sm" onclick="window.kmAction.setGraphZoom(100 - state.graphZoom)" style="padding:2px 8px;font-size:10px">⛶ Reset</button>
+                <button class="km-btn km-btn-sm" onclick="window.kmAction.setGraphZoom(100 - state.graphZoom)" style="padding:2px 8px;font-size:10px">Reset</button>
               </div>
             </div>
           </div>
@@ -1399,7 +1398,7 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26%.`,
               <p class="km-page-subtitle">Real-time operational telemetry for sovereign knowledge nodes, Ed25519 cryptographic provenance, and pull-based peer synchronization.</p>
             </div>
             <div style="display:flex;gap:10px">
-              <button class="km-btn km-btn-accent" onclick="window.kmAction.bootstrapDemo()">⚡ Seed 3-Node Federation State</button>
+              <button class="km-btn km-btn-accent" onclick="window.kmAction.bootstrapDemo()">Seed 3-Node Federation State</button>
               <button class="km-btn km-btn-primary" onclick="window.kmAction.setTab('knowledge')">+ Publish Knowledge Bundle</button>
             </div>
           </div>
@@ -1491,8 +1490,8 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26%.`,
                 <p class="km-metric-sub" style="margin:0 0 10px">${{esc(n.description)}}</p>
                 <div class="km-mono" style="margin-bottom:10px;display:inline-block">${{esc(n.endpoint)}}</div>
                 <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-secondary);border-top:1px solid var(--border-subtle);padding-top:10px">
-                  <span>📦 ${{n.bundle_count}} bundles</span>
-                  <span>🤖 ${{n.agent_count}} agents</span>
+                  <span>${{n.bundle_count}} bundles</span>
+                  <span>${{n.agent_count}} agents</span>
                   <span>⇄ ${{n.peer_count}} peers</span>
                 </div>
               </div>
@@ -1865,7 +1864,7 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26%.`,
             </div>
           </div>
           <div class="km-notice ${{state.isTampered ? 'error' : 'verified'}}">
-            <span><strong>${{state.isTampered ? '🚨 Cryptographic Tamper Alert:' : '✓ Epistemic Separation Principle:'}}</strong> ${{state.isTampered ? 'Canonical SHA-256 digest mismatch detected! Kyro rejects tampered bundles.' : 'A valid Ed25519 signature proves publisher authenticity and payload integrity — not absolute factual truth.'}}</span>
+            <span><strong>${{state.isTampered ? 'Cryptographic Tamper Alert:' : 'Epistemic Separation Principle:'}}</strong> ${{state.isTampered ? 'Canonical SHA-256 digest mismatch detected! Kyro rejects tampered bundles.' : 'A valid Ed25519 signature proves publisher authenticity and payload integrity — not absolute factual truth.'}}</span>
           </div>
           ${{vr ? `
             <div class="km-grid-3">
@@ -1894,9 +1893,9 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26%.`,
                 <div class="km-metric-sub">Click "Simulate Payload Tampering" to mutate the claim statement and run live backend verification (/api/v1/trust/verify).</div>
               </div>
               <div style="display:flex;gap:8px">
-                <button class="km-btn km-btn-danger" onclick="window.kmAction.simulateTamper()">⚡ Simulate Payload Tampering</button>
+                <button class="km-btn km-btn-danger" onclick="window.kmAction.simulateTamper()">Simulate Payload Tampering</button>
                 <button class="km-btn" onclick="window.kmAction.restoreAuthentic()">↺ Restore Authentic Bundle</button>
-                <button class="km-btn km-btn-primary" onclick="window.kmAction.runVerify()">✓ Run Cryptographic Verification</button>
+                <button class="km-btn km-btn-primary" onclick="window.kmAction.runVerify()">Run Cryptographic Verification</button>
               </div>
             </div>
             <textarea id="km-verify-textarea" class="km-textarea" style="font-family:var(--font-mono);font-size:12px;min-height:260px;background:#060911">${{esc(state.verifyJson)}}</textarea>
@@ -2105,17 +2104,17 @@ for item in hits["results"]:
       const navItems = [
         ['overview', '◈', 'Overview', ''],
         ['nodes', '⬡', 'My Nodes', state.nodes.length],
-        ['knowledge', '❖', 'Knowledge Bundles', state.bundles.length],
-        ['claims', '⚖', 'Claims & Lifecycle', totalClaims],
-        ['okf-graph', '🕸', 'OKF Graph Workspace', ''],
+        ['knowledge', '⊞', 'Knowledge Bundles', state.bundles.length],
+        ['claims', '§', 'Claims & Lifecycle', totalClaims],
+        ['okf-graph', '☍', 'OKF Graph Workspace', ''],
         ['discover', '⌕', 'Discover', ''],
-        ['agents', '🤖', 'AI Agents', state.agents.length],
+        ['agents', '▲', 'AI Agents', state.agents.length],
         ['federation', '⇄', 'Federation & Peers', state.peers.length],
-        ['trust', '🛡', 'Trust & Verifier', ''],
-        ['bounties', '★', 'Reputation & Bounties', state.bounties.length],
-        ['audit', '📋', 'Activity & Audit', state.audit.length],
+        ['trust', '✓', 'Trust & Verifier', ''],
+        ['bounties', '✦', 'Reputation & Bounties', state.bounties.length],
+        ['audit', '≡', 'Activity & Audit', state.audit.length],
         ['developer', '⌘', 'Developer Portal', ''],
-        ['settings', '⚙', 'Organizations & RBAC', ''],
+        ['settings', '⎈', 'Organizations & RBAC', ''],
       ];
       const primaryNode = state.nodes[0];
 
@@ -2124,7 +2123,7 @@ for item in hits["results"]:
           <aside class="km-sidebar ${{state.sidebarCollapsed ? 'collapsed' : ''}}">
             <div class="km-brand-bar">
               <div class="km-brand-logo" style="display:flex;align-items:center;gap:10px">
-                <img src="/static/kyro-logo.png" alt="Kyro Logo" style="height:30px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(56,189,248,0.45));" />
+                <img src="/static/kyro-logo.png" alt="Kyro Logo" style="height:32px;width:32px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(56,189,248,0.55));flex-shrink:0" />
                 ${{!state.sidebarCollapsed ? '<div>ky<span>ro</span></div>' : ''}}
               </div>
               <button class="km-btn km-btn-sm" onclick="window.kmAction.toggleSidebar()">${{state.sidebarCollapsed ? '»' : '«'}}</button>
@@ -2160,9 +2159,9 @@ for item in hits["results"]:
                 ${{primaryNode ? `<span class="km-mono" style="font-size:11px;color:#94a3b8;white-space:nowrap" title="${{esc(primaryNode.key_fingerprint)}}">Ed25519: ${{esc(primaryNode.key_fingerprint.slice(0, 12))}}…</span>` : ''}}
               </div>
               <div class="km-topbar-right" style="display:flex;align-items:center;gap:8px;flex-wrap:nowrap;flex-shrink:0">
-                <button class="km-btn km-btn-sm km-btn-accent" style="font-size:11.5px;padding:5px 10px" onclick="window.kmAction.bootstrapDemo()">⚡ Seed 3-Node</button>
-                <button class="km-btn km-btn-sm" style="font-size:11.5px;padding:5px 10px" onclick="window.kmAction.setTab('discover')">⌕ Search</button>
-                <button class="km-btn km-btn-sm" style="font-size:11.5px;padding:5px 10px" onclick="window.kmAction.setTab('trust')">🛡 Verifier</button>
+                <button class="km-btn km-btn-sm km-btn-accent" style="font-size:11.5px;padding:5px 10px" onclick="window.kmAction.bootstrapDemo()">Seed 3-Node</button>
+                <button class="km-btn km-btn-sm" style="font-size:11.5px;padding:5px 10px" onclick="window.kmAction.setTab('discover')">Search</button>
+                <button class="km-btn km-btn-sm" style="font-size:11.5px;padding:5px 10px" onclick="window.kmAction.setTab('trust')">Verifier</button>
                 <button class="km-btn km-btn-sm km-btn-danger" style="font-size:11.5px;padding:5px 10px" onclick="window.kmAction.signOut()">Sign Out</button>
               </div>
             </header>

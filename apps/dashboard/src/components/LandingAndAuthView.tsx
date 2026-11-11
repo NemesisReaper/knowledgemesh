@@ -141,9 +141,6 @@ for item in hits["results"]:
           <div>
             ky<span>ro</span>
           </div>
-          <span className="km-badge info" style={{ marginLeft: 8 }}>
-            {String(manifest?.protocol || "kyro-fed/1.0")}
-          </span>
         </div>
 
         <nav className="km-landing-nav-links">
@@ -166,7 +163,7 @@ for item in hits["results"]:
             className="km-btn km-btn-primary"
             onClick={onGoToLogin}
           >
-            🔐 Sign In to Console →
+            Sign In to Console →
           </button>
         </div>
       </header>
@@ -206,7 +203,7 @@ for item in hits["results"]:
               className="km-btn km-btn-lg"
               onClick={onGoToLogin}
             >
-              🔐 Console Sign In
+              Console Sign In
             </button>
           </div>
 
@@ -331,7 +328,7 @@ for item in hits["results"]:
           </div>
 
           <div className="km-feature-card">
-            <div className="km-feature-icon">❖</div>
+            <div className="km-feature-icon">◈</div>
             <h3 style={{ margin: "0 0 8px", fontSize: 18 }}>
               Structured OKF Knowledge & Claims
             </h3>
@@ -341,7 +338,7 @@ for item in hits["results"]:
           </div>
 
           <div className="km-feature-card">
-            <div className="km-feature-icon">🛡</div>
+            <div className="km-feature-icon">✓</div>
             <h3 style={{ margin: "0 0 8px", fontSize: 18 }}>
               Zero-Trust Cryptographic Verification
             </h3>
@@ -361,7 +358,7 @@ for item in hits["results"]:
           </div>
 
           <div className="km-feature-card">
-            <div className="km-feature-icon">🧬</div>
+            <div className="km-feature-icon">☍</div>
             <h3 style={{ margin: "0 0 8px", fontSize: 18 }}>
               Knowledge DNA & Immutable Lineage
             </h3>
@@ -371,7 +368,7 @@ for item in hits["results"]:
           </div>
 
           <div className="km-feature-card">
-            <div className="km-feature-icon">🤖</div>
+            <div className="km-feature-icon">▲</div>
             <h3 style={{ margin: "0 0 8px", fontSize: 18 }}>
               Scoped AI Agents & Python SDK
             </h3>
@@ -607,7 +604,7 @@ for item in hits["results"]:
               className="km-btn km-btn-primary km-btn-lg"
               onClick={onGoToLogin}
             >
-              🔐 Sign In with Credentials →
+              Sign In with Credentials →
             </button>
             <button
               type="button"
@@ -857,7 +854,7 @@ export function LoginGateView({
                 fontWeight: 700,
               }}
             >
-              🚀 Demo Bypass →
+              Demo Bypass →
             </button>
           </div>
 
@@ -929,7 +926,7 @@ export function LoginGateView({
               {loading
                 ? "Verifying with Backend…"
                 : mode === "login"
-                ? "🔓 Authenticate & Open Dashboard →"
+                ? "Authenticate & Open Dashboard →"
                 : "Create Account & Open Dashboard →"}
             </button>
           </form>

@@ -177,7 +177,7 @@ export default function KnowledgeTransformationHero({ onExplore, onDocs, onLogin
         <div>OPEN KNOWLEDGE INFRASTRUCTURE</div>
         {onLogin && (
           <button onClick={onLogin} className="okf-secondary" style={{ padding: '0 14px', minHeight: 32, cursor: 'pointer' }}>
-            🔐 Console Sign In
+            Console Sign In
           </button>
         )}
       </header>
@@ -195,7 +195,7 @@ export default function KnowledgeTransformationHero({ onExplore, onDocs, onLogin
           </a>
           {onLogin && (
             <button onClick={onLogin} className="okf-secondary" style={{ cursor: 'pointer' }}>
-              🔐 Console Sign In
+              Console Sign In
             </button>
           )}
         </div>

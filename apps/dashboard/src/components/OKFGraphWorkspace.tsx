@@ -159,10 +159,10 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
 
         {[
           { id: "dashboard", icon: "⊞", label: "Dashboard" },
-          { id: "repositories", icon: "📁", label: "Repositories" },
-          { id: "graph", icon: "🕸", label: "Knowledge Graph" },
-          { id: "agents", icon: "🤖", label: "Agents" },
-          { id: "settings", icon: "⚙", label: "Settings" },
+          { id: "repositories", icon: "⊞", label: "Repositories" },
+          { id: "graph", icon: "☍", label: "Knowledge Graph" },
+          { id: "agents", icon: "▲", label: "Agents" },
+          { id: "settings", icon: "⎈", label: "Settings" },
         ].map((item) => {
           const isActive = activeSidebarItem === item.id;
           return (
@@ -295,7 +295,7 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
               className="km-btn km-btn-sm km-btn-primary"
               style={{ fontSize: "12px", fontWeight: 600 }}
             >
-              🚀 Deploy OKF
+              Deploy OKF
             </button>
             <div
               style={{
@@ -471,7 +471,7 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
               }}
             />
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: "20px" }}>📦</span>
+              <span style={{ fontSize: "12px", fontWeight: 800, color: "#38bdf8", padding: "2px 7px", borderRadius: "5px", background: "rgba(56,189,248,0.18)", border: "1px solid rgba(56,189,248,0.4)" }}>OKF</span>
               <span
                 style={{
                   fontSize: "10.5px",
@@ -674,10 +674,12 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: "16px",
+                    fontSize: "11px",
+                    fontWeight: 800,
+                    color: agent.color,
                   }}
                 >
-                  🤖
+                  AI
                 </div>
               </div>
 

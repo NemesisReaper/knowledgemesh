@@ -124,7 +124,7 @@ export function OverviewView({
               className="km-btn km-btn-accent"
               onClick={onBootstrapDemo}
             >
-              ⚡ Seed 3-Node Federation Demo
+              Seed 3-Node Federation Demo
             </button>
           )}
           <button type="button" className="km-btn" onClick={onRefresh}>
@@ -572,8 +572,8 @@ export function NodesView({
                 paddingTop: 10,
               }}
             >
-              <span>📦 {n.bundle_count} bundles</span>
-              <span>🤖 {n.agent_count} agents</span>
+              <span>{n.bundle_count} bundles</span>
+              <span>{n.agent_count} agents</span>
               <span>⇄ {n.peer_count} peers</span>
             </div>
           </div>

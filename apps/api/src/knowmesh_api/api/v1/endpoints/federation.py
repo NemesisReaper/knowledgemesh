@@ -28,7 +28,7 @@ def get_federation_protocol_manifest(
 ) -> dict[str, Any]:
     ident = service.get_node_public_identity()
     return {
-        "protocol": "knowmesh-fed/1.0",
+        "protocol": "kyro-fed/1.0",
         "format": "OKF-v0.2",
         "signing_suite": "Ed25519",
         "canonicalization": "RFC-8785-JCS",

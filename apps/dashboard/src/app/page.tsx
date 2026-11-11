@@ -225,19 +225,19 @@ export default function KyroConsolePage() {
         { id: "nodes", icon: "⬡", label: "My Nodes", count: nodes.length },
         {
           id: "knowledge",
-          icon: "❖",
+          icon: "⊞",
           label: "Knowledge Bundles",
           count: bundles.length,
         },
         {
           id: "claims",
-          icon: "⚖",
+          icon: "§",
           label: "Claims & 6-D Rubric",
           count: totalClaimsCount,
         },
         {
           id: "okf-graph",
-          icon: "🕸",
+          icon: "☍",
           label: "OKF Graph Workspace",
           count: undefined,
         },
@@ -247,7 +247,7 @@ export default function KyroConsolePage() {
     {
       group: "Federation & Trust",
       items: [
-        { id: "agents", icon: "🤖", label: "AI Agents", count: agents.length },
+        { id: "agents", icon: "▲", label: "AI Agents", count: agents.length },
         {
           id: "federation",
           icon: "⇄",
@@ -256,19 +256,19 @@ export default function KyroConsolePage() {
         },
         {
           id: "trust",
-          icon: "🛡",
+          icon: "✓",
           label: "Trust & Verifier",
           count: undefined,
         },
         {
           id: "bounties",
-          icon: "★",
+          icon: "✦",
           label: "Reputation & Bounties",
           count: bountiesCount,
         },
         {
           id: "audit",
-          icon: "📋",
+          icon: "≡",
           label: "Activity & Audit",
           count: auditEvents.length,
         },
@@ -285,7 +285,7 @@ export default function KyroConsolePage() {
         },
         {
           id: "settings",
-          icon: "⚙",
+          icon: "⎈",
           label: "Organizations & RBAC",
           count: undefined,
         },
@@ -427,7 +427,7 @@ export default function KyroConsolePage() {
               className="km-btn km-btn-sm km-btn-accent"
               onClick={handleBootstrapDemo}
             >
-              ⚡ Seed 3-Node State
+              Seed 3-Node State
             </button>
             <button
               type="button"
@@ -441,7 +441,7 @@ export default function KyroConsolePage() {
               className="km-btn km-btn-sm"
               onClick={() => setActiveTab("trust")}
             >
-              🛡 Tamper Verifier
+              Tamper Verifier
             </button>
             <button
               type="button"
@@ -576,7 +576,7 @@ export default function KyroConsolePage() {
                   action: () => setActiveTab("overview"),
                 },
                 {
-                  label: "❖ Publish & Sign New OKF Knowledge Bundle",
+                  label: "⊞ Publish & Sign New OKF Knowledge Bundle",
                   action: () => setActiveTab("knowledge"),
                 },
                 {
@@ -584,7 +584,7 @@ export default function KyroConsolePage() {
                   action: () => setActiveTab("discover"),
                 },
                 {
-                  label: "🛡 Open Zero-Trust Tamper & Signature Verifier",
+                  label: "✓ Open Zero-Trust Tamper & Signature Verifier",
                   action: () => setActiveTab("trust"),
                 },
                 {
@@ -592,7 +592,7 @@ export default function KyroConsolePage() {
                   action: () => setActiveTab("federation"),
                 },
                 {
-                  label: "🤖 Manage AI Agents & Rotate SHA-256 Keys",
+                  label: "▲ Manage AI Agents & Rotate SHA-256 Keys",
                   action: () => setActiveTab("agents"),
                 },
                 {
@@ -600,7 +600,7 @@ export default function KyroConsolePage() {
                   action: () => setActiveTab("developer"),
                 },
                 {
-                  label: "⚡ Seed 3-Node Federation State on Backend",
+                  label: "● Seed 3-Node Federation State on Backend",
                   action: () => handleBootstrapDemo(),
                 },
               ]

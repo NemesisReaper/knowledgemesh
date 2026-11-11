@@ -1074,7 +1074,7 @@ export function TrustSecurityView({ bundles }: { bundles: BundleItem[] }) {
               className="km-btn km-btn-danger"
               onClick={simulateTampering}
             >
-              ⚡ Simulate Payload Tampering
+              Simulate Payload Tampering
             </button>
             {isTampered && (
               <button
