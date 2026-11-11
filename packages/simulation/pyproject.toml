@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knowmesh-simulation"
+version = "0.1.0"
+description = "Scenario, network failure and counterfactual simulation for KnowMesh"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.setuptools]
+packages = ["simulation"]
+
+[tool.setuptools.package-dir]
+simulation = "."
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -23,3 +23,7 @@ htmlcov/
 .vscode/
 .idea/
 
+ 
+*.zip
+extracted_zip/
+okf-3d-hero/

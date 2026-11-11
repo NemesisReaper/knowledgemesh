@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knowmesh-knowledge-graph"
+version = "0.1.0"
+description = "Knowledge graph primitives for KnowMesh"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.setuptools]
+packages = ["knowledge_graph"]
+
+[tool.setuptools.package-dir]
+knowledge_graph = "."
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

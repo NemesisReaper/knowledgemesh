@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knowmesh-intelligence"
+version = "0.1.0"
+description = "Evidence-grounded intelligence and claim reasoning primitives for KnowMesh"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.setuptools]
+packages = ["intelligence"]
+
+[tool.setuptools.package-dir]
+intelligence = "."
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

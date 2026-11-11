@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knowmesh-okf"
+version = "0.1.0"
+description = "Open Knowledge Format (OKF) canonicalization, manifests, validation, and resolution"
+requires-python = ">=3.10"
+dependencies = ["pydantic>=2.6.0"]
+
+[tool.setuptools]
+packages = ["okf"]
+
+[tool.setuptools.package-dir]
+okf = "."
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+

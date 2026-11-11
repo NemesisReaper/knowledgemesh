@@ -12,7 +12,7 @@ from .base import Base, TimestampMixin, UUIDMixin
 if TYPE_CHECKING:
     from .bundle import Bundle
     from .claim import Claim
-    from .identity import Identity
+    from .identity import PublisherIdentity
 
 
 class Verification(Base, UUIDMixin, TimestampMixin):
@@ -63,4 +63,4 @@ class Verification(Base, UUIDMixin, TimestampMixin):
     # Relationships
     claim: Mapped[Optional["Claim"]] = relationship("Claim", foreign_keys=[claim_id], lazy="selectin")
     bundle: Mapped[Optional["Bundle"]] = relationship("Bundle", foreign_keys=[bundle_id], lazy="selectin")
-    verifier: Mapped["Identity"] = relationship("Identity", foreign_keys=[verifier_id], lazy="selectin")
+    verifier: Mapped["PublisherIdentity"] = relationship("PublisherIdentity", foreign_keys=[verifier_id], lazy="selectin")

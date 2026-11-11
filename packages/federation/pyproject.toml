@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knowmesh-federation"
+version = "0.1.0"
+description = "Peer discovery, routing, synchronization planning and resilience for KnowMesh"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.setuptools]
+packages = ["federation"]
+
+[tool.setuptools.package-dir]
+federation = "."
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

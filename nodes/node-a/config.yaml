@@ -1,0 +1,18 @@
+node_id: node-a
+name: "Alpha Research Node"
+organization: "Alpha Federated Research"
+endpoint: "http://127.0.0.1:8000"
+database_url: "sqlite:///./node_a.db"
+visibility: "federated"
+signing_algorithm: "Ed25519"
+capabilities:
+  - "knowledge:publish"
+  - "knowledge:search"
+  - "federation:sync"
+  - "trust:ed25519"
+peers:
+  - peer_node_id: "node-b"
+    endpoint: "http://127.0.0.1:8001"
+  - peer_node_id: "node-c"
+    endpoint: "http://127.0.0.1:8002"
+

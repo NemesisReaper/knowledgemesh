@@ -1,0 +1,88 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: knowmesh
+      POSTGRES_PASSWORD: knowmesh_dev_password
+      POSTGRES_DB: knowmesh_node_a
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U knowmesh -d knowmesh_node_a"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  node-a:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/api.Dockerfile
+    environment:
+      KNOWMESH_NODE_ID: node-a
+      KNOWMESH_NODE_NAME: "Alpha Research Node"
+      KNOWMESH_NODE_ENDPOINT: "http://node-a:8000"
+      KNOWMESH_DATABASE_URL: "postgresql+psycopg2://knowmesh:knowmesh_dev_password@postgres:5432/knowmesh_node_a"
+      KNOWMESH_ALLOW_LOCAL_PEERS: "true"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  node-b:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/api.Dockerfile
+    environment:
+      KNOWMESH_NODE_ID: node-b
+      KNOWMESH_NODE_NAME: "Beta Intelligence Node"
+      KNOWMESH_NODE_ENDPOINT: "http://node-b:8001"
+      KNOWMESH_DATABASE_URL: "sqlite:///./node_b.db"
+      KNOWMESH_ALLOW_LOCAL_PEERS: "true"
+    command: ["uvicorn", "knowmesh_api.main:app", "--host", "0.0.0.0", "--port", "8001"]
+    ports:
+      - "8001:8001"
+
+  node-c:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/api.Dockerfile
+    environment:
+      KNOWMESH_NODE_ID: node-c
+      KNOWMESH_NODE_NAME: "Gamma Observatory Node"
+      KNOWMESH_NODE_ENDPOINT: "http://node-c:8002"
+      KNOWMESH_DATABASE_URL: "sqlite:///./node_c.db"
+      KNOWMESH_ALLOW_LOCAL_PEERS: "true"
+    command: ["uvicorn", "knowmesh_api.main:app", "--host", "0.0.0.0", "--port", "8002"]
+    ports:
+      - "8002:8002"
+
+  worker:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/worker.Dockerfile
+    environment:
+      KNOWMESH_NODE_ID: node-a
+      KNOWMESH_DATABASE_URL: "postgresql+psycopg2://knowmesh:knowmesh_dev_password@postgres:5432/knowmesh_node_a"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/dashboard.Dockerfile
+    environment:
+      NEXT_PUBLIC_KNOWMESH_API_URL: "http://localhost:8000"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - node-a
+
+volumes:
+  pgdata:
+

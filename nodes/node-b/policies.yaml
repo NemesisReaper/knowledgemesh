@@ -1,0 +1,8 @@
+default_visibility: "organization"
+minimum_trust_level: "standard"
+require_ed25519_signature: true
+require_okf_canonical_digest: true
+require_provenance_chain: true
+reject_revoked_signers: true
+allow_private_bundle_federation: false
+

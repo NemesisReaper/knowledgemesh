@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knowmesh-search"
+version = "0.1.0"
+description = "Lexical, semantic and hybrid search for KnowMesh"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.setuptools]
+packages = ["search"]
+
+[tool.setuptools.package-dir]
+search = "."
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

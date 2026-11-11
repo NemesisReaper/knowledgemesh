@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knowledgemesh"
+version = "0.1.0"
+description = "Federated, cryptographically verifiable knowledge network for autonomous agents"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = [
+    "sqlalchemy>=2.0.0",
+    "alembic>=1.13.0",
+    "pydantic>=2.6.0",
+    "pydantic-settings>=2.2.0",
+    "cryptography>=42.0.0",
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.28.0",
+    "httpx>=0.27.0",
+    "pyyaml>=6.0.1",
+    "python-dotenv>=1.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+]
+
+[tool.setuptools.packages.find]
+where = [".", "packages", "packages/knowledge/src", "apps/api/src", "apps/worker/src"]
+
+[tool.pytest.ini_options]
+pythonpath = [
+    ".",
+    "packages",
+    "packages/knowledge/src",
+    "apps/api/src",
+    "apps/worker/src",
+]
+testpaths = [
+    "packages",
+    "apps/api/tests",
+    "apps/worker/tests",
+]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+filterwarnings = [
+    "ignore::DeprecationWarning:fastapi.testclient",
+]
+

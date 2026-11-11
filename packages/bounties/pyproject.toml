@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knowmesh-bounties"
+version = "0.1.0"
+description = "Knowledge bounty requests, matching, submissions, and evaluation for KnowMesh"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.setuptools]
+packages = ["bounties"]
+
+[tool.setuptools.package-dir]
+bounties = "."
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+

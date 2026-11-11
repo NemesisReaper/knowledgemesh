@@ -11,7 +11,7 @@ from .base import Base, TimestampMixin, UUIDMixin
 
 if TYPE_CHECKING:
     from .bundle import Bundle
-    from .identity import Identity
+    from .identity import PublisherIdentity
 
 
 class Lineage(Base, UUIDMixin, TimestampMixin):
@@ -60,8 +60,8 @@ class Lineage(Base, UUIDMixin, TimestampMixin):
         foreign_keys=[child_bundle_id],
         lazy="selectin",
     )
-    actor: Mapped[Optional["Identity"]] = relationship(
-        "Identity",
+    actor: Mapped[Optional["PublisherIdentity"]] = relationship(
+        "PublisherIdentity",
         foreign_keys=[actor_id],
         lazy="selectin",
     )

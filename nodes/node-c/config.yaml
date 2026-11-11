@@ -1,0 +1,17 @@
+node_id: node-c
+name: "Gamma Observatory Node"
+organization: "Gamma Verification Lab"
+endpoint: "http://127.0.0.1:8002"
+database_url: "sqlite:///./node_c.db"
+visibility: "federated"
+signing_algorithm: "Ed25519"
+capabilities:
+  - "knowledge:search"
+  - "federation:sync"
+  - "trust:ed25519"
+peers:
+  - peer_node_id: "node-a"
+    endpoint: "http://127.0.0.1:8000"
+  - peer_node_id: "node-b"
+    endpoint: "http://127.0.0.1:8001"
+

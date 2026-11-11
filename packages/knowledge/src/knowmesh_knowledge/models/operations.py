@@ -10,7 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base, TimestampMixin, UUIDMixin
 
 if TYPE_CHECKING:
-    from .identity import Identity
+    from .identity import PublisherIdentity
 
 
 class Operation(Base, UUIDMixin, TimestampMixin):
@@ -42,8 +42,8 @@ class Operation(Base, UUIDMixin, TimestampMixin):
     payload: Mapped[Optional[dict[str, Any]]] = mapped_column(JSON, nullable=True)
 
     # Relationships
-    actor: Mapped[Optional["Identity"]] = relationship(
-        "Identity",
+    actor: Mapped[Optional["PublisherIdentity"]] = relationship(
+        "PublisherIdentity",
         foreign_keys=[actor_id],
         lazy="selectin",
     )

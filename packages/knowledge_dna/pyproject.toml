@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knowmesh-knowledge-dna"
+version = "0.1.0"
+description = "Knowledge identity, mutation, lineage, split, merge and history primitives"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.setuptools]
+packages = ["knowledge_dna"]
+
+[tool.setuptools.package-dir]
+knowledge_dna = "."
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

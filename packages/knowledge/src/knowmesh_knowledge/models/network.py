@@ -11,7 +11,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base, TimestampMixin, UUIDMixin
 
 if TYPE_CHECKING:
-    from .identity import Identity
+    from .identity import PublisherIdentity
 
 
 class NetworkNode(Base, UUIDMixin, TimestampMixin):
@@ -25,7 +25,12 @@ class NetworkNode(Base, UUIDMixin, TimestampMixin):
     endpoint: Mapped[str] = mapped_column(String(512), nullable=False)
     identity_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         Uuid(as_uuid=True),
-        ForeignKey("publisher_identities.id", ondelete="SET NULL"),
+        ForeignKey(
+            "publisher_identities.id",
+            ondelete="SET NULL",
+            use_alter=True,
+            name="fk_network_nodes_identity_id",
+        ),
         nullable=True,
         index=True,
     )
@@ -38,8 +43,8 @@ class NetworkNode(Base, UUIDMixin, TimestampMixin):
     )
 
     # Relationships
-    identity: Mapped[Optional["Identity"]] = relationship(
-        "Identity",
+    identity: Mapped[Optional["PublisherIdentity"]] = relationship(
+        "PublisherIdentity",
         foreign_keys=[identity_id],
         lazy="selectin",
     )

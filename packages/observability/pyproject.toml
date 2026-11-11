@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knowmesh-observability"
+version = "0.1.0"
+description = "Structured logging, metrics, tracing and health checks for KnowMesh"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.setuptools]
+packages = ["observability"]
+
+[tool.setuptools.package-dir]
+observability = "."
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

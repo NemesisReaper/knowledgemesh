@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knowmesh-sdk"
+version = "0.1.0"
+description = "Python client SDK for interacting with KnowMesh nodes"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.setuptools]
+packages = ["sdk"]
+
+[tool.setuptools.package-dir]
+sdk = "."
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
