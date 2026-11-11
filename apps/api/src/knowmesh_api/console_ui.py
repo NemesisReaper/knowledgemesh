@@ -1340,6 +1340,8 @@ def render_console_html() -> str:
           </div>
         </div>
       `;
+    }}
+
     function renderMainContent() {{
       const m = (state.overview && state.overview.metrics) || {{
         total_nodes: state.nodes.length,
