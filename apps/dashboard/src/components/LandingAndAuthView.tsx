@@ -127,8 +127,17 @@ for item in hits["results"]:
 
       {/* Top Sticky Navigation */}
       <header className="km-landing-nav">
-        <div className="km-brand-logo">
-          <span className="km-brand-glyph">KY</span>
+        <div className="km-brand-logo" style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <img
+            src="/kyro-logo.png"
+            alt="Kyro Logo"
+            style={{
+              height: 36,
+              width: "auto",
+              objectFit: "contain",
+              filter: "drop-shadow(0 0 12px rgba(56, 189, 248, 0.45))",
+            }}
+          />
           <div>
             ky<span>ro</span>
           </div>
@@ -786,8 +795,17 @@ export function LoginGateView({
               marginBottom: 16,
             }}
           >
-            <div className="km-brand-logo">
-              <span className="km-brand-glyph">KY</span>
+            <div className="km-brand-logo" style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <img
+                src="/kyro-logo.png"
+                alt="Kyro Logo"
+                style={{
+                  height: 34,
+                  width: "auto",
+                  objectFit: "contain",
+                  filter: "drop-shadow(0 0 12px rgba(56, 189, 248, 0.45))",
+                }}
+              />
               <div>
                 ky<span>ro</span>
               </div>

@@ -743,8 +743,8 @@ def render_console_html() -> str:
           <div class="km-aurora-orb-2"></div>
 
           <header class="km-landing-nav">
-            <div class="km-brand-logo">
-              <span class="km-brand-glyph">KY</span>
+            <div class="km-brand-logo" style="display:flex;align-items:center;gap:10px">
+              <img src="/static/kyro-logo.png" alt="Kyro Logo" style="height:36px;width:auto;object-fit:contain;filter:drop-shadow(0 0 12px rgba(56,189,248,0.45));" />
               <div>ky<span>ro</span></div>
               <span class="km-badge info" style="margin-left:8px">${{esc(protoName)}}</span>
             </div>
@@ -947,8 +947,8 @@ def render_console_html() -> str:
             </div>
             <div class="km-auth-card">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-                <div class="km-brand-logo">
-                  <span class="km-brand-glyph">KY</span>
+                <div class="km-brand-logo" style="display:flex;align-items:center;gap:10px">
+                  <img src="/static/kyro-logo.png" alt="Kyro Logo" style="height:34px;width:auto;object-fit:contain;filter:drop-shadow(0 0 12px rgba(56,189,248,0.45));" />
                   <div>ky<span>ro</span></div>
                 </div>
                 <span class="km-badge verified">Sovereign Mesh Identity</span>
@@ -2123,8 +2123,8 @@ for item in hits["results"]:
         <div class="km-shell">
           <aside class="km-sidebar ${{state.sidebarCollapsed ? 'collapsed' : ''}}">
             <div class="km-brand-bar">
-              <div class="km-brand-logo">
-                <span class="km-brand-glyph">KY</span>
+              <div class="km-brand-logo" style="display:flex;align-items:center;gap:10px">
+                <img src="/static/kyro-logo.png" alt="Kyro Logo" style="height:30px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(56,189,248,0.45));" />
                 ${{!state.sidebarCollapsed ? '<div>ky<span>ro</span></div>' : ''}}
               </div>
               <button class="km-btn km-btn-sm" onclick="window.kmAction.toggleSidebar()">${{state.sidebarCollapsed ? '»' : '«'}}</button>
@@ -2214,8 +2214,8 @@ for item in hits["results"]:
         threeScene = scene;
 
         // 2. Perspective Camera (Centered with Generous Framing)
-        const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 50);
-        camera.position.set(0, 0, 8.8);
+        const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 50);
+        camera.position.set(0, 0, 9.6);
         threeCamera = camera;
 
       // 3. High-Performance Transparent WebGL Renderer
@@ -2311,10 +2311,10 @@ for item in hits["results"]:
       }}
 
         // DUAL GRAPH COMPUTATION (Goldberg Polyhedron):
-        // Scaled to fit perfectly within bounds with no clipping
-        const SPHERE_RADIUS = 2.35;
-        const STRUT_RADIUS = 0.036;
-        const NODE_RADIUS = 0.058;
+        // Scaled to fit perfectly within bounds with generous margins (no edge clipping)
+        const SPHERE_RADIUS = 1.70;
+        const STRUT_RADIUS = 0.026;
+        const NODE_RADIUS = 0.042;
 
       const dualVerts = [];
       for (let f = 0; f < pFaces.length; f++) {{
@@ -2459,7 +2459,7 @@ for item in hits["results"]:
       particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
       const particleMaterial = new THREE.PointsMaterial({{
         color: 0x67e8f9,
-        size: 0.16,
+        size: 0.12,
         transparent: true,
         opacity: 0.95,
       }});
@@ -2471,7 +2471,7 @@ for item in hits["results"]:
       const sparkleGeo = new THREE.BufferGeometry();
       const sparklePositions = new Float32Array(sparkleCount * 3);
       for (let s = 0; s < sparkleCount; s++) {{
-        const rad = 2.8 + Math.random() * 1.8;
+        const rad = 2.2 + Math.random() * 1.3;
         const theta = Math.random() * Math.PI * 2;
         const phiAngle = Math.acos((Math.random() * 2) - 1);
         sparklePositions[s * 3 + 0] = rad * Math.sin(phiAngle) * Math.cos(theta);
@@ -2481,7 +2481,7 @@ for item in hits["results"]:
       sparkleGeo.setAttribute('position', new THREE.BufferAttribute(sparklePositions, 3));
       const sparkles = new THREE.Points(
         sparkleGeo,
-        new THREE.PointsMaterial({{ color: 0x93c5fd, size: 0.08, transparent: true, opacity: 0.45 }})
+        new THREE.PointsMaterial({{ color: 0x93c5fd, size: 0.065, transparent: true, opacity: 0.45 }})
       );
       scene.add(sparkles);
 

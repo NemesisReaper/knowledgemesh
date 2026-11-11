@@ -52,8 +52,8 @@ export function KnowledgeTransformationScene({
       const scene = new THREE.Scene();
 
       // 2. Camera with Generous Breathing Room
-      const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 50);
-      camera.position.set(0, 0, 8.8);
+      const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 50);
+      camera.position.set(0, 0, 9.6);
 
       // 3. WebGL Renderer
       renderer = new THREE.WebGLRenderer({
@@ -166,9 +166,9 @@ export function KnowledgeTransformationScene({
       }
 
       // Shrunk to perfectly balanced scale (no clipping / out-of-bounds)
-      const SPHERE_RADIUS = 2.45;
-      const STRUT_RADIUS = 0.038;
-      const NODE_RADIUS = 0.062;
+      const SPHERE_RADIUS = 1.7;
+      const STRUT_RADIUS = 0.026;
+      const NODE_RADIUS = 0.042;
 
       const dualVerts: any[] = [];
       for (let f = 0; f < pFaces.length; f++) {
@@ -340,7 +340,7 @@ export function KnowledgeTransformationScene({
       );
       const particleMaterial = new THREE.PointsMaterial({
         color: 0x67e8f9,
-        size: 0.16,
+        size: 0.12,
         transparent: true,
         opacity: 0.95,
       });
@@ -352,7 +352,7 @@ export function KnowledgeTransformationScene({
       const sparkleGeo = new THREE.BufferGeometry();
       const sparklePositions = new Float32Array(sparkleCount * 3);
       for (let s = 0; s < sparkleCount; s++) {
-        const rad = 2.8 + Math.random() * 1.8;
+        const rad = 2.2 + Math.random() * 1.3;
         const theta = Math.random() * Math.PI * 2;
         const phiAngle = Math.acos(Math.random() * 2 - 1);
         sparklePositions[s * 3 + 0] =
@@ -369,7 +369,7 @@ export function KnowledgeTransformationScene({
         sparkleGeo,
         new THREE.PointsMaterial({
           color: 0x93c5fd,
-          size: 0.08,
+          size: 0.065,
           transparent: true,
           opacity: 0.45,
         })

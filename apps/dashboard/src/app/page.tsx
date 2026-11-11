@@ -303,8 +303,17 @@ export default function KyroConsolePage() {
         aria-label="Primary Navigation"
       >
         <div className="km-brand-bar">
-          <div className="km-brand-logo">
-            <span className="km-brand-glyph">KY</span>
+          <div className="km-brand-logo" style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <img
+              src="/kyro-logo.png"
+              alt="Kyro Logo"
+              style={{
+                height: 32,
+                width: "auto",
+                objectFit: "contain",
+                filter: "drop-shadow(0 0 10px rgba(56, 189, 248, 0.45))",
+              }}
+            />
             {!sidebarCollapsed && (
               <div>
                 ky<span>ro</span>
