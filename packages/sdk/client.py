@@ -36,6 +36,9 @@ class KnowMeshClient:
     ) -> None:
         if not base_url or not base_url.strip():
             raise SDKValidationError("base_url is required")
+        parsed_base = urllib.parse.urlparse(base_url)
+        if parsed_base.scheme not in {"http", "https"}:
+            raise SDKValidationError(f"Invalid base_url scheme '{parsed_base.scheme}': only http and https are permitted")
         if timeout_seconds <= 0:
             raise SDKValidationError("timeout_seconds must be positive")
         self.base_url = base_url.rstrip("/")
@@ -78,6 +81,9 @@ class KnowMeshClient:
     ) -> Any:
         method_upper = method.upper()
         url = self._build_url(path, params=params)
+        parsed_url = urllib.parse.urlparse(url)
+        if parsed_url.scheme not in {"http", "https"}:
+            raise SDKValidationError(f"Unsupported URL scheme '{parsed_url.scheme}': only http and https are permitted")
         if self._transport is not None:
             status, payload = self._transport(method_upper, url, json_body, self.headers)
             return self._handle_response(status, payload)
@@ -87,7 +93,7 @@ class KnowMeshClient:
         for attempt in range(self.max_retries + 1):
             req = urllib.request.Request(url, data=data, headers=self.headers, method=method_upper)
             try:
-                with urllib.request.urlopen(req, timeout=self.timeout_seconds) as resp:
+                with urllib.request.urlopen(req, timeout=self.timeout_seconds) as resp:  # nosec B310
                     raw = resp.read().decode("utf-8")
                     parsed = json.loads(raw) if raw else None
                     return self._handle_response(resp.status, parsed)
