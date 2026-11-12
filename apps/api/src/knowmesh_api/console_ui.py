@@ -666,7 +666,7 @@ def render_console_html() -> str:
             <div style="max-width:1240px;margin:0 auto;padding:0 28px;height:72px;display:flex;align-items:center;justify-content:space-between">
               <!-- Logo on Left -->
               <div style="display:flex;align-items:center;gap:12px;cursor:pointer" onclick="window.scrollTo({{ top: 0, behavior: 'smooth' }})">
-                <img src="/static/kyro-logo.png" alt="Kyro Logo" style="height:30px;width:30px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(99,102,241,0.35))" onerror="this.src='/kyro-logo.png'" />
+                <img src="/static/kyro-logo.png" alt="Kyro Logo" style="height:32px;width:32px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.06))" onerror="this.src='/kyro-logo.png'" />
                 <span style="font-size:20px;font-weight:800;letter-spacing:-0.035em;color:#0A0F1D;display:flex;align-items:baseline;gap:6px">
                   kyro
                   <span style="font-size:11px;font-weight:650;letter-spacing:0.02em;color:#6366F1;background:rgba(99,102,241,0.08);padding:2px 7px;border-radius:999px;border:1px solid rgba(99,102,241,0.2)">v0.2</span>
@@ -736,19 +736,12 @@ def render_console_html() -> str:
                 </div>
               </div>
 
-              <!-- Right: 3D Sphere Canvas Viewport with Floating Telemetry Pills -->
-              <div style="position:relative;width:100%;min-height:560px;display:flex;align-items:center;justify-content:center">
-                <div style="position:relative;width:100%;height:640px;min-height:560px;background:transparent;display:flex;align-items:center;justify-content:center;overflow:visible">
+              <!-- Right: 3D Sphere Canvas Viewport -->
+              <div style="position:relative;width:100%;min-height:560px;display:flex;align-items:center;justify-content:center;margin-top:-36px">
+                <!-- Radial glow enhancing contrast of cyan holographic sphere on light background -->
+                <div style="position:absolute;width:480px;height:480px;border-radius:50%;background:radial-gradient(circle, rgba(56, 189, 248, 0.14) 0%, rgba(99, 102, 241, 0.08) 36%, rgba(236, 72, 153, 0.04) 65%, transparent 75%);filter:blur(40px);pointer-events:none;z-index:0"></div>
+                <div style="position:relative;width:100%;height:640px;min-height:560px;background:transparent;display:flex;align-items:center;justify-content:center;overflow:visible;z-index:1">
                   <canvas id="km-three-canvas" style="width:100%;height:100%;display:block;background:transparent"></canvas>
-                </div>
-
-                <!-- Floating Telemetry Pill 1 (Top-Right) -->
-                <div style="position:absolute;top:14px;right:10px;background-color:rgba(255,255,255,0.88);backdrop-filter:blur(14px);border:1px solid rgba(226,232,240,0.9);border-radius:12px;padding:10px 14px;box-shadow:0 12px 30px -6px rgba(10,15,29,0.07);display:flex;align-items:center;gap:10px;z-index:10;pointer-events:none">
-                  <div style="width:10px;height:10px;border-radius:50%;background-color:#10B981;box-shadow:0 0 10px rgba(16,185,129,0.8)"></div>
-                  <div>
-                    <div style="fontSize:11px;font-weight:700;color:#0A0F1D">Ed25519 Envelope Verified</div>
-                    <div style="font-size:10px;color:#64748B;font-family:monospace">node-a · 51e75b86...</div>
-                  </div>
                 </div>
 
                 <!-- Floating Telemetry Pill 2 (Bottom-Left) -->
@@ -1092,7 +1085,7 @@ print("✓ Published & verified:", signed_envelope.canonical_digest)</pre>
             <div class="km-auth-card">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
                 <div class="km-brand-logo" style="display:flex;align-items:center;gap:10px">
-                  <img src="/static/kyro-logo.png" alt="Kyro Logo" style="height:34px;width:auto;object-fit:contain;filter:drop-shadow(0 0 12px rgba(56,189,248,0.45));" />
+                  <img src="/static/kyro-logo.png" alt="Kyro Logo" style="height:34px;width:auto;object-fit:contain;filter:drop-shadow(0 2px 10px rgba(0,0,0,0.3));" />
                   <div>ky<span>ro</span></div>
                 </div>
                 <span class="km-badge verified">Sovereign Mesh Identity</span>
@@ -2292,7 +2285,7 @@ for item in hits["results"]:
           <aside class="km-sidebar ${{state.sidebarCollapsed ? 'collapsed' : ''}}">
             <div class="km-brand-bar">
               <div class="km-brand-logo" style="display:flex;align-items:center;gap:10px">
-                <img src="/static/kyro-logo.png" alt="Kyro Logo" style="height:32px;width:32px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(56,189,248,0.55));flex-shrink:0" />
+                <img src="/static/kyro-logo.png" alt="Kyro Logo" style="height:32px;width:32px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.35));flex-shrink:0" />
                 ${{!state.sidebarCollapsed ? '<div>ky<span>ro</span></div>' : ''}}
               </div>
               <button class="km-btn km-btn-sm" onclick="window.kmAction.toggleSidebar()">${{state.sidebarCollapsed ? '»' : '«'}}</button>
@@ -2400,31 +2393,32 @@ for item in hits["results"]:
       renderer.toneMappingExposure = 1.25;
       threeRenderer = renderer;
 
-      // 4. Studio Lighting Rig tailored for Luxury Light Aesthetic
-      const ambientLight = new THREE.AmbientLight(0xffffff, 2.4);
+      // 4. Studio Lighting Rig tailored for Luxury Light Aesthetic & Cyan Sphere
+      const ambientLight = new THREE.AmbientLight(0xffffff, 2.2);
       scene.add(ambientLight);
 
-      // Key light: vibrant royal indigo / violet
-      const keyLight = new THREE.DirectionalLight(0x6366f1, 4.5);
+      // Key light: vibrant cyan highlight
+      const keyLight = new THREE.DirectionalLight(0x38bdf8, 4.2);
       keyLight.position.set(-8, 12, 10);
       scene.add(keyLight);
 
-      // Rim light: electric magenta / rose edge definition
-      const rimLight = new THREE.DirectionalLight(0xec4899, 3.8);
+      // Rim light: electric cyan edge definition
+      const rimLight = new THREE.DirectionalLight(0x06b6d4, 3.6);
       rimLight.position.set(10, 8, -6);
       scene.add(rimLight);
 
-      // Violet bottom fill accent
-      const violetLight = new THREE.PointLight(0xa855f7, 3.2, 25);
+      // Accent fill light: warm violet accent
+      const violetLight = new THREE.PointLight(0xa855f7, 2.6, 25);
       violetLight.position.set(0, -6, 5);
       scene.add(violetLight);
 
-      // Inner glowing core light
-      const innerCoreLight = new THREE.PointLight(0x8b5cf6, 5.0, 14);
+      // Inner glowing core light: electric cyan core
+      const innerCoreLight = new THREE.PointLight(0x38bdf8, 5.0, 14);
       innerCoreLight.position.set(0, 0, 0);
       scene.add(innerCoreLight);
 
       // 5. Construct Mathematical Goldberg Polyhedron Dual Sphere
+      const phi = (1.0 + Math.sqrt(5.0)) / 2.0;
       // Base icosahedron vertices
       const baseVerts = [
         [-1,  phi, 0], [ 1,  phi, 0], [-1, -phi, 0], [ 1, -phi, 0],
@@ -2525,21 +2519,21 @@ for item in hits["results"]:
       const sphereGroup = new THREE.Group();
       scene.add(sphereGroup);
 
-      // Materials matching theme
+      // Signature Cyan & Ice-Blue Geodesic Buckyball Materials
       const strutMaterial = new THREE.MeshStandardMaterial({{
-        color: 0x4f46e5,
-        emissive: 0x7c3aed,
-        emissiveIntensity: 0.35,
-        metalness: 0.90,
-        roughness: 0.12,
+        color: 0x67e8f9,
+        emissive: 0x0284c7,
+        emissiveIntensity: 0.55,
+        metalness: 0.88,
+        roughness: 0.15,
       }});
 
       const nodeMaterial = new THREE.MeshStandardMaterial({{
-        color: 0xec4899,
-        emissive: 0xdb2777,
-        emissiveIntensity: 0.65,
-        metalness: 0.92,
-        roughness: 0.10,
+        color: 0x93c5fd,
+        emissive: 0x38bdf8,
+        emissiveIntensity: 0.70,
+        metalness: 0.90,
+        roughness: 0.12,
       }});
 
       // Instanced Cylindrical Struts
@@ -2718,8 +2712,8 @@ for item in hits["results"]:
         sphereGroup.rotation.x = currentTiltX;
         sphereGroup.rotation.z = -currentTiltY * 0.35;
 
-        // Subtle zero-gravity vertical breathing
-        sphereGroup.position.y = Math.sin(now * 0.0014) * 0.08;
+        // Subtle zero-gravity vertical breathing (shifted gracefully above center)
+        sphereGroup.position.y = 0.32 + Math.sin(now * 0.0014) * 0.08;
 
         // Animate data packet pulses along struts
         const posAttr = particleGeo.attributes.position;

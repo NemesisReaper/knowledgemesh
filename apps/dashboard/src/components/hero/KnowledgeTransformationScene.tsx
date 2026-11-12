@@ -70,45 +70,27 @@ export function KnowledgeTransformationScene({
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = theme === "light" ? 1.35 : 1.25;
 
-      // 4. Studio Lighting Rig tailored for theme
-      const isLight = theme === "light";
-      const ambientLight = new THREE.AmbientLight(
-        isLight ? 0xffffff : 0x0e1726,
-        isLight ? 2.4 : 2.5
-      );
+      // 4. Studio Lighting Rig tailored for Luxury Light Aesthetic & Cyan Sphere
+      const ambientLight = new THREE.AmbientLight(0xffffff, 2.2);
       scene.add(ambientLight);
 
-      // Key light: vibrant royal indigo / cyan highlight
-      const keyLight = new THREE.DirectionalLight(
-        isLight ? 0x6366f1 : 0x38bdf8,
-        isLight ? 4.6 : 3.8
-      );
+      // Key light: vibrant cyan highlight
+      const keyLight = new THREE.DirectionalLight(0x38bdf8, 4.2);
       keyLight.position.set(-8, 12, 10);
       scene.add(keyLight);
 
-      // Rim light: electric magenta / cyan edge definition
-      const rimLight = new THREE.DirectionalLight(
-        isLight ? 0xec4899 : 0x06b6d4,
-        isLight ? 3.8 : 3.2
-      );
+      // Rim light: electric cyan edge definition
+      const rimLight = new THREE.DirectionalLight(0x06b6d4, 3.6);
       rimLight.position.set(10, 8, -6);
       scene.add(rimLight);
 
-      // Accent fill light: warm violet
-      const violetLight = new THREE.PointLight(
-        0xa855f7,
-        isLight ? 3.2 : 2.0,
-        25
-      );
+      // Accent fill light: warm violet accent
+      const violetLight = new THREE.PointLight(0xa855f7, 2.6, 25);
       violetLight.position.set(0, -6, 5);
       scene.add(violetLight);
 
-      // Inner glowing core light
-      const innerCoreLight = new THREE.PointLight(
-        isLight ? 0x8b5cf6 : 0x38bdf8,
-        isLight ? 5.0 : 4.5,
-        14
-      );
+      // Inner glowing core light: electric cyan core
+      const innerCoreLight = new THREE.PointLight(0x38bdf8, 5.0, 14);
       innerCoreLight.position.set(0, 0, 0);
       scene.add(innerCoreLight);
 
@@ -238,21 +220,21 @@ export function KnowledgeTransformationScene({
       const sphereGroup = new THREE.Group();
       scene.add(sphereGroup);
 
-      // Materials tailored for light/dark theme
+      // Signature Cyan & Ice-Blue Geodesic Buckyball Materials
       const strutMaterial = new THREE.MeshStandardMaterial({
-        color: isLight ? 0x4f46e5 : 0x67e8f9,
-        emissive: isLight ? 0x7c3aed : 0x0284c7,
-        emissiveIntensity: isLight ? 0.35 : 0.45,
-        metalness: isLight ? 0.90 : 0.85,
-        roughness: isLight ? 0.12 : 0.18,
+        color: 0x67e8f9,
+        emissive: 0x0284c7,
+        emissiveIntensity: 0.55,
+        metalness: 0.88,
+        roughness: 0.15,
       });
 
       const nodeMaterial = new THREE.MeshStandardMaterial({
-        color: isLight ? 0xec4899 : 0x93c5fd,
-        emissive: isLight ? 0xdb2777 : 0x38bdf8,
-        emissiveIntensity: isLight ? 0.65 : 0.6,
-        metalness: isLight ? 0.92 : 0.88,
-        roughness: isLight ? 0.10 : 0.14,
+        color: 0x93c5fd,
+        emissive: 0x38bdf8,
+        emissiveIntensity: 0.70,
+        metalness: 0.90,
+        roughness: 0.12,
       });
 
       // Instanced Struts
@@ -463,8 +445,8 @@ export function KnowledgeTransformationScene({
         sphereGroup.rotation.x = currentTiltX;
         sphereGroup.rotation.z = -currentTiltY * 0.35;
 
-        // Subtle zero-gravity breathing
-        sphereGroup.position.y = Math.sin(now * 0.0014) * 0.08;
+        // Subtle zero-gravity breathing (shifted gracefully above center)
+        sphereGroup.position.y = 0.32 + Math.sin(now * 0.0014) * 0.08;
 
         // Packet progression along edges
         const posAttrP = particleGeo.attributes.position;

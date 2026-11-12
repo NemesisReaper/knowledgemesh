@@ -177,10 +177,10 @@ export function LandingPageView({
               src="/static/kyro-logo.png"
               alt="Kyro Logo"
               style={{
-                height: "30px",
-                width: "30px",
+                height: "32px",
+                width: "32px",
                 objectFit: "contain",
-                filter: "drop-shadow(0 2px 8px rgba(99, 102, 241, 0.35))",
+                filter: "drop-shadow(0 2px 6px rgba(0, 0, 0, 0.06))",
               }}
               onError={(e) => {
                 // Fallback to local public path if static fails
@@ -651,48 +651,26 @@ export function LandingPageView({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              marginTop: "-36px",
             }}
           >
-            {/* Luminous Three.js Interactive Dual-Sphere */}
-            <KnowledgeTransformationScene theme="light" />
-
-            {/* Floating Glassmorphic Telemetry Pill 1 (Top-Right) */}
+            {/* Ambient Radial Glow to make the Cyan Holographic Sphere pop */}
             <div
               style={{
                 position: "absolute",
-                top: "14px",
-                right: "10px",
-                backgroundColor: "rgba(255, 255, 255, 0.88)",
-                backdropFilter: "blur(14px)",
-                border: "1px solid rgba(226, 232, 240, 0.9)",
-                borderRadius: "12px",
-                padding: "10px 14px",
-                boxShadow: "0 12px 30px -6px rgba(10, 15, 29, 0.07)",
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                zIndex: 10,
+                width: "480px",
+                height: "480px",
+                borderRadius: "50%",
+                background:
+                  "radial-gradient(circle, rgba(56, 189, 248, 0.14) 0%, rgba(99, 102, 241, 0.08) 36%, rgba(236, 72, 153, 0.04) 65%, transparent 75%)",
+                filter: "blur(40px)",
                 pointerEvents: "none",
+                zIndex: 0,
               }}
-            >
-              <div
-                style={{
-                  width: "10px",
-                  height: "10px",
-                  borderRadius: "50%",
-                  backgroundColor: "#10B981",
-                  boxShadow: "0 0 10px rgba(16, 185, 129, 0.8)",
-                }}
-              />
-              <div>
-                <div style={{ fontSize: "11px", fontWeight: 700, color: "#0A0F1D" }}>
-                  Ed25519 Envelope Verified
-                </div>
-                <div style={{ fontSize: "10px", color: "#64748B", fontFamily: "monospace" }}>
-                  node-a · 51e75b86...
-                </div>
-              </div>
-            </div>
+            />
+
+            {/* Luminous Three.js Interactive Dual-Sphere */}
+            <KnowledgeTransformationScene theme="light" />
 
             {/* Floating Telemetry Pill 2 (Bottom-Left) */}
             <div
