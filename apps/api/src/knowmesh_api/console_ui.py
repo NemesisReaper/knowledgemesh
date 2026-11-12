@@ -808,7 +808,7 @@ def render_console_html() -> str:
                     <span style="color:#10B981;font-weight:600">✓ SHA-256 DIGEST LOCKED</span>
                   </div>
                   <div style="color:#475569;line-height:1.5">
-                    {"bundle_id":"bun-kv-2026","domain":"distributed_ml","format_version":"0.2","publisher":"did:kyro:node-a"}
+                    {{"bundle_id":"bun-kv-2026","domain":"distributed_ml","format_version":"0.2","publisher":"did:kyro:node-a"}}
                   </div>
                   <div style="margin-top:10px;padding-top:8px;border-top:1px dashed #E2E8F0;font-size:11px;color:#6366F1;overflow:hidden;text-overflow:ellipsis">
                     sha256: 4f1a8c9b2d7e5f6a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a
@@ -2765,7 +2765,7 @@ for item in hits["results"]:
       const autoScale = Math.min(scaleX, scaleY, 1.05);
       const zoomFactor = (state.graphZoom || 100) / 100;
       const finalScale = Math.max(0.35, autoScale * zoomFactor);
-      stage.style.transform = `scale(${finalScale.toFixed(3)})`;
+      stage.style.transform = `scale(${{finalScale.toFixed(3)}})`;
     }}
 
     window.addEventListener('resize', () => {{
