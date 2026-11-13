@@ -1,1 +1,6 @@
-const nextConfig = {};\nexport default nextConfig;\n
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+};
+
+export default nextConfig;

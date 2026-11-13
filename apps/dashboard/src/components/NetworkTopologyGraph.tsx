@@ -88,12 +88,17 @@ export function NetworkTopologyGraph({
 
     if (isTriangular) {
       // 2 peers: triangular layout with peers above local anchor
-      result[peers[0].id] = { x: 540, y: 95 };
-      result[peers[1].id] = { x: 200, y: 95 };
+      result[peers[0].id] = { x: 550, y: 95 };
+      result[peers[1].id] = { x: 190, y: 95 };
+    } else if (count === 3) {
+      // 3 peers: orthogonal T-layout (Top, Right, Left) with Center anchor
+      result[peers[0].id] = { x: 370, y: 65 };
+      result[peers[1].id] = { x: 620, y: 195 };
+      result[peers[2].id] = { x: 120, y: 195 };
     } else {
       // General N peers: elliptical distribution
-      const radiusX = count > 8 ? 205 : count > 4 ? 185 : 160;
-      const radiusY = count > 8 ? 135 : 125;
+      const radiusX = count > 8 ? 240 : count > 4 ? 220 : 190;
+      const radiusY = count > 8 ? 140 : 130;
 
       peers.forEach((node, index) => {
         const angle = (index / Math.max(count, 1)) * Math.PI * 2 - Math.PI / 2;
@@ -292,9 +297,9 @@ export function NetworkTopologyGraph({
           <div
             style={{
               background:
-                "radial-gradient(circle at 50% 50%, #0E172A 0%, #070B14 100%)",
+                "radial-gradient(circle at 50% 50%, #FFFFFF 0%, #F8FAFC 100%)",
               border: "1px solid var(--border-default)",
-              borderRadius: "var(--radius-md)",
+              borderRadius: "var(--radius-lg)",
               overflow: "hidden",
               position: "relative",
               minHeight: 380,
@@ -311,15 +316,17 @@ export function NetworkTopologyGraph({
                 flexWrap: "wrap",
                 padding: "6px 12px",
                 borderRadius: "var(--radius-pill)",
-                background: "rgba(9, 13, 24, 0.82)",
-                border: "1px solid var(--border-subtle)",
+                background: "rgba(255, 255, 255, 0.92)",
+                backdropFilter: "blur(8px)",
+                border: "1px solid var(--border-default)",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
                 fontSize: 11,
                 color: "var(--text-secondary)",
               }}
             >
-              <Legend color="#6599FF" label="Local Anchor Node" />
-              <Legend color="#38D399" label="Verified Peer" />
-              <Legend color="#F5B942" label="Pending Handshake" />
+              <Legend color="#4F46E5" label="Local Anchor Node" />
+              <Legend color="#059669" label="Verified Peer" />
+              <Legend color="#D97706" label="Pending Handshake" />
             </div>
 
             <svg
@@ -345,8 +352,8 @@ export function NetworkTopologyGraph({
                   <path
                     d="M 36 0 L 0 0 0 36"
                     fill="none"
-                    stroke="#152036"
-                    strokeWidth="0.75"
+                    stroke="#F1F5F9"
+                    strokeWidth="1"
                   />
                 </pattern>
                 <radialGradient
@@ -355,8 +362,8 @@ export function NetworkTopologyGraph({
                   cy="50%"
                   r="50%"
                 >
-                  <stop offset="0%" stopColor="#6599FF" stopOpacity="0.42" />
-                  <stop offset="100%" stopColor="#6599FF" stopOpacity="0" />
+                  <stop offset="0%" stopColor="#4F46E5" stopOpacity="0.25" />
+                  <stop offset="100%" stopColor="#4F46E5" stopOpacity="0" />
                 </radialGradient>
                 <radialGradient
                   id="kmNodeGlowVerified"
@@ -364,8 +371,8 @@ export function NetworkTopologyGraph({
                   cy="50%"
                   r="50%"
                 >
-                  <stop offset="0%" stopColor="#38D399" stopOpacity="0.35" />
-                  <stop offset="100%" stopColor="#38D399" stopOpacity="0" />
+                  <stop offset="0%" stopColor="#059669" stopOpacity="0.2" />
+                  <stop offset="100%" stopColor="#059669" stopOpacity="0" />
                 </radialGradient>
               </defs>
 
@@ -375,7 +382,7 @@ export function NetworkTopologyGraph({
                 cy={195}
                 r={95}
                 fill="none"
-                stroke="#1A2742"
+                stroke="#E2E8F0"
                 strokeDasharray="3,6"
               />
               <circle
@@ -383,7 +390,7 @@ export function NetworkTopologyGraph({
                 cy={195}
                 r={168}
                 fill="none"
-                stroke="#18243D"
+                stroke="#E2E8F0"
                 strokeDasharray="4,8"
               />
 
@@ -403,8 +410,8 @@ export function NetworkTopologyGraph({
                 const dx = target.x - source.x;
                 const dy = target.y - source.y;
                 const len = Math.sqrt(dx * dx + dy * dy) || 1;
-                const badgeX = Math.round((source.x + target.x) / 2 + (-dy / len) * 18);
-                const badgeY = Math.round((source.y + target.y) / 2 + (dx / len) * 18);
+                const badgeX = Math.round((source.x + target.x) / 2);
+                const badgeY = Math.round((source.y + target.y) / 2);
 
                 return (
                   <g key={edge.id}>
@@ -430,7 +437,7 @@ export function NetworkTopologyGraph({
                       opacity={0.85}
                     />
 
-                    {simulationMode !== "idle" && verified && (
+                    {verified && (
                       <>
                         <circle
                           r={4}
@@ -441,14 +448,14 @@ export function NetworkTopologyGraph({
                           }
                         >
                           <animateMotion
-                            dur={`${2.1 + index * 0.35}s`}
+                            dur={`${simulationMode === "idle" ? 2.8 + index * 0.4 : 1.4 + index * 0.25}s`}
                             repeatCount="indefinite"
                             path={path}
                           />
                         </circle>
                         <circle r={3.5} fill="#38D399">
                           <animateMotion
-                            dur={`${2.4 + index * 0.3}s`}
+                            dur={`${simulationMode === "idle" ? 3.2 + index * 0.4 : 1.6 + index * 0.25}s`}
                             repeatCount="indefinite"
                             path={reversePath}
                           />
@@ -463,17 +470,17 @@ export function NetworkTopologyGraph({
                         width={108}
                         height={20}
                         rx={10}
-                        fill="#0B111E"
+                        fill="#FFFFFF"
                         stroke={stroke}
                         strokeWidth={1}
-                        opacity={0.95}
+                        opacity={0.98}
                       />
                       <text
                         x={0}
                         y={2.5}
-                        fill="#D7E3FF"
+                        fill="#0A0F1D"
                         fontSize="9.5"
-                        fontWeight="600"
+                        fontWeight="650"
                         textAnchor="middle"
                       >
                         {edge.verified ? "✓ Verified" : edge.status}
@@ -491,10 +498,10 @@ export function NetworkTopologyGraph({
                 const isLocal = node.type === "local_node";
                 const isSelected = selectedNode?.id === node.id;
                 const stroke = isLocal
-                  ? "#6599FF"
+                  ? "#4F46E5"
                   : node.status === "active"
-                    ? "#38D399"
-                    : "#F5B942";
+                    ? "#059669"
+                    : "#D97706";
 
                 const isUpper = point.y < (positions[filteredNodes[0]?.id]?.y ?? 195) - 20;
                 const cardY = isUpper ? -52 : (isLocal ? 30 : 26);
@@ -533,48 +540,55 @@ export function NetworkTopologyGraph({
                         className="km-pulse-circle"
                         r={24}
                         fill="none"
-                        stroke="#6599FF"
+                        stroke="#4F46E5"
                         strokeWidth={1.5}
                       />
                     )}
                     <circle
                       r={isLocal ? 24 : 20}
-                      fill="#0D1526"
+                      fill="#FFFFFF"
                       stroke={stroke}
                       strokeWidth={isSelected ? 3.5 : 2.2}
                     />
                     <circle r={isLocal ? 8 : 6} fill={stroke} />
-                    <rect
-                      x={-86}
-                      y={cardY}
-                      width={172}
-                      height={36}
-                      rx={8}
-                      fill="rgba(11, 17, 30, 0.92)"
-                      stroke={isSelected ? stroke : "#22304A"}
-                    />
-                    <text
-                      y={textY1}
-                      fill="#F3F7FF"
-                      fontSize="11"
-                      fontWeight="650"
-                      textAnchor="middle"
-                      pointerEvents="none"
-                    >
-                      {node.label.length > 25
-                        ? `${node.label.slice(0, 24)}…`
-                        : node.label}
-                    </text>
-                    <text
-                      y={textY2}
-                      fill="#8FA1C2"
-                      fontSize="9.5"
-                      fontFamily="var(--font-mono)"
-                      textAnchor="middle"
-                      pointerEvents="none"
-                    >
-                      {node.id} · {node.visibility}
-                    </text>
+                    {(() => {
+                      const fullLabel = node.label || node.id;
+                      const cardWidth = Math.max(185, Math.min(270, Math.round(fullLabel.length * 7.4) + 26));
+                      const cardX = -Math.round(cardWidth / 2);
+                      return (
+                        <>
+                          <rect
+                            x={cardX}
+                            y={cardY}
+                            width={cardWidth}
+                            height={36}
+                            rx={8}
+                            fill="rgba(255, 255, 255, 0.95)"
+                            stroke={isSelected ? stroke : "#CBD5E1"}
+                          />
+                          <text
+                            y={textY1}
+                            fill="#0A0F1D"
+                            fontSize="11"
+                            fontWeight="700"
+                            textAnchor="middle"
+                            pointerEvents="none"
+                          >
+                            {fullLabel}
+                          </text>
+                          <text
+                            y={textY2}
+                            fill="#64748B"
+                            fontSize="9.5"
+                            fontFamily="var(--font-mono)"
+                            textAnchor="middle"
+                            pointerEvents="none"
+                          >
+                            {node.id} · {node.visibility}
+                          </text>
+                        </>
+                      );
+                    })()}
                   </g>
                 );
               })}

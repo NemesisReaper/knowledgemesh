@@ -47,6 +47,8 @@ export function KnowledgeTransformationScene({
       const container = containerRef.current;
       if (!canvas || !container) return;
 
+      const isLight = theme === "light";
+
       const width = Math.max(container.clientWidth || 700, 360);
       const height = Math.max(container.clientHeight || 640, 560);
 
@@ -501,13 +503,44 @@ export function KnowledgeTransformationScene({
         overflow: "visible",
       }}
     >
-      <canvas
-        ref={canvasRef}
+      <div
+        className="km-sphere-wrapper"
         style={{
           width: "100%",
           height: "100%",
-          display: "block",
-          background: "transparent",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1,
+        }}
+      >
+        <canvas
+          ref={canvasRef}
+          style={{
+            width: "100%",
+            height: "100%",
+            display: "block",
+            background: "transparent",
+          }}
+        />
+      </div>
+      {/* Single unified cyan ground shadow matching the sphere with synchronous breathing */}
+      <div
+        aria-hidden="true"
+        className="km-sphere-shadow"
+        style={{
+          position: "absolute",
+          bottom: "52px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "320px",
+          height: "40px",
+          borderRadius: "50%",
+          background:
+            "radial-gradient(ellipse at center, rgba(6, 182, 212, 0.52) 0%, rgba(56, 189, 248, 0.30) 35%, rgba(14, 165, 233, 0.10) 65%, transparent 80%)",
+          filter: "blur(10px)",
+          pointerEvents: "none",
+          zIndex: 0,
         }}
       />
     </div>

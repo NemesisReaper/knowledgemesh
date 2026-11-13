@@ -115,3 +115,26 @@ def delete_claim(
         session.delete(rec)
         session.commit()
     return None
+
+
+@router.post("/extract")
+def extract_claims_from_text(
+    body: dict[str, Any],
+    principal: PrincipalContext = Depends(get_optional_principal),
+    service: KnowMeshService = Depends(get_service),
+) -> dict[str, Any]:
+    text = str(body.get("text") or body.get("content") or "")
+    source_id = str(body.get("source_id") or "doc-input")
+    domain = str(body.get("domain") or "scientific_computing")
+    try:
+        from knowmesh_worker.jobs.claim_extraction import Job
+        job = Job()
+        return job.run({
+            "text": text,
+            "source_id": source_id,
+            "domain": domain,
+            "use_llm": body.get("use_llm", False),
+        })
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Claim extraction failed: {exc}") from exc
+

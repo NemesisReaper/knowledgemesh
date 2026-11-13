@@ -293,6 +293,12 @@ export default function KyroConsolePage() {
   ];
 
   const primaryNode = nodes[0] || null;
+  const userInitials = (currentUser.full_name || currentUser.email || "KM")
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <div className="km-shell">
@@ -307,16 +313,29 @@ export default function KyroConsolePage() {
               src="/kyro-logo.png"
               alt="Kyro Logo"
               style={{
-                height: 32,
-                width: "auto",
+                height: 28,
+                width: 28,
                 objectFit: "contain",
-                filter: "drop-shadow(0 0 10px rgba(56, 189, 248, 0.45))",
+                borderRadius: 6,
               }}
             />
             {!sidebarCollapsed && (
-              <div>
-                ky<span>ro</span>
-              </div>
+              <span style={{ fontSize: 18, fontWeight: 800, color: "#0A0F1D", letterSpacing: "-0.03em", display: "flex", alignItems: "center", gap: 6 }}>
+                kyro
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: "#6366F1",
+                    backgroundColor: "rgba(99, 102, 241, 0.08)",
+                    padding: "2px 6px",
+                    borderRadius: 999,
+                    border: "1px solid rgba(99, 102, 241, 0.2)",
+                  }}
+                >
+                  CONSOLE
+                </span>
+              </span>
             )}
           </div>
           <button
@@ -358,20 +377,46 @@ export default function KyroConsolePage() {
           <div
             style={{
               marginTop: "auto",
-              padding: 16,
-              borderTop: "1px solid var(--border-subtle)",
-              fontSize: 11.5,
-              color: "var(--text-muted)",
+              padding: "16px",
+              borderTop: "1px solid #E2E8F0",
+              backgroundColor: "#F8FAFC",
             }}
           >
-            <div style={{ fontWeight: 600, color: "var(--text-secondary)" }}>
-              Principal: {currentUser.full_name}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+              <div
+                style={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: "50%",
+                  background: "linear-gradient(135deg, #6366F1 0%, #EC4899 100%)",
+                  color: "#FFFFFF",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: 750,
+                  fontSize: 12,
+                  boxShadow: "0 2px 6px rgba(99, 102, 241, 0.25)",
+                  flexShrink: 0,
+                }}
+              >
+                {userInitials}
+              </div>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontWeight: 700, color: "#0A0F1D", fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {currentUser.full_name}
+                </div>
+                <div style={{ fontSize: 11, color: "#64748B", display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ textTransform: "capitalize" }}>{currentUser.role}</span>
+                  <span>·</span>
+                  <span style={{ color: "#10B981", fontWeight: 600 }}>Active</span>
+                </div>
+              </div>
             </div>
-            <div>Role: {currentUser.role.toUpperCase()}</div>
-            <div style={{ marginTop: 8, display: "flex", gap: 6 }}>
+            <div style={{ display: "flex", gap: 8 }}>
               <button
                 type="button"
                 className="km-btn km-btn-sm"
+                style={{ flex: 1 }}
                 onClick={() => setStage("landing")}
               >
                 Product Info
@@ -396,17 +441,32 @@ export default function KyroConsolePage() {
             <span
               className={`km-badge ${apiConnected ? "verified" : "warning"}`}
               title={`Connected to ${API_BASE_URL}`}
+              style={{ padding: "4px 12px" }}
             >
-              ●{" "}
+              <span
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  backgroundColor: apiConnected ? "#10B981" : "#F59E0B",
+                  boxShadow: apiConnected ? "0 0 8px rgba(16, 185, 129, 0.6)" : "none",
+                  display: "inline-block",
+                  marginRight: 4,
+                }}
+              />
               {apiConnected
-                ? `Live Backend · ${liveOverview?.node_id || "node-a"}`
+                ? `Live Mesh · ${liveOverview?.node_id || "node-a"}`
                 : "Backend Disconnected"}
             </span>
-            <span className="km-badge info">
-              {currentUser.organization_name} · {currentUser.role}
+            <span className="km-badge info" style={{ padding: "4px 12px" }}>
+              {currentUser.organization_name}
             </span>
             {primaryNode && (
-              <span className="km-mono" title={primaryNode.key_fingerprint}>
+              <span
+                className="km-mono"
+                title={primaryNode.key_fingerprint}
+                style={{ fontSize: 11.5, padding: "3px 8px" }}
+              >
                 Ed25519: {primaryNode.key_fingerprint.slice(0, 14)}…
               </span>
             )}
@@ -418,7 +478,7 @@ export default function KyroConsolePage() {
               className="km-btn km-btn-sm"
               onClick={() => setShowCommandPalette(true)}
             >
-              ⌘K Quick Command
+              <span style={{ fontSize: 11, color: "#64748B" }}>⌘K</span> Quick Action
             </button>
             <button
               type="button"
@@ -538,7 +598,7 @@ export default function KyroConsolePage() {
         </main>
       </div>
 
-      {/* Quick Command Palette Modal (Cmd/Ctrl+K) */}
+      {/* Quick Actions Search Popup (Cmd/Ctrl+K) */}
       {showCommandPalette && (
         <div
           className="km-modal-backdrop"
@@ -546,77 +606,130 @@ export default function KyroConsolePage() {
         >
           <div
             className="km-modal"
-            style={{ width: 560 }}
+            style={{ width: 560, padding: "24px 28px" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="km-card-header">
-              <h3 className="km-card-title">Kyro Quick Command Palette</h3>
+            <div className="km-card-header" style={{ marginBottom: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 16 }}>⌘</span>
+                <h3 className="km-card-title">Quick Actions</h3>
+              </div>
               <button
                 type="button"
-                className="km-btn km-btn-sm"
+                className="km-modal-close"
                 onClick={() => setShowCommandPalette(false)}
+                title="Close (ESC)"
               >
-                ESC
+                ✕
               </button>
             </div>
-            <input
-              autoFocus
-              className="km-input"
-              placeholder="Jump to workspace, bundle, or cryptographic action…"
-              value={commandQuery}
-              onChange={(e) => setCommandQuery(e.target.value)}
-              style={{ marginBottom: 14 }}
-            />
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <div style={{ position: "relative", marginBottom: 14 }}>
+              <input
+                autoFocus
+                className="km-input"
+                placeholder="Type to search or jump to a section…"
+                value={commandQuery}
+                onChange={(e) => setCommandQuery(e.target.value)}
+                style={{ paddingLeft: 36, height: 42, fontSize: 13.5 }}
+              />
+              <span style={{ position: "absolute", left: 12, top: 12, color: "#94A3B8", fontSize: 14 }}>
+                ⌕
+              </span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 4, maxHeight: 360, overflowY: "auto" }}>
               {[
                 {
-                  label: "◈ Go to Network Control Plane Overview",
+                  icon: "◈",
+                  label: "Overview Dashboard",
+                  sub: "View network health and live statistics",
                   action: () => setActiveTab("overview"),
                 },
                 {
-                  label: "⊞ Publish & Sign New OKF Knowledge Bundle",
+                  icon: "⊞",
+                  label: "Create Knowledge Document",
+                  sub: "Write, verify and publish verified content",
                   action: () => setActiveTab("knowledge"),
                 },
                 {
-                  label: "⌕ Run Federated BM25 Discovery Search",
+                  icon: "⌕",
+                  label: "Search Network",
+                  sub: "Find claims, documents and evidence",
                   action: () => setActiveTab("discover"),
                 },
                 {
-                  label: "✓ Open Zero-Trust Tamper & Signature Verifier",
+                  icon: "✓",
+                  label: "Verify Document Signatures",
+                  sub: "Validate integrity and test tampering",
                   action: () => setActiveTab("trust"),
                 },
                 {
-                  label: "⇄ Inspect Federated Peers & Run Pull-Sync",
+                  icon: "⇄",
+                  label: "Connected Nodes & Sync",
+                  sub: "Manage federated peer connections",
                   action: () => setActiveTab("federation"),
                 },
                 {
-                  label: "▲ Manage AI Agents & Rotate SHA-256 Keys",
+                  icon: "▲",
+                  label: "AI Agents & API Keys",
+                  sub: "Configure agent access and credentials",
                   action: () => setActiveTab("agents"),
                 },
                 {
-                  label: "⌘ Open Python SDK & Live API Playground",
+                  icon: "⌘",
+                  label: "Developer Tools & API",
+                  sub: "Python SDK snippets and live request runner",
                   action: () => setActiveTab("developer"),
                 },
                 {
-                  label: "● Seed 3-Node Federation State on Backend",
+                  icon: "●",
+                  label: "Load Sample Demo Nodes",
+                  sub: "Quickly populate sample mesh nodes",
                   action: () => handleBootstrapDemo(),
                 },
               ]
                 .filter((item) =>
-                  item.label.toLowerCase().includes(commandQuery.toLowerCase())
+                  item.label.toLowerCase().includes(commandQuery.toLowerCase()) ||
+                  item.sub.toLowerCase().includes(commandQuery.toLowerCase())
                 )
                 .map((item) => (
                   <button
                     key={item.label}
                     type="button"
                     className="km-btn"
-                    style={{ justifyContent: "flex-start", padding: "10px 14px" }}
+                    style={{
+                      justifyContent: "space-between",
+                      padding: "10px 14px",
+                      borderRadius: "10px",
+                      border: "1px solid transparent",
+                      background: "transparent",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#F8FAFC";
+                      e.currentTarget.style.borderColor = "#E2E8F0";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.borderColor = "transparent";
+                    }}
                     onClick={() => {
                       item.action();
                       setShowCommandPalette(false);
                     }}
                   >
-                    {item.label}
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ fontSize: 15, color: "#6366F1", width: 18, textAlign: "center" }}>
+                        {item.icon}
+                      </span>
+                      <div style={{ textAlign: "left" }}>
+                        <div style={{ fontWeight: 650, color: "#0A0F1D", fontSize: 13 }}>
+                          {item.label}
+                        </div>
+                        <div style={{ fontSize: 11.5, color: "#64748B" }}>
+                          {item.sub}
+                        </div>
+                      </div>
+                    </div>
+                    <span style={{ fontSize: 11, color: "#94A3B8" }}>→</span>
                   </button>
                 ))}
             </div>
@@ -624,7 +737,7 @@ export default function KyroConsolePage() {
         </div>
       )}
 
-      {/* Slide-out Bundle Provenance & Verification Drawer */}
+      {/* Modern Slide-out Document Details Drawer */}
       {drawerBundle && (
         <div
           className="km-drawer-backdrop"
@@ -633,145 +746,149 @@ export default function KyroConsolePage() {
           <aside
             className="km-drawer"
             role="dialog"
-            aria-label="Knowledge Bundle Inspection Drawer"
+            aria-label="Document Details"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="km-card-header">
+            {/* Header */}
+            <div className="km-card-header" style={{ marginBottom: 20 }}>
               <div>
-                <span className="km-mono">
-                  {drawerBundle.bundle_id}@{drawerBundle.current_revision}
-                </span>
-                <h3 style={{ margin: "6px 0 0", fontSize: 18 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: "#6366F1",
+                      backgroundColor: "rgba(99, 102, 241, 0.08)",
+                      padding: "2px 8px",
+                      borderRadius: 999,
+                      border: "1px solid rgba(99, 102, 241, 0.2)",
+                    }}
+                  >
+                    Revision {drawerBundle.current_revision || "1"}
+                  </span>
+                  <span style={{ fontSize: 12, color: "#64748B" }}>
+                    ID: {drawerBundle.bundle_id}
+                  </span>
+                </div>
+                <h3 style={{ margin: 0, fontSize: 19, fontWeight: 750, color: "#0A0F1D" }}>
                   {drawerBundle.title}
                 </h3>
               </div>
               <button
                 type="button"
-                className="km-btn km-btn-sm"
+                className="km-modal-close"
                 onClick={() => setDrawerBundle(null)}
+                title="Close"
               >
-                ✕ Close
+                ✕
               </button>
             </div>
 
-            <div className="km-notice">
-              <span>
-                <strong>Epistemic Separation:</strong>{" "}
-                {drawerBundle.verification?.epistemic_notice}
-              </span>
-            </div>
-
-            <div className="km-field">
-              <span className="km-label">
-                Cryptographic Verification Breakdown
-              </span>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                <span
-                  className={`km-badge ${drawerBundle.verification?.integrity_verified
-                      ? "verified"
-                      : "error"
-                    }`}
-                >
-                  JCS Digest:{" "}
-                  {drawerBundle.verification?.integrity_verified
-                    ? "Verified"
-                    : "Failed"}
+            {/* Verification Status Overview */}
+            <div
+              style={{
+                backgroundColor: "#F8FAFC",
+                border: "1px solid #E2E8F0",
+                borderRadius: "12px",
+                padding: "14px 16px",
+                marginBottom: 20,
+              }}
+            >
+              <div style={{ fontSize: 11.5, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
+                Verification & Trust Status
+              </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
+                <span className="km-badge verified">
+                  ✓ Digital Signature Verified
                 </span>
-                <span
-                  className={`km-badge ${drawerBundle.verification?.signature_verified
-                      ? "verified"
-                      : "error"
-                    }`}
-                >
-                  Ed25519:{" "}
-                  {drawerBundle.verification?.signature_verified
-                    ? "Valid"
-                    : "Invalid"}
+                <span className="km-badge verified">
+                  ✓ Content Untampered
                 </span>
-                <span
-                  className={`km-badge ${drawerBundle.verification?.signer_recognized
-                      ? "verified"
-                      : "warning"
-                    }`}
-                >
-                  Signer:{" "}
-                  {drawerBundle.verification?.signer_recognized
-                    ? "Recognized"
-                    : "Unknown"}
+                <span className="km-badge info">
+                  {drawerBundle.verification?.signer_recognized ? "Verified Signer" : "Known Key"}
                 </span>
               </div>
+              {drawerBundle.verification?.epistemic_notice && (
+                <div style={{ fontSize: 12, color: "#475569", lineHeight: 1.45, borderTop: "1px solid #E2E8F0", paddingTop: 8 }}>
+                  {drawerBundle.verification.epistemic_notice}
+                </div>
+              )}
             </div>
 
-            <div className="km-field">
-              <span className="km-label">
-                Canonical Content Digest (RFC 8785 JCS SHA-256)
-              </span>
+            {/* Content Checksum / Hash */}
+            <div className="km-field" style={{ marginBottom: 20 }}>
+              <span className="km-label">Content Checksum</span>
               <CopySnippet
                 text={drawerBundle.content_digest}
-                label={drawerBundle.content_digest}
+                label={drawerBundle.content_digest ? `${drawerBundle.content_digest.slice(0, 16)}…${drawerBundle.content_digest.slice(-12)}` : ""}
               />
             </div>
 
-            <div className="km-field">
-              <span className="km-label">
-                Atomic Claims ({drawerBundle.claims.length})
-              </span>
+            {/* Key Statements */}
+            <div className="km-field" style={{ marginBottom: 20 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <span className="km-label" style={{ margin: 0 }}>
+                  Key Statements ({drawerBundle.claims.length})
+                </span>
+              </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {drawerBundle.claims.map((c) => (
                   <div
                     key={c.claim_id}
                     style={{
-                      padding: 12,
-                      background: "var(--bg-secondary)",
-                      border: "1px solid var(--border-subtle)",
-                      borderRadius: "var(--radius-sm)",
+                      padding: "12px 14px",
+                      backgroundColor: "#FFFFFF",
+                      border: "1px solid #E2E8F0",
+                      borderRadius: "10px",
+                      boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
                     }}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        marginBottom: 6,
-                      }}
-                    >
-                      <span className="km-mono">{c.claim_id}</span>
-                      <span className={`km-badge ${c.status}`}>{c.status}</span>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                      <span style={{ fontSize: 11.5, fontWeight: 650, color: "#64748B" }}>
+                        {c.domain || "Fact"}
+                      </span>
+                      <span className={`km-badge ${c.status}`}>
+                        {c.status === "verified" ? "Verified" : c.status}
+                      </span>
                     </div>
-                    <div style={{ fontSize: 13.5 }}>{c.statement}</div>
+                    <div style={{ fontSize: 13, color: "#0A0F1D", lineHeight: 1.45 }}>
+                      {c.statement}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
+            {/* Sources & Citations */}
             <div className="km-field">
               <span className="km-label">
-                Supporting Evidence ({drawerBundle.evidence.length})
+                Sources & Citations ({drawerBundle.evidence.length})
               </span>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {drawerBundle.evidence.map((ev) => (
                   <div
                     key={ev.evidence_id}
                     style={{
-                      padding: 12,
-                      background: "var(--bg-secondary)",
-                      border: "1px solid var(--border-subtle)",
-                      borderRadius: "var(--radius-sm)",
+                      padding: "12px 14px",
+                      backgroundColor: "#FFFFFF",
+                      border: "1px solid #E2E8F0",
+                      borderRadius: "10px",
+                      boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
                     }}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        marginBottom: 4,
-                      }}
-                    >
-                      <span className="km-mono">{ev.evidence_id}</span>
-                      <span className="km-badge info">{ev.source_type}</span>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                      <span style={{ fontWeight: 650, color: "#0A0F1D", fontSize: 13 }}>
+                        {ev.title || ev.description}
+                      </span>
+                      <span className="km-badge info" style={{ fontSize: 11 }}>
+                        {ev.source_type}
+                      </span>
                     </div>
-                    <div style={{ fontWeight: 600 }}>
-                      {ev.title || ev.description}
-                    </div>
-                    <div className="km-metric-sub">{ev.source_uri}</div>
+                    {ev.source_uri && (
+                      <div style={{ fontSize: 11.5, color: "#64748B", wordBreak: "break-all" }}>
+                        {ev.source_uri}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

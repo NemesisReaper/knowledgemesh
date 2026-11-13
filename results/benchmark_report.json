@@ -1,0 +1,142 @@
+{
+  "timestamp": "2026-11-12T23:23:27Z",
+  "papers_evaluated": 100,
+  "total_claims_extracted": 267,
+  "avg_claims_per_paper": 2.67,
+  "metrics": {
+    "claim_to_source_attribution_fidelity": "100.0%",
+    "attribution_character_exact_matches": "267/267",
+    "contradiction_detection_recall": "91.0%",
+    "contradictions_flagged": "91/100",
+    "ed25519_signature_verification_rate": "100.0%",
+    "rfc8785_canonical_digest_integrity": "100.0% (Zero digest collisions)"
+  },
+  "performance": {
+    "total_runtime_seconds": 0.015,
+    "throughput_papers_per_sec": 6692.2,
+    "avg_latency_ms_per_paper": 0.15,
+    "estimated_cost_per_1000_papers_usd": "$0.00 (Local zero-trust pipeline)"
+  },
+  "sample_records": [
+    {
+      "paper_id": "paper-001",
+      "domain": "Machine Learning & Systems",
+      "text_length_chars": 393,
+      "extracted_claims_count": 2,
+      "attribution_verified_count": 2,
+      "attribution_fidelity": 1.0,
+      "contradiction_detected": false,
+      "canonical_digest": "sha256:1a818aef6489caba...",
+      "signature_valid": true,
+      "latency_ms": 1.02
+    },
+    {
+      "paper_id": "paper-002",
+      "domain": "Machine Learning & Systems",
+      "text_length_chars": 431,
+      "extracted_claims_count": 3,
+      "attribution_verified_count": 3,
+      "attribution_fidelity": 1.0,
+      "contradiction_detected": false,
+      "canonical_digest": "sha256:4b58d04a1478c7a4...",
+      "signature_valid": true,
+      "latency_ms": 0.2
+    },
+    {
+      "paper_id": "paper-003",
+      "domain": "Machine Learning & Systems",
+      "text_length_chars": 379,
+      "extracted_claims_count": 2,
+      "attribution_verified_count": 2,
+      "attribution_fidelity": 1.0,
+      "contradiction_detected": false,
+      "canonical_digest": "sha256:1b83d5345316ed17...",
+      "signature_valid": true,
+      "latency_ms": 0.16
+    },
+    {
+      "paper_id": "paper-004",
+      "domain": "Biomedicine & Genomics",
+      "text_length_chars": 414,
+      "extracted_claims_count": 2,
+      "attribution_verified_count": 2,
+      "attribution_fidelity": 1.0,
+      "contradiction_detected": false,
+      "canonical_digest": "sha256:886129a3ea9dc189...",
+      "signature_valid": true,
+      "latency_ms": 0.16
+    },
+    {
+      "paper_id": "paper-005",
+      "domain": "Biomedicine & Genomics",
+      "text_length_chars": 406,
+      "extracted_claims_count": 2,
+      "attribution_verified_count": 2,
+      "attribution_fidelity": 1.0,
+      "contradiction_detected": false,
+      "canonical_digest": "sha256:2a565bebeda2b2d0...",
+      "signature_valid": true,
+      "latency_ms": 0.16
+    },
+    {
+      "paper_id": "paper-006",
+      "domain": "Distributed Consensus & Databases",
+      "text_length_chars": 395,
+      "extracted_claims_count": 1,
+      "attribution_verified_count": 1,
+      "attribution_fidelity": 1.0,
+      "contradiction_detected": false,
+      "canonical_digest": "sha256:1013521ca0b9f015...",
+      "signature_valid": true,
+      "latency_ms": 0.14
+    },
+    {
+      "paper_id": "paper-007",
+      "domain": "Distributed Consensus & Databases",
+      "text_length_chars": 366,
+      "extracted_claims_count": 0,
+      "attribution_verified_count": 0,
+      "attribution_fidelity": 1.0,
+      "contradiction_detected": false,
+      "canonical_digest": "sha256:d632eb0efa89558c...",
+      "signature_valid": true,
+      "latency_ms": 0.12
+    },
+    {
+      "paper_id": "paper-008",
+      "domain": "High-Energy Physics & Astronomy",
+      "text_length_chars": 408,
+      "extracted_claims_count": 0,
+      "attribution_verified_count": 0,
+      "attribution_fidelity": 1.0,
+      "contradiction_detected": false,
+      "canonical_digest": "sha256:69b0f0f88afedda2...",
+      "signature_valid": true,
+      "latency_ms": 0.46
+    },
+    {
+      "paper_id": "paper-009",
+      "domain": "Zero-Trust Cryptography & Security",
+      "text_length_chars": 419,
+      "extracted_claims_count": 0,
+      "attribution_verified_count": 0,
+      "attribution_fidelity": 1.0,
+      "contradiction_detected": false,
+      "canonical_digest": "sha256:6d01119f3a9df260...",
+      "signature_valid": true,
+      "latency_ms": 0.13
+    },
+    {
+      "paper_id": "paper-010",
+      "domain": "Machine Learning & Systems",
+      "text_length_chars": 339,
+      "extracted_claims_count": 3,
+      "attribution_verified_count": 3,
+      "attribution_fidelity": 1.0,
+      "contradiction_detected": true,
+      "canonical_digest": "sha256:c7cc49d5a1f2a081...",
+      "signature_valid": true,
+      "latency_ms": 0.15
+    }
+  ]
+}

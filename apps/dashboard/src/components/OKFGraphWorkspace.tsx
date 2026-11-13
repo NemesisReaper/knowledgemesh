@@ -13,6 +13,15 @@ export function OKFGraphWorkspace({
   const [searchQuery, setSearchQuery] = useState<string>("");
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [stageScale, setStageScale] = useState<number>(1);
+  const [toast, setToast] = useState<{ id: string; message: string; type: "success" | "info" | "warning" | "error" } | null>(null);
+
+  const showToast = (message: string, type: "success" | "info" | "warning" | "error" = "info") => {
+    const id = Date.now().toString();
+    setToast({ id, message, type });
+    setTimeout(() => {
+      setToast((curr) => (curr?.id === id ? null : curr));
+    }, 3800);
+  };
 
   // Dynamic auto-fit scaling so the entire illustration is 100% visible
   useEffect(() => {
@@ -39,96 +48,67 @@ export function OKFGraphWorkspace({
   const documentCards = [
     {
       id: "doc-md-1",
-      title: "concept-kv-quant.md",
-      type: "Markdown (.md)",
-      tagType: "type: concept",
-      tagStatus: "status: verified",
-      badgeColor: "#10B981", // emerald
+      category: "Concept",
+      title: "KV-Cache Quantization",
+      filename: "concept-kv-quant.md",
+      summary: "Maintains 99.6% needle retrieval accuracy up to 128k context with 3.7x lower memory footprint.",
+      meta: "Confidence: 99.6% · 128k Tokens",
+      badgeColor: "#4F46E5",
       x: 180,
-      y: 125,
-      yaml: `---
-bundle_id: bun-kv-2026
-type: concept
-status: verified
-confidence: 0.996
----`,
-      rawContent: `# INT4 KV-Cache Group Quantization
-Maintains 99.6% needle retrieval accuracy up to 128k tokens with 3.7x lower HBM memory footprint.
-- verified_by: did:kyro:node-a
-- canonical_jcs: e3b0c44298fc1c...`,
+      y: 135,
     },
     {
       id: "doc-yaml-1",
-      title: "manifest.yaml",
-      type: "YAML Frontmatter",
-      tagType: "type: schema",
-      tagStatus: "status: verified",
-      badgeColor: "#F59E0B", // warm amber
+      category: "Specification",
+      title: "Format Specification",
+      filename: "manifest.yaml",
+      summary: "Open Knowledge Format v0.2 with canonical RFC 8785 JSON serialization and Ed25519 signing suite.",
+      meta: "Node: node-a · Ed25519 Signed",
+      badgeColor: "#F59E0B",
       x: 180,
-      y: 375,
-      yaml: `format_version: "0.2"
-publisher: "node-a"
-signing_suite: "Ed25519"
-digest: "RFC8785-JCS"`,
-      rawContent: `bundle_specification:
-  okf_version: "0.2"
-  canonical_serialization: "rfc8785"
-  hash_algorithm: "sha256"`,
+      y: 415,
     },
     {
       id: "doc-md-2",
-      title: "evidence-benchmark.md",
-      type: "Markdown (.md)",
-      tagType: "type: evidence",
-      tagStatus: "status: verified",
-      badgeColor: "#10B981",
-      x: 780,
-      y: 125,
-      yaml: `---
-source: LongBench-128k
-reliability: 0.98
-hardware: 8xH100 SXM5
----`,
-      rawContent: `### LongBench-128k Multi-Hop Empirical Trace
-Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% under INT4 KV caching.`,
+      category: "Evidence",
+      title: "Empirical Benchmark",
+      filename: "evidence-benchmark.md",
+      summary: "Nsight trace confirms memory bandwidth saturation drops from 94% to 26% under INT4 KV caching.",
+      meta: "Reliability: 0.98 · 8xH100 SXM5",
+      badgeColor: "#0EA5E9",
+      x: 840,
+      y: 135,
     },
     {
       id: "doc-yaml-2",
-      title: "lineage-prov.yaml",
-      type: "YAML Frontmatter",
-      tagType: "type: provenance",
-      tagStatus: "status: verified",
-      badgeColor: "#F59E0B",
-      x: 780,
-      y: 375,
-      yaml: `w3c_prov:
-  activity: "bundle.published"
-  actor: "architect@kyro"
-  parent_hash: "00000000"`,
-      rawContent: `provenance_chain:
-  generation: 1
-  hash_chain: "sha256:4f1a8c9b2d..."
-  immutable_head: true`,
+      category: "Provenance",
+      title: "Audit & Lineage Trail",
+      filename: "lineage-prov.yaml",
+      summary: "W3C PROV activity chain with immutable cryptographic generation hash and verification lineage.",
+      meta: "Actor: architect@kyro · Gen 1",
+      badgeColor: "#10B981",
+      x: 840,
+      y: 415,
     },
   ];
 
   const agentNodes = [
     {
       id: "agent-indexer",
-      label: "Agent-Indexer",
-      sub: "Active Indexing (60Hz)",
-      x: 480,
-      y: 55,
-      color: "#3B82F6",
+      label: "Index Agent",
+      sub: "Active · 60Hz",
+      x: 510,
+      y: 65,
+      color: "#4F46E5",
       angle: 0,
     },
     {
       id: "agent-query-bot",
-      label: "Agent-Query-Bot",
-      sub: "Context Traversal",
-      x: 480,
-      y: 445,
-      color: "#06B6D4",
+      label: "Query Agent",
+      sub: "Active · Traversal",
+      x: 510,
+      y: 495,
+      color: "#0EA5E9",
       angle: 180,
     },
   ];
@@ -137,7 +117,8 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
     ? documentCards.filter(
         (c) =>
           c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          c.yaml.toLowerCase().includes(searchQuery.toLowerCase())
+          c.filename.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          c.summary.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : documentCards;
 
@@ -148,21 +129,21 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
         display: "flex",
         height: "calc(100vh - 110px)",
         minHeight: "520px",
-        backgroundColor: "#0B0F19",
-        color: "#F3F7FF",
+        backgroundColor: "#FAFAFB",
+        color: "#0A0F1D",
         fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         borderRadius: "var(--radius-lg)",
-        border: "1px solid #1E293B",
+        border: "1px solid #E2E8F0",
         overflow: "hidden",
-        boxShadow: "0 25px 60px -15px rgba(0, 0, 0, 0.7)",
+        boxShadow: "var(--shadow-card)",
       }}
     >
       {/* 1. Left SaaS Sidebar */}
       <aside
         style={{
           width: "72px",
-          backgroundColor: "#070B14",
-          borderRight: "1px solid #1E293B",
+          backgroundColor: "#FFFFFF",
+          borderRight: "1px solid #E2E8F0",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -176,14 +157,14 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
             width: "42px",
             height: "42px",
             borderRadius: "10px",
-            background: "linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)",
+            background: "linear-gradient(135deg, #4F46E5 0%, #0284C7 100%)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             fontWeight: 800,
             fontSize: "16px",
             color: "#FFFFFF",
-            boxShadow: "0 0 16px rgba(59, 130, 246, 0.4)",
+            boxShadow: "0 4px 14px rgba(79, 70, 229, 0.25)",
             marginBottom: "8px",
           }}
         >
@@ -211,13 +192,13 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
               borderRadius: "10px",
               border:
                 activeSidebarItem === item.id
-                  ? "1px solid rgba(6, 182, 212, 0.5)"
-                  : "none",
+                  ? "1px solid #E2E8F0"
+                  : "1px solid transparent",
               backgroundColor:
                 activeSidebarItem === item.id
-                  ? "rgba(6, 182, 212, 0.12)"
+                  ? "#F8FAFC"
                   : "transparent",
-              color: activeSidebarItem === item.id ? "#06B6D4" : "#64748B",
+              color: activeSidebarItem === item.id ? "#4F46E5" : "#64748B",
               fontSize: "18px",
               display: "flex",
               alignItems: "center",
@@ -244,8 +225,8 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
         <header
           style={{
             height: "56px",
-            backgroundColor: "#0D1322",
-            borderBottom: "1px solid #1E293B",
+            backgroundColor: "#FFFFFF",
+            borderBottom: "1px solid #E2E8F0",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -257,10 +238,10 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
           {/* Breadcrumb / Path */}
           <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px" }}>
             <span style={{ color: "#64748B" }}>Workspaces</span>
-            <span style={{ color: "#334155" }}>/</span>
+            <span style={{ color: "#CBD5E1" }}>/</span>
             <span style={{ color: "#64748B" }}>Production</span>
-            <span style={{ color: "#334155" }}>/</span>
-            <span style={{ color: "#F8FAFC", fontWeight: 600 }}>Knowledge-Base-OKF</span>
+            <span style={{ color: "#CBD5E1" }}>/</span>
+            <span style={{ color: "#0A0F1D", fontWeight: 700 }}>Knowledge-Base-OKF</span>
             <span
               style={{
                 marginLeft: "8px",
@@ -268,9 +249,9 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
                 borderRadius: "999px",
                 fontSize: "11px",
                 fontWeight: 600,
-                backgroundColor: "rgba(16, 185, 129, 0.15)",
-                color: "#10B981",
-                border: "1px solid rgba(16, 185, 129, 0.3)",
+                backgroundColor: "rgba(16, 185, 129, 0.12)",
+                color: "#059669",
+                border: "1px solid rgba(16, 185, 129, 0.25)",
               }}
             >
               ● Live Sync
@@ -287,16 +268,16 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
               style={{
                 width: "100%",
                 height: "34px",
-                backgroundColor: "#080C14",
-                border: "1px solid #1E293B",
+                backgroundColor: "#F8FAFC",
+                border: "1px solid #E2E8F0",
                 borderRadius: "8px",
                 padding: "0 12px 0 32px",
-                color: "#F8FAFC",
+                color: "#0A0F1D",
                 fontSize: "12.5px",
                 outline: "none",
               }}
             />
-            <span style={{ position: "absolute", left: "10px", top: "8px", color: "#64748B", fontSize: "14px" }}>
+            <span style={{ position: "absolute", left: "10px", top: "8px", color: "#94A3B8", fontSize: "14px" }}>
               ⌕
             </span>
           </div>
@@ -306,21 +287,21 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
             <button
               type="button"
               className="km-btn km-btn-sm"
-              onClick={() => alert("Git Sync: OKF repository synchronized with commit HEAD.")}
+              onClick={() => showToast("✓ OKF Git repository synchronized with commit HEAD.", "success")}
             >
               Sync Git
             </button>
             <button
               type="button"
               className="km-btn km-btn-sm"
-              onClick={() => alert("Export Bundle: Canonical RFC 8785 JCS payload downloaded.")}
+              onClick={() => showToast("✓ Exported canonical RFC 8785 JCS bundle to downloads.", "success")}
             >
               Export Bundle
             </button>
             <button
               type="button"
               className="km-btn km-btn-sm km-btn-primary"
-              onClick={() => alert("Deploy: Verified OKF knowledge published to federated mesh.")}
+              onClick={() => showToast("✓ Verified OKF bundle deployed and broadcasted to mesh.", "success")}
             >
               Deploy
             </button>
@@ -331,7 +312,7 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
                 width: "32px",
                 height: "32px",
                 borderRadius: "50%",
-                background: "linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%)",
+                background: "linear-gradient(135deg, #4F46E5 0%, #0284C7 100%)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -339,7 +320,6 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
                 fontWeight: 700,
                 color: "#FFFFFF",
                 marginLeft: "6px",
-                border: "1.5px solid rgba(6, 182, 212, 0.6)",
               }}
             >
               KY
@@ -354,7 +334,7 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
             flex: 1,
             position: "relative",
             overflow: "hidden",
-            backgroundColor: "#080C14",
+            backgroundColor: "#F8FAFC",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -368,8 +348,8 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
           <div
             style={{
               position: "relative",
-              width: "960px",
-              height: "520px",
+              width: "1020px",
+              height: "580px",
               transform: `scale(${stageScale.toFixed(3)})`,
               transformOrigin: "center center",
               transition: "transform 0.12s ease",
@@ -378,7 +358,7 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
           >
             {/* Subtle Dot-Grid Background Pattern */}
             <svg
-              viewBox="0 0 960 520"
+              viewBox="0 0 1020 580"
               style={{
                 position: "absolute",
                 top: 0,
@@ -390,290 +370,309 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
             >
               <defs>
                 <pattern id="okfDotGrid2" width="24" height="24" patternUnits="userSpaceOnUse">
-                  <circle cx="2" cy="2" r="1.2" fill="#1E293B" opacity="0.65" />
+                  <circle cx="2" cy="2" r="1.2" fill="#E2E8F0" />
                 </pattern>
+                <filter id="neon-glow-react" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
               </defs>
               <rect width="100%" height="100%" fill="url(#okfDotGrid2)" />
 
-              {/* Curved Bézier Connection Paths with Particle Streams */}
-              {/* Path 1: Center (480, 250) -> Top-Left Card (180, 125) */}
+              {/* Central Radar Pulse Waves */}
+              <circle cx="510" cy="275" r="30" fill="none" stroke="#4F46E5" strokeWidth="2" opacity="0.8">
+                <animate attributeName="r" values="30;85" dur="2.8s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0.8;0" dur="2.8s" repeatCount="indefinite" />
+              </circle>
+              <circle cx="510" cy="275" r="30" fill="none" stroke="#7C3AED" strokeWidth="1.5" opacity="0.6">
+                <animate attributeName="r" values="30;115" dur="2.8s" begin="1.4s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0.6;0" dur="2.8s" begin="1.4s" repeatCount="indefinite" />
+              </circle>
+
+              {/* Smooth Curved Connections with Terminal Port Anchors */}
+              {/* Top-Left: KV-Cache Quantization (295, 135) to Anchor (390, 255) */}
               <path
-                d="M 480 250 C 330 250, 270 125, 180 125"
+                className="km-laser-path-1"
+                d="M 295 135 C 345 135, 340 255, 390 255"
                 fill="none"
-                stroke="#06B6D4"
+                stroke="#CBD5E1"
                 strokeWidth="1.8"
-                opacity="0.65"
               />
-              <circle r="4" fill="#67E8F9">
-                <animateMotion dur="2.4s" repeatCount="indefinite" path="M 480 250 C 330 250, 270 125, 180 125" />
+              <circle className="km-ignited-port" cx="295" cy="135" r="5" fill="#4F46E5" stroke="#FFFFFF" strokeWidth="2" />
+              <circle className="km-ignited-port" cx="390" cy="255" r="5" fill="#4F46E5" stroke="#FFFFFF" strokeWidth="2" />
+              <circle r="8" fill="#4F46E5" opacity="0.45" filter="url(#neon-glow-react)">
+                <animateMotion dur="2.2s" repeatCount="indefinite" path="M 295 135 C 345 135, 340 255, 390 255" />
+              </circle>
+              <circle r="4.5" fill="#6366F1">
+                <animateMotion dur="2.2s" repeatCount="indefinite" path="M 295 135 C 345 135, 340 255, 390 255" />
+              </circle>
+              <circle r="2" fill="#FFFFFF">
+                <animateMotion dur="2.2s" repeatCount="indefinite" path="M 295 135 C 345 135, 340 255, 390 255" />
               </circle>
 
-              {/* Path 2: Center (480, 250) -> Bottom-Left Card (180, 375) */}
+              {/* Bottom-Left: Format Specification (295, 415) to Anchor (390, 295) */}
               <path
-                d="M 480 250 C 330 250, 270 375, 180 375"
+                className="km-laser-path-2"
+                d="M 295 415 C 345 415, 340 295, 390 295"
                 fill="none"
-                stroke="#F59E0B"
+                stroke="#CBD5E1"
                 strokeWidth="1.8"
-                opacity="0.65"
               />
-              <circle r="4" fill="#FBBF24">
-                <animateMotion dur="2.8s" repeatCount="indefinite" path="M 480 250 C 330 250, 270 375, 180 375" />
+              <circle className="km-ignited-port" cx="295" cy="415" r="5" fill="#F59E0B" stroke="#FFFFFF" strokeWidth="2" />
+              <circle className="km-ignited-port" cx="390" cy="295" r="5" fill="#F59E0B" stroke="#FFFFFF" strokeWidth="2" />
+              <circle r="8" fill="#F59E0B" opacity="0.45" filter="url(#neon-glow-react)">
+                <animateMotion dur="2.6s" repeatCount="indefinite" path="M 295 415 C 345 415, 340 295, 390 295" />
+              </circle>
+              <circle r="4.5" fill="#F59E0B">
+                <animateMotion dur="2.6s" repeatCount="indefinite" path="M 295 415 C 345 415, 340 295, 390 295" />
+              </circle>
+              <circle r="2" fill="#FFFFFF">
+                <animateMotion dur="2.6s" repeatCount="indefinite" path="M 295 415 C 345 415, 340 295, 390 295" />
               </circle>
 
-              {/* Path 3: Center (480, 250) -> Top-Right Card (780, 125) */}
+              {/* Top-Right: Anchor (630, 255) to Empirical Benchmark (725, 135) */}
               <path
-                d="M 480 250 C 630 250, 690 125, 780 125"
+                className="km-laser-path-3"
+                d="M 630 255 C 680 255, 675 135, 725 135"
                 fill="none"
-                stroke="#06B6D4"
+                stroke="#CBD5E1"
                 strokeWidth="1.8"
-                opacity="0.65"
               />
-              <circle r="4" fill="#67E8F9">
-                <animateMotion dur="2.2s" repeatCount="indefinite" path="M 480 250 C 630 250, 690 125, 780 125" />
+              <circle className="km-ignited-port" cx="630" cy="255" r="5" fill="#0EA5E9" stroke="#FFFFFF" strokeWidth="2" />
+              <circle className="km-ignited-port" cx="725" cy="135" r="5" fill="#0EA5E9" stroke="#FFFFFF" strokeWidth="2" />
+              <circle r="8" fill="#0EA5E9" opacity="0.45" filter="url(#neon-glow-react)">
+                <animateMotion dur="2.0s" repeatCount="indefinite" path="M 630 255 C 680 255, 675 135, 725 135" />
+              </circle>
+              <circle r="4.5" fill="#0EA5E9">
+                <animateMotion dur="2.0s" repeatCount="indefinite" path="M 630 255 C 680 255, 675 135, 725 135" />
+              </circle>
+              <circle r="2" fill="#FFFFFF">
+                <animateMotion dur="2.0s" repeatCount="indefinite" path="M 630 255 C 680 255, 675 135, 725 135" />
               </circle>
 
-              {/* Path 4: Center (480, 250) -> Bottom-Right Card (780, 375) */}
+              {/* Bottom-Right: Anchor (630, 295) to Audit & Lineage (725, 415) */}
               <path
-                d="M 480 250 C 630 250, 690 375, 780 375"
+                className="km-laser-path-4"
+                d="M 630 295 C 680 295, 675 415, 725 415"
                 fill="none"
-                stroke="#F59E0B"
+                stroke="#CBD5E1"
                 strokeWidth="1.8"
-                opacity="0.65"
               />
-              <circle r="4" fill="#FBBF24">
-                <animateMotion dur="2.6s" repeatCount="indefinite" path="M 480 250 C 630 250, 690 375, 780 375" />
+              <circle className="km-ignited-port" cx="630" cy="295" r="5" fill="#10B981" stroke="#FFFFFF" strokeWidth="2" />
+              <circle className="km-ignited-port" cx="725" cy="415" r="5" fill="#10B981" stroke="#FFFFFF" strokeWidth="2" />
+              <circle r="8" fill="#10B981" opacity="0.45" filter="url(#neon-glow-react)">
+                <animateMotion dur="2.4s" repeatCount="indefinite" path="M 630 295 C 680 295, 675 415, 725 415" />
+              </circle>
+              <circle r="4.5" fill="#10B981">
+                <animateMotion dur="2.4s" repeatCount="indefinite" path="M 630 295 C 680 295, 675 415, 725 415" />
+              </circle>
+              <circle r="2" fill="#FFFFFF">
+                <animateMotion dur="2.4s" repeatCount="indefinite" path="M 630 295 C 680 295, 675 415, 725 415" />
               </circle>
 
-              {/* Path 5: Center -> Top Agent (480, 55) */}
-              <line x1="480" y1="250" x2="480" y2="55" stroke="#3B82F6" strokeWidth="1.6" strokeDasharray="4,4" opacity="0.75" />
-              <circle r="3.5" fill="#3B82F6">
-                <animateMotion dur="1.8s" repeatCount="indefinite" path="M 480 250 L 480 55" />
+              {/* Top AI Agent Vertical Connection */}
+              <line className="km-laser-vpath" x1="510" y1="220" x2="510" y2="108" stroke="#CBD5E1" strokeWidth="1.6" strokeDasharray="4,4" />
+              <circle className="km-ignited-port" cx="510" cy="220" r="4.5" fill="#4F46E5" stroke="#FFFFFF" strokeWidth="1.8" />
+              <circle className="km-ignited-port" cx="510" cy="108" r="4.5" fill="#4F46E5" stroke="#FFFFFF" strokeWidth="1.8" />
+              <circle r="7" fill="#4F46E5" opacity="0.45" filter="url(#neon-glow-react)">
+                <animateMotion dur="1.7s" repeatCount="indefinite" path="M 510 220 L 510 108" />
+              </circle>
+              <circle r="3.5" fill="#4F46E5">
+                <animateMotion dur="1.7s" repeatCount="indefinite" path="M 510 220 L 510 108" />
               </circle>
 
-              {/* Path 6: Center -> Bottom Agent (480, 445) */}
-              <line x1="480" y1="250" x2="480" y2="445" stroke="#06B6D4" strokeWidth="1.6" strokeDasharray="4,4" opacity="0.75" />
-              <circle r="3.5" fill="#06B6D4">
-                <animateMotion dur="2.0s" repeatCount="indefinite" path="M 480 250 L 480 445" />
+              {/* Bottom AI Agent Vertical Connection */}
+              <line className="km-laser-vpath" x1="510" y1="330" x2="510" y2="440" stroke="#CBD5E1" strokeWidth="1.6" strokeDasharray="4,4" />
+              <circle className="km-ignited-port" cx="510" cy="330" r="4.5" fill="#0EA5E9" stroke="#FFFFFF" strokeWidth="1.8" />
+              <circle className="km-ignited-port" cx="510" cy="440" r="4.5" fill="#0EA5E9" stroke="#FFFFFF" strokeWidth="1.8" />
+              <circle r="7" fill="#0EA5E9" opacity="0.45" filter="url(#neon-glow-react)">
+                <animateMotion dur="1.9s" repeatCount="indefinite" path="M 510 330 L 510 440" />
+              </circle>
+              <circle r="3.5" fill="#0EA5E9">
+                <animateMotion dur="1.9s" repeatCount="indefinite" path="M 510 330 L 510 440" />
               </circle>
             </svg>
 
-            {/* Central Anchor Node: Glowing Primary Folder */}
+            {/* Central Anchor Node: Clean Verifiable Document */}
             <div
-              className="km-float-centered"
+              className="km-float-centered km-assemble-anchor"
               style={{
                 position: "absolute",
-                left: "480px",
-                top: "250px",
-                width: "210px",
-                padding: "16px 20px",
-                backgroundColor: "rgba(15, 23, 42, 0.92)",
-                backdropFilter: "blur(14px)",
-                borderRadius: "14px",
-                border: "1.5px solid rgba(59, 130, 246, 0.65)",
-                boxShadow: "0 0 32px rgba(59, 130, 246, 0.4)",
+                left: "510px",
+                top: "275px",
+                width: "240px",
+                padding: "18px 20px",
+                backgroundColor: "#FFFFFF",
+                borderRadius: "16px",
+                border: "1.5px solid #E2E8F0",
+                boxShadow: "0 16px 36px -8px rgba(10, 15, 29, 0.08)",
                 display: "flex",
                 flexDirection: "column",
                 gap: "6px",
                 zIndex: 10,
+                textAlign: "left",
+                transform: "translate(-50%, -50%)",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontSize: "12px", fontWeight: 800, color: "#38bdf8", padding: "2px 7px", borderRadius: "5px", background: "rgba(56,189,248,0.18)", border: "1px solid rgba(56,189,248,0.4)" }}>
-                  OKF
+                <span
+                  style={{
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    color: "#4F46E5",
+                    padding: "2px 8px",
+                    borderRadius: "6px",
+                    backgroundColor: "rgba(79, 70, 229, 0.08)",
+                  }}
+                >
+                  Mesh Anchor
                 </span>
                 <span
                   style={{
                     fontSize: "10px",
-                    fontWeight: 700,
-                    color: "#67E8F9",
-                    backgroundColor: "rgba(6, 182, 212, 0.18)",
-                    padding: "2px 8px",
+                    fontWeight: 600,
+                    color: "#059669",
+                    backgroundColor: "rgba(16, 185, 129, 0.08)",
+                    padding: "2px 7px",
                     borderRadius: "999px",
-                    border: "1px solid rgba(6, 182, 212, 0.45)",
                   }}
                 >
-                  CORE ANCHOR
+                  ✓ Verified
                 </span>
               </div>
-              <div style={{ fontWeight: 700, fontSize: "14px", color: "#F8FAFC" }}>
-                Knowledge Bundle (OKF)
+              <div style={{ fontWeight: 700, fontSize: "14px", color: "#0A0F1D", marginTop: "2px" }}>
+                Knowledge Document
               </div>
-              <div style={{ fontSize: "11px", color: "#94A3B8", fontFamily: "var(--font-mono)" }}>
+              <div style={{ fontSize: "11px", color: "#64748B", fontFamily: "var(--font-mono)" }}>
                 did:kyro:bundle-root
+              </div>
+              <div style={{ fontSize: "10.5px", color: "#94A3B8", marginTop: "2px", paddingTop: "6px", borderTop: "1px solid #F1F5F9" }}>
+                4 Linked Documents · RFC 8785
               </div>
             </div>
 
-            {/* Glassmorphic Document Cards */}
+            {/* Document Cards */}
             {filteredCards.map((card) => {
               const isHovered = hoveredCardId === card.id;
-              const isBottom = card.y > 250;
+              const animClass = card.x < 510 ? (card.y < 275 ? 'km-assemble-top-left' : 'km-assemble-bottom-left') : (card.y < 275 ? 'km-assemble-top-right' : 'km-assemble-bottom-right');
               return (
                 <div
                   key={card.id}
-                  className="km-float-centered"
+                  className={`km-float-centered km-card-${card.id} ${animClass}`}
                   onMouseEnter={() => setHoveredCardId(card.id)}
+                  onMouseLeave={() => setHoveredCardId(null)}
                   style={{
                     position: "absolute",
                     left: `${card.x}px`,
                     top: `${card.y}px`,
-                    width: "210px",
-                    padding: "12px 14px",
-                    backgroundColor: "rgba(14, 20, 35, 0.88)",
-                    backdropFilter: "blur(12px)",
-                    borderRadius: "12px",
+                    width: "230px",
+                    padding: "14px 16px",
+                    backgroundColor: "#FFFFFF",
+                    borderRadius: "14px",
                     border: "1.5px solid",
-                    borderColor: isHovered ? card.badgeColor : "rgba(101, 153, 255, 0.25)",
+                    borderColor: isHovered ? card.badgeColor : "#E2E8F0",
                     boxShadow: isHovered
-                      ? `0 10px 24px -4px rgba(0, 0, 0, 0.7), 0 0 18px ${card.badgeColor}45`
-                      : "var(--shadow-card)",
-                    transition: "border-color 0.2s, box-shadow 0.2s",
+                      ? `0 16px 32px -4px rgba(10, 15, 29, 0.1), 0 0 1px ${card.badgeColor}`
+                      : "0 4px 16px rgba(10, 15, 29, 0.04)",
+                    transform: `translate(-50%, -50%) ${isHovered ? "translateY(-3px)" : "translateY(0)"}`,
+                    transition: "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
                     cursor: "pointer",
                     zIndex: isHovered ? 25 : 12,
+                    textAlign: "left",
                   }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                    <span style={{ fontSize: "10px", fontWeight: 700, padding: "2px 6px", borderRadius: "4px", color: card.badgeColor, backgroundColor: `${card.badgeColor}20` }}>
-                      {card.title.endsWith(".md") ? ".md" : "YAML"}
-                    </span>
-                    <div style={{ display: "flex", gap: "4px" }}>
-                      <span style={{ fontSize: "9px", padding: "1px 5px", borderRadius: "3px", background: "rgba(255,255,255,0.06)", color: "#94A3B8" }}>
-                        {card.tagType}
-                      </span>
-                      <span style={{ fontSize: "9px", padding: "1px 5px", borderRadius: "3px", background: "rgba(255,255,255,0.06)", color: "#94A3B8" }}>
-                        {card.tagStatus}
-                      </span>
-                    </div>
-                  </div>
-                  <div style={{ fontWeight: 600, fontSize: "12.5px", color: "#F1F5F9", marginBottom: "6px" }}>
-                    {card.title}
-                  </div>
-                  <pre
-                    style={{
-                      margin: 0,
-                      padding: "6px 8px",
-                      backgroundColor: "#070B14",
-                      borderRadius: "6px",
-                      fontSize: "10px",
-                      fontFamily: "var(--font-mono)",
-                      color: "#94A3B8",
-                      lineHeight: 1.35,
-                      overflow: "hidden",
-                    }}
-                  >
-                    {card.yaml}
-                  </pre>
-
-                  {/* INWARD-OPENING TOOLTIP (NEVER CLIPS OUT OF STAGE) */}
-                  {isHovered && (
-                    <div
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                    <span
                       style={{
-                        position: "absolute",
-                        ...(isBottom ? { bottom: "103%" } : { top: "103%" }),
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        width: "240px",
-                        maxHeight: "140px",
-                        overflowY: "auto",
-                        backgroundColor: "#060A14",
-                        border: `1px solid ${card.badgeColor}`,
-                        borderRadius: "8px",
-                        padding: "10px 12px",
-                        boxShadow: `0 12px 28px -4px rgba(0,0,0,0.85), 0 0 16px ${card.badgeColor}35`,
-                        zIndex: 35,
-                        pointerEvents: "none",
+                        fontSize: "10.5px",
+                        fontWeight: 700,
+                        padding: "2px 8px",
+                        borderRadius: "6px",
+                        color: card.badgeColor,
+                        backgroundColor: `${card.badgeColor}14`,
                       }}
                     >
-                      <div style={{ fontSize: "11px", fontWeight: 700, color: card.badgeColor, marginBottom: "4px" }}>
-                        Raw Preview ({card.title})
-                      </div>
-                      <div style={{ fontSize: "10.5px", color: "#CBD5E1", lineHeight: 1.4 }}>
-                        {card.rawContent}
-                      </div>
-                    </div>
-                  )}
+                      {card.category}
+                    </span>
+                    <span style={{ fontSize: "10px", fontWeight: 600, color: "#059669", display: "flex", alignItems: "center", gap: "3px" }}>
+                      ● Verified
+                    </span>
+                  </div>
+                  <div style={{ fontWeight: 700, fontSize: "13px", color: "#0A0F1D", marginBottom: "2px" }}>
+                    {card.title}
+                  </div>
+                  <div style={{ fontSize: "10.5px", color: "#64748B", fontFamily: "var(--font-mono)", marginBottom: "8px" }}>
+                    {card.filename}
+                  </div>
+                  <div style={{ fontSize: "11px", color: "#334155", lineHeight: 1.45, marginBottom: "10px" }}>
+                    {card.summary}
+                  </div>
+                  <div style={{ fontSize: "10px", fontWeight: 500, color: "#94A3B8", paddingTop: "8px", borderTop: "1px solid #F1F5F9" }}>
+                    {card.meta}
+                  </div>
                 </div>
               );
             })}
 
             {/* AI Agent Nodes */}
-            {agentNodes.map((agent) => (
-              <div
-                key={agent.id}
-                className="km-float-centered"
-                style={{
-                  position: "absolute",
-                  left: `${agent.x}px`,
-                  top: `${agent.y}px`,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  zIndex: 15,
-                }}
-              >
+            {agentNodes.map((agent) => {
+              const animClass = agent.y < 275 ? 'km-assemble-agent-top' : 'km-assemble-agent-bottom';
+              return (
                 <div
-                  className="km-radar-pulse"
+                  key={agent.id}
+                  className={`km-float-centered ${animClass}`}
                   style={{
                     position: "absolute",
-                    width: "58px",
-                    height: "58px",
-                    borderRadius: "50%",
-                    border: `2px solid ${agent.color}`,
-                    top: "0px",
-                    pointerEvents: "none",
+                    left: `${agent.x}px`,
+                    top: `${agent.y}px`,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    zIndex: 15,
+                    transform: "translate(-50%, -50%)",
                   }}
-                />
+                >
                 <div
-                  className="km-telemetry-ring"
                   style={{
-                    position: "relative",
-                    width: "50px",
-                    height: "50px",
+                    width: "44px",
+                    height: "44px",
                     borderRadius: "50%",
-                    border: `2px dashed ${agent.color}`,
+                    backgroundColor: "#FFFFFF",
+                    border: `1.5px solid ${agent.color}`,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    backgroundColor: "rgba(11, 15, 25, 0.92)",
-                    boxShadow: `0 0 20px ${agent.color}45`,
+                    boxShadow: "0 8px 20px -2px rgba(10, 15, 29, 0.08)",
                   }}
                 >
-                  <div
-                    style={{
-                      width: "34px",
-                      height: "34px",
-                      borderRadius: "50%",
-                      backgroundColor: "#0F172A",
-                      border: `1.5px solid ${agent.color}`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "11px",
-                      fontWeight: 800,
-                      color: agent.color,
-                    }}
-                  >
+                  <span style={{ fontSize: "11px", fontWeight: 800, color: agent.color }}>
                     AI
-                  </div>
+                  </span>
                 </div>
                 <div
                   style={{
                     marginTop: "6px",
                     textAlign: "center",
-                    padding: "2px 8px",
-                    backgroundColor: "rgba(11, 15, 25, 0.9)",
-                    borderRadius: "4px",
-                    border: "1px solid #1E293B",
+                    padding: "3px 10px",
+                    backgroundColor: "#FFFFFF",
+                    borderRadius: "20px",
+                    border: "1px solid #E2E8F0",
+                    boxShadow: "0 2px 8px rgba(10, 15, 29, 0.04)",
                   }}
                 >
-                  <div style={{ fontSize: "11px", fontWeight: 700, color: "#F8FAFC" }}>
+                  <div style={{ fontSize: "11px", fontWeight: 600, color: "#0A0F1D" }}>
                     {agent.label}
                   </div>
-                  <div style={{ fontSize: "9px", color: agent.color }}>
+                  <div style={{ fontSize: "9.5px", color: "#059669", fontWeight: 500 }}>
                     {agent.sub}
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Canvas Mini-Map */}
@@ -684,26 +683,27 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
               left: "16px",
               width: "120px",
               height: "70px",
-              backgroundColor: "rgba(11, 15, 25, 0.88)",
-              border: "1px solid #1E293B",
-              borderRadius: "6px",
+              backgroundColor: "rgba(255, 255, 255, 0.92)",
+              border: "1px solid #E2E8F0",
+              borderRadius: "8px",
               padding: "6px",
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
               pointerEvents: "none",
               zIndex: 25,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
             }}
           >
-            <span style={{ fontSize: "9px", fontWeight: 700, color: "#64748B", letterSpacing: "0.05em" }}>
+            <span style={{ fontSize: "9px", fontWeight: 750, color: "#64748B", letterSpacing: "0.05em" }}>
               GRAPH MINI-MAP
             </span>
-            <div style={{ position: "relative", flex: 1, border: "1px dashed #334155", borderRadius: "3px", marginTop: "4px" }}>
-              <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: "12px", height: "8px", backgroundColor: "#3B82F6", borderRadius: "1px" }} />
-              <div style={{ position: "absolute", top: "20%", left: "20%", width: "6px", height: "4px", backgroundColor: "#10B981", borderRadius: "1px" }} />
-              <div style={{ position: "absolute", bottom: "20%", left: "20%", width: "6px", height: "4px", backgroundColor: "#F59E0B", borderRadius: "1px" }} />
-              <div style={{ position: "absolute", top: "20%", right: "20%", width: "6px", height: "4px", backgroundColor: "#10B981", borderRadius: "1px" }} />
-              <div style={{ position: "absolute", bottom: "20%", right: "20%", width: "6px", height: "4px", backgroundColor: "#F59E0B", borderRadius: "1px" }} />
+            <div style={{ position: "relative", flex: 1, border: "1px dashed #CBD5E1", borderRadius: "3px", marginTop: "4px", backgroundColor: "#F8FAFC" }}>
+              <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: "12px", height: "8px", backgroundColor: "#4F46E5", borderRadius: "1px" }} />
+              <div style={{ position: "absolute", top: "20%", left: "20%", width: "6px", height: "4px", backgroundColor: "#059669", borderRadius: "1px" }} />
+              <div style={{ position: "absolute", bottom: "20%", left: "20%", width: "6px", height: "4px", backgroundColor: "#D97706", borderRadius: "1px" }} />
+              <div style={{ position: "absolute", top: "20%", right: "20%", width: "6px", height: "4px", backgroundColor: "#059669", borderRadius: "1px" }} />
+              <div style={{ position: "absolute", bottom: "20%", right: "20%", width: "6px", height: "4px", backgroundColor: "#D97706", borderRadius: "1px" }} />
             </div>
           </div>
 
@@ -716,11 +716,12 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
               display: "flex",
               alignItems: "center",
               gap: "6px",
-              backgroundColor: "rgba(11, 15, 25, 0.92)",
-              border: "1px solid #1E293B",
+              backgroundColor: "rgba(255, 255, 255, 0.95)",
+              border: "1px solid #E2E8F0",
               borderRadius: "8px",
               padding: "4px 8px",
               zIndex: 25,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
             }}
           >
             <button
@@ -731,7 +732,7 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
             >
               −
             </button>
-            <span style={{ fontSize: "11px", fontFamily: "var(--font-mono)", color: "#94A3B8", minWidth: "40px", textAlign: "center" }}>
+            <span style={{ fontSize: "11px", fontFamily: "var(--font-mono)", color: "#334155", minWidth: "40px", textAlign: "center" }}>
               {zoomLevel}%
             </span>
             <button
@@ -753,6 +754,28 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
           </div>
         </div>
       </div>
+
+      {toast && (
+        <div className="km-toast-container" role="region" aria-live="polite">
+          <div className={`km-toast ${toast.type}`}>
+            <div className="km-toast-body">
+              <div className="km-toast-icon">
+                {toast.type === "success" ? "✓" : toast.type === "error" ? "✕" : toast.type === "warning" ? "⚠" : "ℹ"}
+              </div>
+              <div className="km-toast-message">{toast.message}</div>
+            </div>
+            <button
+              type="button"
+              className="km-modal-close"
+              style={{ width: "24px", height: "24px", fontSize: "11px" }}
+              onClick={() => setToast(null)}
+              aria-label="Dismiss"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

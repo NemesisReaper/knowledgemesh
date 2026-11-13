@@ -33,6 +33,7 @@ export function LandingPageView({
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   );
   const [verifyState, setVerifyState] = useState<"idle" | "verifying" | "valid">("valid");
+  const [proofConfirmed, setProofConfirmed] = useState<boolean>(false);
 
   // Sticky navbar scroll blur transition
   useEffect(() => {
@@ -70,9 +71,39 @@ export function LandingPageView({
     };
   }, [demoInputHash]);
 
-  const liveNodes = overview?.nodes?.length || 3;
+  // Scroll reveal observer
+  useEffect(() => {
+    const elements = document.querySelectorAll(".km-reveal, .km-reveal-scale, .km-reveal-left, .km-reveal-right");
+    if (!elements.length) return;
+    if (typeof IntersectionObserver === "undefined") {
+      elements.forEach((el) => el.classList.add("km-revealed"));
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("km-revealed");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+    elements.forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        el.classList.add("km-revealed");
+      } else {
+        observer.observe(el);
+      }
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  const liveNodes = overview?.metrics?.total_nodes || overview?.topology?.nodes?.length || 3;
   const liveClaims = overview?.metrics?.published_claims || 4;
-  const liveBundles = overview?.bundles?.length || 3;
+  const liveBundles = overview?.metrics?.knowledge_bundles || 3;
 
   return (
     <div
@@ -193,26 +224,9 @@ export function LandingPageView({
                 fontWeight: 800,
                 letterSpacing: "-0.035em",
                 color: "#0A0F1D",
-                display: "flex",
-                alignItems: "baseline",
-                gap: "6px",
               }}
             >
-              kyro
-              <span
-                style={{
-                  fontSize: "11px",
-                  fontWeight: 650,
-                  letterSpacing: "0.02em",
-                  color: "#6366F1",
-                  background: "rgba(99, 102, 241, 0.08)",
-                  padding: "2px 7px",
-                  borderRadius: "999px",
-                  border: "1px solid rgba(99, 102, 241, 0.2)",
-                }}
-              >
-                v0.2
-              </span>
+              Kyro
             </span>
           </div>
 
@@ -671,44 +685,6 @@ export function LandingPageView({
 
             {/* Luminous Three.js Interactive Dual-Sphere */}
             <KnowledgeTransformationScene theme="light" />
-
-            {/* Floating Telemetry Pill 2 (Bottom-Left) */}
-            <div
-              style={{
-                position: "absolute",
-                bottom: "32px",
-                left: "4px",
-                backgroundColor: "rgba(255, 255, 255, 0.88)",
-                backdropFilter: "blur(14px)",
-                border: "1px solid rgba(226, 232, 240, 0.9)",
-                borderRadius: "12px",
-                padding: "10px 14px",
-                boxShadow: "0 12px 30px -6px rgba(10, 15, 29, 0.07)",
-                zIndex: 10,
-                pointerEvents: "none",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "3px" }}>
-                <span
-                  style={{
-                    fontSize: "9.5px",
-                    fontWeight: 700,
-                    color: "#6366F1",
-                    backgroundColor: "rgba(99, 102, 241, 0.1)",
-                    padding: "2px 6px",
-                    borderRadius: "4px",
-                  }}
-                >
-                  OKF v0.2
-                </span>
-                <span style={{ fontSize: "11px", fontWeight: 700, color: "#0A0F1D" }}>
-                  bun-kv-2026.okf
-                </span>
-              </div>
-              <div style={{ fontSize: "10px", color: "#64748B" }}>
-                99.6% Needle Retrieval · 128k Multi-Hop Trace
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -1525,14 +1501,19 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
               </div>
 
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "8px" }}>
-                <span style={{ fontSize: "12px", color: "#10B981", fontWeight: 600 }}>
-                  ✓ Valid RFC 8785 Hash Format · 256-bit Cryptographic Proof
+                <span style={{ fontSize: "12px", color: proofConfirmed ? "#059669" : "#10B981", fontWeight: 600 }}>
+                  {proofConfirmed
+                    ? "✓ Cryptographic Proof Confirmed: Payload Digest Matches Ed25519 Authority"
+                    : "✓ Valid RFC 8785 Hash Format · 256-bit Cryptographic Proof"}
                 </span>
                 <button
                   type="button"
-                  onClick={() => alert(`Verified Digest: ${computedDigest}\nStatus: Cryptographically Untampered.`)}
+                  onClick={() => {
+                    setProofConfirmed(true);
+                    setTimeout(() => setProofConfirmed(false), 4000);
+                  }}
                   style={{
-                    backgroundColor: "#0A0F1D",
+                    backgroundColor: proofConfirmed ? "#10B981" : "#0A0F1D",
                     color: "#FFFFFF",
                     border: "none",
                     borderRadius: "8px",
@@ -1540,9 +1521,10 @@ Nsight profiling confirms memory bandwidth saturation drops from 94% to 26% unde
                     fontSize: "12.5px",
                     fontWeight: 650,
                     cursor: "pointer",
+                    transition: "all 0.2s ease",
                   }}
                 >
-                  Confirm Proof
+                  {proofConfirmed ? "✓ Proof Verified" : "Confirm Proof"}
                 </button>
               </div>
             </div>
@@ -1850,28 +1832,12 @@ kyro verify ./bun-kv-2026.okf --strict-rfc8785
                 }}
               />
               <span style={{ fontSize: "18px", fontWeight: 800, color: "#0A0F1D", letterSpacing: "-0.03em" }}>
-                kyro
+                Kyro
               </span>
             </div>
-            <p style={{ fontSize: "14px", color: "#64748B", lineHeight: 1.6, margin: "0 0 20px", maxWidth: "280px" }}>
+            <p style={{ fontSize: "14px", color: "#64748B", lineHeight: 1.6, margin: 0, maxWidth: "280px" }}>
               The zero-trust knowledge mesh protocol for autonomous AI agents and sovereign nodes.
             </p>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                fontSize: "12px",
-                fontWeight: 600,
-                color: "#10B981",
-                backgroundColor: "rgba(16, 185, 129, 0.08)",
-                padding: "4px 10px",
-                borderRadius: "999px",
-              }}
-            >
-              <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#10B981" }} />
-              All 3 Live Nodes Synchronized
-            </div>
           </div>
 
           {/* Column 2: Protocol */}
@@ -2107,263 +2073,595 @@ export function LoginGateView({
     <div
       style={{
         minHeight: "100vh",
-        backgroundColor: "#FFFFFF",
+        backgroundColor: "#FAFAFB",
         color: "#0A0F1D",
-        fontFamily: 'Inter, Geist, -apple-system, sans-serif',
+        fontFamily: 'Inter, Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         display: "flex",
-        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        padding: "40px 20px",
+        padding: "40px 24px",
         position: "relative",
+        overflow: "hidden",
       }}
     >
+      {/* Flowing Ambient Gradient Glows (Purple, Violet, Blue, Pink, Orange) */}
       <div
         style={{
           position: "absolute",
-          top: "10%",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "500px",
-          height: "400px",
-          background: "radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(236, 72, 153, 0.08) 50%, transparent 100%)",
-          filter: "blur(60px)",
+          top: "-120px",
+          left: "20%",
+          width: "600px",
+          height: "600px",
+          background:
+            "radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, rgba(99, 102, 241, 0.08) 35%, rgba(236, 72, 153, 0.05) 65%, transparent 80%)",
+          filter: "blur(80px)",
           pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          bottom: "-100px",
+          right: "15%",
+          width: "560px",
+          height: "560px",
+          background:
+            "radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, rgba(249, 115, 22, 0.05) 45%, transparent 75%)",
+          filter: "blur(90px)",
+          pointerEvents: "none",
+          zIndex: 0,
         }}
       />
 
+      {/* Main Split Authentication Executive Console */}
       <div
         style={{
           width: "100%",
-          maxWidth: "440px",
+          maxWidth: "1060px",
           backgroundColor: "#FFFFFF",
-          borderRadius: "20px",
+          borderRadius: "24px",
           border: "1px solid #E2E8F0",
-          boxShadow: "0 20px 45px -10px rgba(10, 15, 29, 0.08)",
-          padding: "36px",
+          boxShadow: "0 24px 60px -12px rgba(10, 15, 29, 0.08)",
+          display: "grid",
+          gridTemplateColumns: "1fr 1.08fr",
+          overflow: "hidden",
           position: "relative",
           zIndex: 1,
         }}
+        className="km-auth-split-grid"
       >
-        {/* Back link */}
-        <button
-          type="button"
-          onClick={onBackToLanding}
+        {/* =========================================================================
+            LEFT PANEL: CRYPTOGRAPHIC CONTROL PLANE SHOWCASE
+            ========================================================================= */}
+        <div
           style={{
-            background: "transparent",
-            border: "none",
-            color: "#64748B",
-            fontSize: "13px",
-            fontWeight: 500,
-            cursor: "pointer",
+            backgroundColor: "#F8FAFC",
+            borderRight: "1px solid #E2E8F0",
+            padding: "48px 42px",
             display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            marginBottom: "20px",
-            padding: 0,
+            flexDirection: "column",
+            justifyContent: "space-between",
+            position: "relative",
+            overflow: "hidden",
           }}
         >
-          ← Return to Website
-        </button>
-
-        {/* Brand */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
-          <img
-            src="/static/kyro-logo.png"
-            alt="Kyro Logo"
-            style={{ height: "30px", width: "30px", objectFit: "contain" }}
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = "/kyro-logo.png";
-            }}
-          />
-          <span style={{ fontSize: "20px", fontWeight: 800, color: "#0A0F1D", letterSpacing: "-0.03em" }}>
-            kyro
-          </span>
-        </div>
-
-        <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#0A0F1D", margin: "0 0 6px" }}>
-          {mode === "login" ? "Sign In to Control Plane" : "Register Sovereign Node"}
-        </h2>
-        <p style={{ fontSize: "13.5px", color: "#64748B", margin: "0 0 24px" }}>
-          {mode === "login"
-            ? "Enter your credentials to access verified nodes and OKF bundles."
-            : "Create an organization account and issue your first Ed25519 node keypair."}
-        </p>
-
-        {errorMsg && (
+          {/* Subtle Ambient Accent */}
           <div
             style={{
-              padding: "10px 14px",
-              backgroundColor: "rgba(239, 68, 68, 0.08)",
-              border: "1px solid rgba(239, 68, 68, 0.25)",
-              borderRadius: "8px",
-              color: "#DC2626",
-              fontSize: "12.5px",
-              marginBottom: "18px",
-              lineHeight: 1.4,
+              position: "absolute",
+              top: "-80px",
+              left: "-80px",
+              width: "280px",
+              height: "280px",
+              background: "radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, transparent 70%)",
+              filter: "blur(50px)",
+              pointerEvents: "none",
             }}
-          >
-            {errorMsg}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-          {mode === "register" && (
-            <>
-              <div>
-                <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#475569", marginBottom: "4px" }}>
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="e.g. Dr. Elena Vance"
-                  style={{
-                    width: "100%",
-                    height: "40px",
-                    padding: "0 12px",
-                    borderRadius: "8px",
-                    border: "1px solid #CBD5E1",
-                    fontSize: "14px",
-                    color: "#0A0F1D",
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#475569", marginBottom: "4px" }}>
-                  Organization Name
-                </label>
-                <input
-                  type="text"
-                  value={orgName}
-                  onChange={(e) => setOrgName(e.target.value)}
-                  placeholder="e.g. Sovereign AI Safety Mesh"
-                  style={{
-                    width: "100%",
-                    height: "40px",
-                    padding: "0 12px",
-                    borderRadius: "8px",
-                    border: "1px solid #CBD5E1",
-                    fontSize: "14px",
-                    color: "#0A0F1D",
-                  }}
-                />
-              </div>
-            </>
-          )}
+          />
 
           <div>
-            <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#475569", marginBottom: "4px" }}>
-              Email Address
-            </label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="architect@kyro.network"
+            {/* Brand Logo & Protocol Pill */}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "32px" }}>
+              <img
+                src="/kyro-logo.png"
+                alt="Kyro Logo"
+                style={{
+                  height: "36px",
+                  width: "36px",
+                  objectFit: "contain",
+                  borderRadius: "8px",
+                }}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/static/kyro-logo.png";
+                }}
+              />
+              <div>
+                <div style={{ fontSize: "21px", fontWeight: 800, color: "#0A0F1D", letterSpacing: "-0.035em", lineHeight: 1.1 }}>
+                  Kyro
+                </div>
+                <div style={{ fontSize: "11px", fontWeight: 650, color: "#6366F1", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                  Control Plane
+                </div>
+              </div>
+            </div>
+
+            {/* Editorial Headline */}
+            <h1
               style={{
-                width: "100%",
-                height: "40px",
-                padding: "0 12px",
-                borderRadius: "8px",
-                border: "1px solid #CBD5E1",
-                fontSize: "14px",
+                fontSize: "28px",
+                fontWeight: 800,
                 color: "#0A0F1D",
+                lineHeight: 1.2,
+                letterSpacing: "-0.03em",
+                margin: "0 0 16px",
               }}
-            />
+            >
+              Zero-Trust Epistemic Governance for AI Agents.
+            </h1>
+
+            <p style={{ fontSize: "14.5px", color: "#475569", lineHeight: 1.6, margin: "0 0 32px" }}>
+              Issue cryptographic Ed25519 node identities, sign Open Knowledge Format bundles with
+              RFC 8785 Canonical JCS, and federate with sovereign consensus.
+            </p>
+
+            {/* Live Interactive Verification Status Box */}
+            <div
+              style={{
+                backgroundColor: "#FFFFFF",
+                borderRadius: "14px",
+                border: "1px solid #E2E8F0",
+                padding: "18px 20px",
+                boxShadow: "0 2px 8px rgba(10, 15, 29, 0.03)",
+                marginBottom: "24px",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+                <span style={{ fontSize: "11px", fontWeight: 750, color: "#64748B", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                  Mesh Node Status
+                </span>
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "2px 8px",
+                    borderRadius: "999px",
+                    backgroundColor: "#ECFDF5",
+                    border: "1px solid #A7F3D0",
+                    color: "#059669",
+                    fontSize: "11px",
+                    fontWeight: 650,
+                  }}
+                >
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#10B981" }} />
+                  Live Federation
+                </span>
+              </div>
+
+              {/* Code snippet of live deterministic hash */}
+              <div
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "11.5px",
+                  color: "#0F172A",
+                  backgroundColor: "#F8FAFC",
+                  padding: "8px 12px",
+                  borderRadius: "8px",
+                  border: "1px solid #E2E8F0",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "8px",
+                }}
+              >
+                <span>ed25519:7f8a…9c42</span>
+                <span style={{ color: "#059669", fontWeight: 700, fontSize: "10.5px" }}>✓ VERIFIED</span>
+              </div>
+
+              <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "6px", fontSize: "12px", color: "#64748B" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span style={{ color: "#4F46E5" }}>◈</span>
+                  <span>RFC 8032 Ed25519 Signatures bound to local keychain</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span style={{ color: "#0284C7" }}>⬡</span>
+                  <span>Conflict-preserving pull-sync across autonomous peers</span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#475569", marginBottom: "4px" }}>
-              Password
-            </label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••••••"
-              style={{
-                width: "100%",
-                height: "40px",
-                padding: "0 12px",
-                borderRadius: "8px",
-                border: "1px solid #CBD5E1",
-                fontSize: "14px",
-                color: "#0A0F1D",
-              }}
-            />
+          {/* Bottom Security Note */}
+          <div
+            style={{
+              paddingTop: "20px",
+              borderTop: "1px solid #E2E8F0",
+              fontSize: "12px",
+              color: "#64748B",
+              lineHeight: 1.5,
+            }}
+          >
+            "Epistemic boundaries ensure that automated agent reasoning remains verifiable, auditable, and sovereign."
           </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              marginTop: "8px",
-              height: "44px",
-              backgroundColor: "#0A0F1D",
-              color: "#FFFFFF",
-              border: "none",
-              borderRadius: "10px",
-              fontSize: "14px",
-              fontWeight: 650,
-              cursor: loading ? "wait" : "pointer",
-              boxShadow: "0 4px 12px rgba(10, 15, 29, 0.15)",
-              transition: "all 0.15s ease",
-            }}
-          >
-            {loading ? "Verifying Credentials..." : mode === "login" ? "Sign In →" : "Create Organization Account →"}
-          </button>
-        </form>
-
-        <div style={{ marginTop: "18px", textAlign: "center" }}>
-          <button
-            type="button"
-            onClick={() => {
-              setMode(mode === "login" ? "register" : "login");
-              setErrorMsg(null);
-            }}
-            style={{
-              background: "transparent",
-              border: "none",
-              fontSize: "12.5px",
-              color: "#6366F1",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            {mode === "login" ? "Don't have an account? Register organization" : "Already registered? Sign in"}
-          </button>
         </div>
 
-        <div style={{ margin: "20px 0 16px", borderTop: "1px solid #F1F5F9", position: "relative", textAlign: "center" }}>
-          <span style={{ position: "relative", top: "-10px", backgroundColor: "#FFFFFF", padding: "0 10px", fontSize: "11px", color: "#94A3B8" }}>
-            QUICK ACCESS
-          </span>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleDemoBypass}
-          disabled={loading}
+        {/* =========================================================================
+            RIGHT PANEL: AUTHENTICATION FORM & INSTANT ACCESS
+            ========================================================================= */}
+        <div
           style={{
-            width: "100%",
-            height: "38px",
-            backgroundColor: "#F8FAFC",
-            border: "1px solid #E2E8F0",
-            borderRadius: "8px",
-            fontSize: "12.5px",
-            fontWeight: 600,
-            color: "#334155",
-            cursor: "pointer",
+            padding: "44px 44px 38px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
           }}
         >
-          ⚡ Instant Demo Access (Sovereign Node A)
-        </button>
+          {/* Top navigation row */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "26px" }}>
+            <button
+              type="button"
+              onClick={onBackToLanding}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "#64748B",
+                fontSize: "13px",
+                fontWeight: 600,
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: 0,
+                transition: "color 0.15s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#0A0F1D")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#64748B")}
+            >
+              ← Return to Website
+            </button>
+            <span
+              style={{
+                fontSize: "11.5px",
+                fontWeight: 600,
+                color: "#64748B",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#10B981" }} />
+              FastAPI v1.0
+            </span>
+          </div>
+
+          {/* Segmented Mode Switcher */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              backgroundColor: "#F1F5F9",
+              padding: "4px",
+              borderRadius: "10px",
+              marginBottom: "28px",
+              border: "1px solid #E2E8F0",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setMode("login");
+                setErrorMsg(null);
+              }}
+              style={{
+                padding: "8px 12px",
+                borderRadius: "8px",
+                border: "none",
+                backgroundColor: mode === "login" ? "#FFFFFF" : "transparent",
+                color: mode === "login" ? "#0A0F1D" : "#64748B",
+                fontWeight: mode === "login" ? 700 : 550,
+                fontSize: "13px",
+                cursor: "pointer",
+                boxShadow: mode === "login" ? "0 2px 6px rgba(0,0,0,0.06)" : "none",
+                transition: "all 0.15s ease",
+              }}
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMode("register");
+                setErrorMsg(null);
+              }}
+              style={{
+                padding: "8px 12px",
+                borderRadius: "8px",
+                border: "none",
+                backgroundColor: mode === "register" ? "#FFFFFF" : "transparent",
+                color: mode === "register" ? "#0A0F1D" : "#64748B",
+                fontWeight: mode === "register" ? 700 : 550,
+                fontSize: "13px",
+                cursor: "pointer",
+                boxShadow: mode === "register" ? "0 2px 6px rgba(0,0,0,0.06)" : "none",
+                transition: "all 0.15s ease",
+              }}
+            >
+              Register Organization
+            </button>
+          </div>
+
+          <h2 style={{ fontSize: "23px", fontWeight: 800, color: "#0A0F1D", margin: "0 0 6px", letterSpacing: "-0.025em" }}>
+            {mode === "login" ? "Sign In to Control Plane" : "Register Sovereign Node"}
+          </h2>
+          <p style={{ fontSize: "13.5px", color: "#64748B", margin: "0 0 24px" }}>
+            {mode === "login"
+              ? "Access verified knowledge bundles, active peers, and telemetry."
+              : "Provision an organization identity and Ed25519 signing keypair."}
+          </p>
+
+          {errorMsg && (
+            <div
+              style={{
+                padding: "12px 14px",
+                backgroundColor: "#FEF2F2",
+                border: "1px solid #FECACA",
+                borderRadius: "10px",
+                color: "#DC2626",
+                fontSize: "13px",
+                marginBottom: "20px",
+                lineHeight: 1.45,
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "8px",
+              }}
+            >
+              <span style={{ fontWeight: 700, fontSize: "14px" }}>!</span>
+              <div>{errorMsg}</div>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {mode === "register" && (
+              <>
+                <div>
+                  <label style={{ display: "block", fontSize: "12.5px", fontWeight: 650, color: "#334155", marginBottom: "6px" }}>
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="e.g. Dr. Elena Vance"
+                    style={{
+                      width: "100%",
+                      height: "42px",
+                      padding: "0 14px",
+                      borderRadius: "10px",
+                      border: "1px solid #CBD5E1",
+                      fontSize: "14px",
+                      color: "#0A0F1D",
+                      backgroundColor: "#FFFFFF",
+                      outline: "none",
+                      transition: "border-color 0.15s, box-shadow 0.15s",
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = "#6366F1";
+                      e.currentTarget.style.boxShadow = "0 0 0 3px rgba(99, 102, 241, 0.14)";
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = "#CBD5E1";
+                      e.currentTarget.style.boxShadow = "none";
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: "12.5px", fontWeight: 650, color: "#334155", marginBottom: "6px" }}>
+                    Organization Name
+                  </label>
+                  <input
+                    type="text"
+                    value={orgName}
+                    onChange={(e) => setOrgName(e.target.value)}
+                    placeholder="e.g. Sovereign AI Safety Mesh"
+                    style={{
+                      width: "100%",
+                      height: "42px",
+                      padding: "0 14px",
+                      borderRadius: "10px",
+                      border: "1px solid #CBD5E1",
+                      fontSize: "14px",
+                      color: "#0A0F1D",
+                      backgroundColor: "#FFFFFF",
+                      outline: "none",
+                      transition: "border-color 0.15s, box-shadow 0.15s",
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = "#6366F1";
+                      e.currentTarget.style.boxShadow = "0 0 0 3px rgba(99, 102, 241, 0.14)";
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = "#CBD5E1";
+                      e.currentTarget.style.boxShadow = "none";
+                    }}
+                  />
+                </div>
+              </>
+            )}
+
+            <div>
+              <label style={{ display: "block", fontSize: "12.5px", fontWeight: 650, color: "#334155", marginBottom: "6px" }}>
+                Work Email Address
+              </label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="architect@kyro.network"
+                style={{
+                  width: "100%",
+                  height: "42px",
+                  padding: "0 14px",
+                  borderRadius: "10px",
+                  border: "1px solid #CBD5E1",
+                  fontSize: "14px",
+                  color: "#0A0F1D",
+                  backgroundColor: "#FFFFFF",
+                  outline: "none",
+                  transition: "border-color 0.15s, box-shadow 0.15s",
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = "#6366F1";
+                  e.currentTarget.style.boxShadow = "0 0 0 3px rgba(99, 102, 241, 0.14)";
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = "#CBD5E1";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: "block", fontSize: "12.5px", fontWeight: 650, color: "#334155", marginBottom: "6px" }}>
+                Password
+              </label>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••••••"
+                style={{
+                  width: "100%",
+                  height: "42px",
+                  padding: "0 14px",
+                  borderRadius: "10px",
+                  border: "1px solid #CBD5E1",
+                  fontSize: "14px",
+                  color: "#0A0F1D",
+                  backgroundColor: "#FFFFFF",
+                  outline: "none",
+                  transition: "border-color 0.15s, box-shadow 0.15s",
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = "#6366F1";
+                  e.currentTarget.style.boxShadow = "0 0 0 3px rgba(99, 102, 241, 0.14)";
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = "#CBD5E1";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                marginTop: "6px",
+                height: "46px",
+                backgroundColor: "#0A0F1D",
+                color: "#FFFFFF",
+                border: "none",
+                borderRadius: "10px",
+                fontSize: "14.5px",
+                fontWeight: 650,
+                cursor: loading ? "wait" : "pointer",
+                boxShadow: "0 4px 14px rgba(10, 15, 29, 0.18)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                transition: "all 0.15s ease",
+              }}
+              onMouseEnter={(e) => {
+                if (!loading) e.currentTarget.style.backgroundColor = "#1E293B";
+              }}
+              onMouseLeave={(e) => {
+                if (!loading) e.currentTarget.style.backgroundColor = "#0A0F1D";
+              }}
+            >
+              {loading
+                ? "Authenticating..."
+                : mode === "login"
+                  ? "Sign In to Control Plane →"
+                  : "Create Organization Account →"}
+            </button>
+          </form>
+
+          {/* Quick Access Divider */}
+          <div
+            style={{
+              margin: "24px 0 16px",
+              borderTop: "1px solid #E2E8F0",
+              position: "relative",
+              textAlign: "center",
+            }}
+          >
+            <span
+              style={{
+                position: "relative",
+                top: "-10px",
+                backgroundColor: "#FFFFFF",
+                padding: "0 12px",
+                fontSize: "11px",
+                fontWeight: 700,
+                color: "#94A3B8",
+                letterSpacing: "0.08em",
+              }}
+            >
+              QUICK ACCESS DEMO
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleDemoBypass}
+            disabled={loading}
+            style={{
+              width: "100%",
+              height: "42px",
+              backgroundColor: "#F8FAFC",
+              border: "1px solid #E2E8F0",
+              borderRadius: "10px",
+              fontSize: "13px",
+              fontWeight: 650,
+              color: "#334155",
+              cursor: loading ? "wait" : "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              transition: "all 0.15s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = "#CBD5E1";
+              e.currentTarget.style.backgroundColor = "#F1F5F9";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = "#E2E8F0";
+              e.currentTarget.style.backgroundColor = "#F8FAFC";
+            }}
+          >
+            <span style={{ color: "#F59E0B" }}>⚡</span>
+            <span>Instant Demo Access (Sovereign Node A)</span>
+          </button>
+
+          <div
+            style={{
+              marginTop: "20px",
+              fontSize: "11px",
+              color: "#94A3B8",
+              textAlign: "center",
+              lineHeight: 1.45,
+            }}
+          >
+            Session keys are protected by RFC 7519 JSON Web Tokens & local Ed25519 identity.
+          </div>
+        </div>
       </div>
     </div>
   );

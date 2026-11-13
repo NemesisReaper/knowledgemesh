@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 from typing import Any
 from pydantic import BaseModel
+from .canonical_jcs import rfc8785_canonicalize
 
 
 def _json_default(obj: Any) -> Any:
@@ -24,22 +25,11 @@ def _json_default(obj: Any) -> Any:
 
 
 def canonicalize_json(data: dict[str, Any] | BaseModel) -> bytes:
-    """Produce deterministic UTF-8 encoded canonical JSON (RFC 8785 style).
+    """Produce deterministic UTF-8 encoded canonical JSON strictly conforming to RFC 8785 JCS.
 
-    Keys are recursively sorted and spacing is eliminated.
+    Keys are recursively sorted by UTF-16 code units and whitespace is eliminated.
     """
-    if isinstance(data, BaseModel):
-        dict_data = data.model_dump(mode="json")
-    else:
-        dict_data = json.loads(json.dumps(data, default=_json_default))
-
-    return json.dumps(
-        dict_data,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=False,
-        default=_json_default,
-    ).encode("utf-8")
+    return rfc8785_canonicalize(data)
 
 
 def hash_bytes(data: bytes, algorithm: str = "sha256") -> str:

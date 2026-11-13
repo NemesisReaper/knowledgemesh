@@ -924,20 +924,27 @@ export function NodesView({
       )}
 
       {showCreateModal && (
-        <div className="km-modal-backdrop">
+        <div className="km-modal-backdrop" onClick={() => setShowCreateModal(false)}>
           <div
             className="km-modal"
             role="dialog"
-            aria-label="Register Knowledge Node"
+            aria-label="Add Knowledge Node"
+            onClick={(e) => e.stopPropagation()}
           >
-            <div className="km-card-header">
-              <h3 className="km-card-title">
-                Register Independent Knowledge Node
-              </h3>
+            <div className="km-card-header" style={{ marginBottom: 16 }}>
+              <div>
+                <h3 className="km-card-title">
+                  Add Knowledge Node
+                </h3>
+                <div className="km-metric-sub" style={{ marginTop: 4 }}>
+                  Configure connection settings to link an independent node to the mesh.
+                </div>
+              </div>
               <button
                 type="button"
-                className="km-btn km-btn-sm"
+                className="km-modal-close"
                 onClick={() => setShowCreateModal(false)}
+                aria-label="Close"
               >
                 ✕
               </button>
@@ -954,7 +961,7 @@ export function NodesView({
                 />
               </div>
               <div className="km-field">
-                <label className="km-label">Logical Node ID (optional)</label>
+                <label className="km-label">Node ID (Optional)</label>
                 <input
                   className="km-input"
                   placeholder="e.g., node-d"
@@ -965,10 +972,11 @@ export function NodesView({
                 />
               </div>
               <div className="km-field">
-                <label className="km-label">HTTP Federation Endpoint *</label>
+                <label className="km-label">Connection URL *</label>
                 <input
                   className="km-input"
                   required
+                  placeholder="e.g., http://localhost:8000"
                   value={form.endpoint}
                   onChange={(e) =>
                     setForm({ ...form, endpoint: e.target.value })
@@ -990,7 +998,7 @@ export function NodesView({
                   </select>
                 </div>
                 <div className="km-field">
-                  <label className="km-label">Default Visibility Policy</label>
+                  <label className="km-label">Visibility</label>
                   <select
                     className="km-select"
                     value={form.visibility}
@@ -1010,6 +1018,7 @@ export function NodesView({
                 <label className="km-label">Description</label>
                 <textarea
                   className="km-textarea"
+                  rows={2}
                   value={form.description}
                   onChange={(e) =>
                     setForm({ ...form, description: e.target.value })
@@ -1017,7 +1026,7 @@ export function NodesView({
                 />
               </div>
               <div
-                style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}
+                style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 20 }}
               >
                 <button
                   type="button"
@@ -1027,7 +1036,7 @@ export function NodesView({
                   Cancel
                 </button>
                 <button type="submit" className="km-btn km-btn-primary">
-                  Generate Ed25519 Keypair & Register
+                  Generate Keypair & Register
                 </button>
               </div>
             </form>
@@ -2287,25 +2296,28 @@ export function KnowledgeView({
 
       {/* 5-Step Knowledge Bundle & OKF Creation Wizard Modal */}
       {showWizard && (
-        <div className="km-modal-backdrop">
+        <div className="km-modal-backdrop" onClick={() => setShowWizard(false)}>
           <div
             className="km-modal"
             role="dialog"
             aria-label="Knowledge Publishing Wizard"
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: 640 }}
           >
-            <div className="km-card-header">
+            <div className="km-card-header" style={{ marginBottom: 16 }}>
               <div>
                 <h3 className="km-card-title">
-                  5-Step OKF Knowledge Publishing Wizard
+                  Create Knowledge Document
                 </h3>
-                <div className="km-metric-sub">
-                  Validates OKF schema, computes RFC 8785 JCS SHA-256 digest, and signs with node Ed25519 key.
+                <div className="km-metric-sub" style={{ marginTop: 4 }}>
+                  Enter document details, format claims, and sign with your node key.
                 </div>
               </div>
               <button
                 type="button"
-                className="km-btn km-btn-sm"
+                className="km-modal-close"
                 onClick={() => setShowWizard(false)}
+                aria-label="Close"
               >
                 ✕
               </button>
@@ -2314,11 +2326,11 @@ export function KnowledgeView({
             {/* Visual Stepper */}
             <div className="km-stepper">
               {[
-                [1, "1. Metadata"],
-                [2, "2. Claims"],
-                [3, "3. Evidence"],
-                [4, "4. Validate"],
-                [5, "5. Ed25519 Sign"],
+                [1, "Info"],
+                [2, "Statements"],
+                [3, "Sources"],
+                [4, "Review"],
+                [5, "Sign & Publish"],
               ].map(([num, label]) => (
                 <div
                   key={num}
@@ -2340,7 +2352,7 @@ export function KnowledgeView({
             {wizardStep === 1 && (
               <div>
                 <div className="km-field">
-                  <label className="km-label">Bundle Title *</label>
+                  <label className="km-label">Document Title *</label>
                   <input
                     className="km-input"
                     required
@@ -2353,9 +2365,10 @@ export function KnowledgeView({
                 </div>
                 <div className="km-grid-2">
                   <div className="km-field">
-                    <label className="km-label">Domain / Category</label>
+                    <label className="km-label">Domain / Topic</label>
                     <input
                       className="km-input"
+                      placeholder="e.g., AI Alignment"
                       value={wizardForm.category}
                       onChange={(e) =>
                         setWizardForm({
@@ -2366,7 +2379,7 @@ export function KnowledgeView({
                     />
                   </div>
                   <div className="km-field">
-                    <label className="km-label">Visibility Policy</label>
+                    <label className="km-label">Visibility</label>
                     <select
                       className="km-select"
                       value={wizardForm.visibility}
@@ -2378,19 +2391,21 @@ export function KnowledgeView({
                       }
                     >
                       <option value="federated">
-                        Federated (Discoverable by Peers)
+                        Federated (Public to Peers)
                       </option>
                       <option value="organization">Organization Only</option>
                       <option value="private">
-                        Private (Owner & Authorized Agents)
+                        Private (Owner & Agents)
                       </option>
                     </select>
                   </div>
                 </div>
                 <div className="km-field">
-                  <label className="km-label">Summary / Description</label>
+                  <label className="km-label">Summary / Notes</label>
                   <textarea
                     className="km-textarea"
+                    rows={3}
+                    placeholder="Brief description of the findings or knowledge..."
                     value={wizardForm.description}
                     onChange={(e) =>
                       setWizardForm({
@@ -2407,10 +2422,12 @@ export function KnowledgeView({
               <div>
                 <div className="km-field">
                   <label className="km-label">
-                    Primary Atomic Claim Statement *
+                    Main Statement / Claim *
                   </label>
                   <textarea
                     className="km-textarea"
+                    rows={3}
+                    placeholder="Enter the primary verifiable statement..."
                     value={wizardForm.claim_statement}
                     onChange={(e) =>
                       setWizardForm({
@@ -2423,7 +2440,7 @@ export function KnowledgeView({
                 <div className="km-grid-2">
                   <div className="km-field">
                     <label className="km-label">
-                      Initial Epistemic Assessment Status
+                      Verification Status
                     </label>
                     <select
                       className="km-select"
@@ -2435,16 +2452,16 @@ export function KnowledgeView({
                         })
                       }
                     >
-                      <option value="proposed">proposed</option>
+                      <option value="proposed">Proposed</option>
                       <option value="evidence_attached">
-                        evidence_attached
+                        Evidence Attached
                       </option>
-                      <option value="supported">supported</option>
+                      <option value="supported">Supported</option>
                     </select>
                   </div>
                   <div className="km-field">
                     <label className="km-label">
-                      Empirical Confidence ({Math.round(wizardForm.claim_confidence * 100)}%)
+                      Confidence Level ({Math.round(wizardForm.claim_confidence * 100)}%)
                     </label>
                     <input
                       type="range"
@@ -2468,9 +2485,10 @@ export function KnowledgeView({
             {wizardStep === 3 && (
               <div>
                 <div className="km-field">
-                  <label className="km-label">Evidence Artifact Title</label>
+                  <label className="km-label">Source / Evidence Title</label>
                   <input
                     className="km-input"
+                    placeholder="e.g., NeurIPS 2026 Evaluation Suite"
                     value={wizardForm.evidence_title}
                     onChange={(e) =>
                       setWizardForm({
@@ -2481,9 +2499,10 @@ export function KnowledgeView({
                   />
                 </div>
                 <div className="km-field">
-                  <label className="km-label">Traceable Source URI *</label>
+                  <label className="km-label">Source Link / URL *</label>
                   <input
                     className="km-input"
+                    placeholder="https://arxiv.org/abs/..."
                     value={wizardForm.evidence_uri}
                     onChange={(e) =>
                       setWizardForm({
@@ -2494,9 +2513,11 @@ export function KnowledgeView({
                   />
                 </div>
                 <div className="km-field">
-                  <label className="km-label">Evidence Description</label>
+                  <label className="km-label">Source Details</label>
                   <textarea
                     className="km-textarea"
+                    rows={3}
+                    placeholder="How this source supports the statement..."
                     value={wizardForm.evidence_desc}
                     onChange={(e) =>
                       setWizardForm({
@@ -2511,18 +2532,18 @@ export function KnowledgeView({
 
             {wizardStep === 4 && (
               <div>
-                <p className="km-metric-sub">
-                  Verify structural conformance with the Open Knowledge Format (OKF v0.2) and RFC 8785 canonical JSON serialization before signing.
+                <p className="km-metric-sub" style={{ marginBottom: 16 }}>
+                  Verify document structure and format standards before signing.
                 </p>
                 <button
                   type="button"
                   className="km-btn km-btn-accent"
                   onClick={handleValidateOkfPreview}
                 >
-                  ✓ Run OKF Schema Validator
+                  ✓ Check Document Format
                 </button>
                 {okfValidationReport && (
-                  <pre className="km-code-block">
+                  <pre className="km-code-block" style={{ marginTop: 16 }}>
                     {JSON.stringify(okfValidationReport, null, 2)}
                   </pre>
                 )}
@@ -2531,14 +2552,13 @@ export function KnowledgeView({
 
             {wizardStep === 5 && (
               <div>
-                <div className="km-notice verified">
+                <div className="km-notice verified" style={{ marginBottom: 16 }}>
                   <span>
-                    Publishing this bundle will compute its canonical OKF SHA-256 digest, sign the payload with{" "}
-                    <strong>{wizardForm.node_id}</strong>&apos;s Ed25519 private key, and append a genesis provenance record.
+                    Publishing this document generates a verifiable cryptographic signature using your selected node key and records provenance.
                   </span>
                 </div>
                 <div className="km-field">
-                  <label className="km-label">Publishing Sovereign Node</label>
+                  <label className="km-label">Publishing Node</label>
                   <select
                     className="km-select"
                     value={wizardForm.node_id}
@@ -2560,7 +2580,9 @@ export function KnowledgeView({
               style={{
                 display: "flex",
                 justifyContent: "space-between",
-                marginTop: 20,
+                marginTop: 24,
+                paddingTop: 16,
+                borderTop: "1px solid var(--border-subtle)",
               }}
             >
               <button
@@ -2585,7 +2607,7 @@ export function KnowledgeView({
                   className="km-btn km-btn-primary"
                   onClick={handlePublishBundle}
                 >
-                  ✓ Sign & Publish OKF Bundle
+                  ✓ Sign & Publish Document
                 </button>
               )}
             </div>

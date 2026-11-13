@@ -23,7 +23,18 @@ htmlcov/
 .vscode/
 .idea/
 
- 
+# Node / Next.js
+node_modules/
+.next/
+*.tsbuildinfo
+next-env.d.ts
+
+# Databases & local state
+*.db
+*.sqlite
+*.sqlite3
+knowmesh.db
+
 *.zip
 extracted_zip/
 okf-3d-hero/

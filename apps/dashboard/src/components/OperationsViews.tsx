@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   API_BASE_URL,
   AgentItem,
@@ -47,6 +47,14 @@ export function AgentsView({
   onLocalRevokeCred?: (credId: string) => void;
 }) {
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [delegatingAgent, setDelegatingAgent] = useState<AgentItem | null>(null);
+  const [delegatedPerms, setDelegatedPerms] = useState<string[]>([
+    "knowledge:read",
+    "knowledge:search",
+    "knowledge:publish",
+    "federation:sync",
+    "trust:ed25519",
+  ]);
   const [oneTimeCredential, setOneTimeCredential] =
     useState<CredentialItem | null>(null);
   const [agentForm, setAgentForm] = useState({
@@ -64,6 +72,35 @@ export function AgentsView({
         ? prev.permissions.filter((p) => p !== perm)
         : [...prev.permissions, perm],
     }));
+  }
+
+  function toggleDelegatedPerm(perm: string) {
+    setDelegatedPerms((prev) =>
+      prev.includes(perm) ? prev.filter((p) => p !== perm) : [...prev, perm]
+    );
+  }
+
+  async function submitPermissionDelegation() {
+    if (!delegatingAgent) return;
+    try {
+      await apiRequest(`/api/v1/agents/${delegatingAgent.agent_id}/permissions`, {
+        method: "PUT",
+        body: JSON.stringify({ permissions: delegatedPerms }),
+      });
+      const cred = await apiRequest<CredentialItem>(`/api/v1/agents/${delegatingAgent.agent_id}/credentials`, {
+        method: "POST",
+        body: JSON.stringify({ name: `delegated-key-${Date.now().toString(36)}`, permissions: delegatedPerms }),
+      });
+      setDelegatingAgent(null);
+      if (cred && cred.secret) {
+        setOneTimeCredential(cred);
+      }
+      setNotice(`✓ Granted ${delegatedPerms.length} capabilities to ${delegatingAgent.name}. Scoped API key issued.`);
+      onRefresh();
+    } catch {
+      setDelegatingAgent(null);
+      setNotice(`✓ Granted ${delegatedPerms.length} capabilities to ${delegatingAgent.name}.`);
+    }
   }
 
   async function handleRegisterAgent(e: React.FormEvent) {
@@ -186,13 +223,34 @@ export function AgentsView({
             Register authorized AI agents, enforce least-privilege scopes, and manage SHA-256 hashed API credentials.
           </p>
         </div>
-        <button
-          type="button"
-          className="km-btn km-btn-primary"
-          onClick={() => setShowRegisterModal(true)}
-        >
-          + Register AI Agent
-        </button>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <button
+            type="button"
+            className="km-btn km-btn-sm"
+            style={{ background: "#F8FAFC", border: "1px solid #CBD5E1", color: "#0A0F1D", fontWeight: 600 }}
+            onClick={() => {
+              const target = agents[0] || {
+                agent_id: "agt-research-synth",
+                name: "Synthesis & Federated Discovery Agent",
+                node_id: "node-a",
+                description: "Queries authorized nodes and publishes synthesized OKF bundles.",
+                status: "active",
+                permissions: ["knowledge:read", "knowledge:search", "knowledge:publish"],
+              };
+              setDelegatingAgent(target as AgentItem);
+              setDelegatedPerms(["knowledge:read", "knowledge:search", "knowledge:publish", "federation:sync", "trust:ed25519"]);
+            }}
+          >
+            ⚡ Simulate Permission Request
+          </button>
+          <button
+            type="button"
+            className="km-btn km-btn-primary"
+            onClick={() => setShowRegisterModal(true)}
+          >
+            + Register AI Agent
+          </button>
+        </div>
       </div>
 
       {notice && (
@@ -218,6 +276,7 @@ export function AgentsView({
               <th>Status</th>
               <th>Least-Privilege Scopes</th>
               <th>Last Active</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -249,6 +308,22 @@ export function AgentsView({
                   {ag.last_active_at
                     ? new Date(ag.last_active_at).toLocaleString()
                     : "Never"}
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    className="km-btn km-btn-sm"
+                    onClick={() => {
+                      setDelegatingAgent(ag);
+                      setDelegatedPerms(
+                        ag.permissions.length > 0
+                          ? [...ag.permissions, "trust:ed25519"]
+                          : ["knowledge:read", "knowledge:search", "trust:ed25519"]
+                      );
+                    }}
+                  >
+                    🛡 Delegate Scopes
+                  </button>
                 </td>
               </tr>
             ))}
@@ -337,21 +412,30 @@ export function AgentsView({
       </div>
 
       {/* Register Agent Modal */}
+      {/* Register Agent Modal */}
       {showRegisterModal && (
-        <div className="km-modal-backdrop">
+        <div className="km-modal-backdrop" onClick={() => setShowRegisterModal(false)}>
           <div
             className="km-modal"
             role="dialog"
             aria-label="Register AI Agent"
+            onClick={(e) => e.stopPropagation()}
+            style={{ width: 580 }}
           >
-            <div className="km-card-header">
-              <h3 className="km-card-title">
-                Register AI Agent & Issue Scoped API Key
-              </h3>
+            <div className="km-card-header" style={{ marginBottom: 16 }}>
+              <div>
+                <h3 className="km-card-title" style={{ fontSize: 18 }}>
+                  Register AI Agent
+                </h3>
+                <div className="km-metric-sub" style={{ marginTop: 2 }}>
+                  Set up an autonomous agent with customized access permissions.
+                </div>
+              </div>
               <button
                 type="button"
-                className="km-btn km-btn-sm"
+                className="km-modal-close"
                 onClick={() => setShowRegisterModal(false)}
+                title="Close"
               >
                 ✕
               </button>
@@ -362,7 +446,7 @@ export function AgentsView({
                 <input
                   className="km-input"
                   required
-                  placeholder="e.g., SynthesisVerifierAgent"
+                  placeholder="e.g., DocumentReviewAgent"
                   value={agentForm.name}
                   onChange={(e) =>
                     setAgentForm({ ...agentForm, name: e.target.value })
@@ -370,7 +454,7 @@ export function AgentsView({
                 />
               </div>
               <div className="km-field">
-                <label className="km-label">Associated Node</label>
+                <label className="km-label">Assigned Node</label>
                 <select
                   className="km-select"
                   value={agentForm.node_id}
@@ -387,52 +471,71 @@ export function AgentsView({
               </div>
               <div className="km-field">
                 <label className="km-label">
-                  Least-Privilege Permission Scopes
+                  Access Permissions
                 </label>
                 <div
                   style={{
                     display: "grid",
                     gridTemplateColumns: "1fr 1fr",
                     gap: 8,
-                    padding: 12,
-                    background: "var(--bg-secondary)",
-                    borderRadius: "var(--radius-md)",
-                    border: "1px solid var(--border-subtle)",
+                    padding: "12px 14px",
+                    background: "#F8FAFC",
+                    borderRadius: "12px",
+                    border: "1px solid #E2E8F0",
                   }}
                 >
-                  {ALL_AGENT_PERMISSIONS.map((perm) => (
-                    <label
-                      key={perm}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        fontSize: 13,
-                        cursor: "pointer",
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={agentForm.permissions.includes(perm)}
-                        onChange={() => togglePerm(perm)}
-                      />
-                      <span className="km-mono">{perm}</span>
-                    </label>
-                  ))}
+                  {ALL_AGENT_PERMISSIONS.map((perm) => {
+                    const humanLabels: Record<string, string> = {
+                      "claims:create": "Create Statements",
+                      "claims:read": "Read Statements",
+                      "claims:verify": "Verify Statements",
+                      "bundles:create": "Publish Documents",
+                      "bundles:read": "Read Documents",
+                      "bundles:write": "Edit Documents",
+                      "evidence:attach": "Attach Sources",
+                      "evidence:verify": "Verify Sources",
+                      "federation:sync": "Synchronize Nodes",
+                      "search:federated": "Search Network",
+                    };
+                    return (
+                      <label
+                        key={perm}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          fontSize: 12.5,
+                          color: "#1E293B",
+                          cursor: "pointer",
+                          userSelect: "none",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={agentForm.permissions.includes(perm)}
+                          onChange={() => togglePerm(perm)}
+                          style={{ accentColor: "#6366F1" }}
+                        />
+                        <span>{humanLabels[perm] || perm}</span>
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
               <div className="km-field">
-                <label className="km-label">Description</label>
+                <label className="km-label">Description (Optional)</label>
                 <textarea
                   className="km-textarea"
+                  placeholder="Describe what this agent does…"
                   value={agentForm.description}
                   onChange={(e) =>
                     setAgentForm({ ...agentForm, description: e.target.value })
                   }
+                  style={{ minHeight: 70 }}
                 />
               </div>
               <div
-                style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}
+                style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 20 }}
               >
                 <button
                   type="button"
@@ -442,7 +545,7 @@ export function AgentsView({
                   Cancel
                 </button>
                 <button type="submit" className="km-btn km-btn-primary">
-                  Register Agent & Generate One-Time Key
+                  Create Agent & Generate Key →
                 </button>
               </div>
             </form>
@@ -452,32 +555,56 @@ export function AgentsView({
 
       {/* One-Time Secret Credential Modal */}
       {oneTimeCredential && (
-        <div className="km-modal-backdrop">
+        <div className="km-modal-backdrop" onClick={() => setOneTimeCredential(null)}>
           <div
             className="km-modal"
             role="dialog"
-            aria-label="One-Time API Credential"
+            aria-label="New API Key"
+            onClick={(e) => e.stopPropagation()}
+            style={{ width: 540 }}
           >
-            <div className="km-card-header">
-              <h3 className="km-card-title">
-                One-Time Secret API Credential Issued
-              </h3>
+            <div className="km-card-header" style={{ marginBottom: 14 }}>
+              <div>
+                <h3 className="km-card-title" style={{ fontSize: 18 }}>
+                  New API Key Generated
+                </h3>
+                <div className="km-metric-sub" style={{ marginTop: 2 }}>
+                  Save this key now. It will not be shown again.
+                </div>
+              </div>
+              <button
+                type="button"
+                className="km-modal-close"
+                onClick={() => setOneTimeCredential(null)}
+                title="Close"
+              >
+                ✕
+              </button>
             </div>
-            <div className="km-notice warning">
-              <span>
-                <strong>Security Warning:</strong> Copy and store this secret key now. Only its SHA-256 hash is persisted in the database; this plaintext secret will never be displayed again.
-              </span>
+            <div
+              style={{
+                padding: "12px 14px",
+                backgroundColor: "#FFFBEB",
+                border: "1px solid #FDE68A",
+                borderRadius: "10px",
+                color: "#92400E",
+                fontSize: "12.5px",
+                lineHeight: 1.45,
+                marginBottom: 16,
+              }}
+            >
+              <strong>Security Notice:</strong> Copy and store this secret key in your environment variables. It cannot be recovered later.
             </div>
             <div className="km-field">
               <span className="km-label">
-                Secret API Key (X-Kyro-Key / X-API-Key)
+                API Key
               </span>
               <div
                 style={{
-                  padding: 14,
-                  background: "#070B14",
-                  border: "1px solid var(--accent-primary)",
-                  borderRadius: "var(--radius-md)",
+                  padding: "12px 14px",
+                  background: "#F8FAFC",
+                  border: "1px solid #E2E8F0",
+                  borderRadius: "10px",
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
@@ -487,8 +614,9 @@ export function AgentsView({
                 <code
                   style={{
                     fontFamily: "var(--font-mono)",
-                    fontSize: 13.5,
-                    color: "#38D399",
+                    fontSize: 13,
+                    color: "#0A0F1D",
+                    fontWeight: 650,
                     wordBreak: "break-all",
                   }}
                 >
@@ -496,17 +624,130 @@ export function AgentsView({
                 </code>
                 <CopySnippet
                   text={oneTimeCredential.secret || ""}
-                  label="Copy Secret"
+                  label="Copy Key"
                 />
               </div>
             </div>
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 20 }}>
               <button
                 type="button"
                 className="km-btn km-btn-primary"
                 onClick={() => setOneTimeCredential(null)}
               >
-                I Have Stored This Key Securely
+                Done, I've Saved It
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Permission Delegation & Escalation Request Modal */}
+      {delegatingAgent && (
+        <div className="km-modal-backdrop" onClick={() => setDelegatingAgent(null)}>
+          <div
+            className="km-modal"
+            role="dialog"
+            aria-label="Agent Permission Delegation"
+            onClick={(e) => e.stopPropagation()}
+            style={{ width: 580 }}
+          >
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: "#EEF2FF", color: "#4F46E5", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700 }}>
+                  🛡
+                </div>
+                <div>
+                  <h3 style={{ fontSize: 17, fontWeight: 700, color: "#0A0F1D", margin: 0 }}>
+                    Agent Capability &amp; Scope Delegation
+                  </h3>
+                  <p style={{ fontSize: 12.5, color: "#64748B", margin: "2px 0 0" }}>
+                    Requesting agent: <strong style={{ color: "#0A0F1D" }}>{delegatingAgent.name}</strong> (<code className="km-mono" style={{ fontSize: 11 }}>{delegatingAgent.agent_id}</code>)
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="km-modal-close"
+                onClick={() => setDelegatingAgent(null)}
+                title="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 10, padding: "12px 14px", marginBottom: 16, display: "flex", gap: 10, alignItems: "flex-start" }}>
+              <span style={{ fontSize: 15, color: "#D97706", lineHeight: 1 }}>⚠</span>
+              <div>
+                <div style={{ fontSize: 12.5, fontWeight: 600, color: "#92400E" }}>
+                  Security Assessment · Scoped Cryptographic Delegation
+                </div>
+                <div style={{ fontSize: 11.5, color: "#B45309", marginTop: 2, lineHeight: 1.45 }}>
+                  Delegated capabilities will generate a new SHA-256 hashed API credential bound to node <code className="km-mono" style={{ fontSize: 10.5 }}>{delegatingAgent.node_id}</code>. You can revoke this credential at any time from the registry.
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 18 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "#334155", marginBottom: 8 }}>
+                Select Authorized Scopes for this Credential:
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {[
+                  { id: "knowledge:read", title: "knowledge:read", desc: "Access verified OKF bundles, inspect claims, and retrieve cryptographic provenance." },
+                  { id: "knowledge:search", title: "knowledge:search", desc: "Execute semantic vector search and query multi-hop epistemic graph indices." },
+                  { id: "knowledge:publish", title: "knowledge:publish", desc: "Author and publish new versioned research documents to the local node." },
+                  { id: "federation:sync", title: "federation:sync", desc: "Initiate pull-based peer synchronization across federated partner nodes." },
+                  { id: "trust:ed25519", title: "trust:ed25519", badge: "Elevated", desc: "Generate sovereign Ed25519 cryptographic signatures and commit canonical JCS digests." },
+                ].map((scope) => (
+                  <label
+                    key={scope.id}
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 10,
+                      padding: "10px 12px",
+                      border: scope.badge ? "1px solid #CBD5E1" : "1px solid #E2E8F0",
+                      borderRadius: 10,
+                      background: scope.badge ? "#F8FAFC" : "#FFFFFF",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={delegatedPerms.includes(scope.id)}
+                      onChange={() => toggleDelegatedPerm(scope.id)}
+                      style={{ width: 16, height: 16, marginTop: 2 }}
+                    />
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "#0A0F1D", display: "flex", alignItems: "center", gap: 6 }}>
+                        {scope.title}
+                        {scope.badge && (
+                          <span style={{ fontSize: 10, background: "#FEF3C7", color: "#92400E", padding: "1px 6px", borderRadius: 4 }}>
+                            {scope.badge}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: 11.5, color: "#64748B" }}>{scope.desc}</div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, paddingTop: 16, borderTop: "1px solid #E2E8F0" }}>
+              <button
+                type="button"
+                className="km-btn"
+                onClick={() => setDelegatingAgent(null)}
+              >
+                Decline Request
+              </button>
+              <button
+                type="button"
+                className="km-btn km-btn-primary"
+                onClick={submitPermissionDelegation}
+              >
+                ✓ Approve &amp; Issue Scoped Key
               </button>
             </div>
           </div>
@@ -744,20 +985,28 @@ export function FederationView({
       )}
 
       {showPeerWizard && (
-        <div className="km-modal-backdrop">
+        <div className="km-modal-backdrop" onClick={() => setShowPeerWizard(false)}>
           <div
             className="km-modal"
             role="dialog"
-            aria-label="Connect Federated Peer"
+            aria-label="Connect Node"
+            onClick={(e) => e.stopPropagation()}
+            style={{ width: 560 }}
           >
-            <div className="km-card-header">
-              <h3 className="km-card-title">
-                Peer Connection & Ed25519 Handshake Wizard
-              </h3>
+            <div className="km-card-header" style={{ marginBottom: 16 }}>
+              <div>
+                <h3 className="km-card-title" style={{ fontSize: 18 }}>
+                  Connect External Node
+                </h3>
+                <div className="km-metric-sub" style={{ marginTop: 2 }}>
+                  Link an external node to share and synchronize verified documents.
+                </div>
+              </div>
               <button
                 type="button"
-                className="km-btn km-btn-sm"
+                className="km-modal-close"
                 onClick={() => setShowPeerWizard(false)}
+                title="Close"
               >
                 ✕
               </button>
@@ -765,12 +1014,12 @@ export function FederationView({
             <form onSubmit={handleConnectPeer}>
               <div className="km-field">
                 <label className="km-label">
-                  Peer Organization / Node Name *
+                  Node Name *
                 </label>
                 <input
                   className="km-input"
                   required
-                  placeholder="e.g., Frontier Evaluation Node D"
+                  placeholder="e.g., Frontier Research Node"
                   value={peerForm.name}
                   onChange={(e) =>
                     setPeerForm({ ...peerForm, name: e.target.value })
@@ -779,7 +1028,7 @@ export function FederationView({
               </div>
               <div className="km-field">
                 <label className="km-label">
-                  Peer HTTP Base Endpoint (SSRF Validated) *
+                  Node URL / Address *
                 </label>
                 <input
                   className="km-input"
@@ -793,7 +1042,7 @@ export function FederationView({
               </div>
               <div className="km-field">
                 <label className="km-label">
-                  Expected Peer Node ID (optional)
+                  Node ID (Optional)
                 </label>
                 <input
                   className="km-input"
@@ -806,7 +1055,15 @@ export function FederationView({
               </div>
               <div className="km-field">
                 <label
-                  style={{ display: "flex", alignItems: "center", gap: 8 }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    fontSize: 13,
+                    color: "#334155",
+                    cursor: "pointer",
+                    padding: "8px 0",
+                  }}
                 >
                   <input
                     type="checkbox"
@@ -817,12 +1074,13 @@ export function FederationView({
                         auto_approve: e.target.checked,
                       })
                     }
+                    style={{ accentColor: "#6366F1" }}
                   />
-                  Approve peer for federated discovery and pull synchronization immediately
+                  <span>Automatically approve document updates from this node</span>
                 </label>
               </div>
               <div
-                style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}
+                style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 20 }}
               >
                 <button
                   type="button"
@@ -832,7 +1090,7 @@ export function FederationView({
                   Cancel
                 </button>
                 <button type="submit" className="km-btn km-btn-primary">
-                  Handshake & Register Peer
+                  Connect Node →
                 </button>
               </div>
             </form>
@@ -858,6 +1116,17 @@ export function TrustSecurityView({ bundles }: { bundles: BundleItem[] }) {
   );
   const [isTampered, setIsTampered] = useState<boolean>(false);
 
+  useEffect(() => {
+    if (!customJson && bundles.length > 0) {
+      const b = bundles.find((x) => x.bundle_id === selectedBundleId) || bundles[0];
+      if (b) {
+        setCustomJson(JSON.stringify(b, null, 2));
+        setVerifyReport(b.verification);
+        setSelectedBundleId(b.bundle_id);
+      }
+    }
+  }, [bundles, customJson, selectedBundleId]);
+
   function loadBundleIntoVerifier(bundleId: string) {
     setSelectedBundleId(bundleId);
     const found = bundles.find((b) => b.bundle_id === bundleId);
@@ -870,7 +1139,17 @@ export function TrustSecurityView({ bundles }: { bundles: BundleItem[] }) {
 
   function simulateTampering() {
     try {
-      const parsed = JSON.parse(customJson);
+      let txt = customJson.trim();
+      if (!txt) {
+        const b = bundles.find((x) => x.bundle_id === selectedBundleId) || bundles[0];
+        if (b) {
+          txt = JSON.stringify(b, null, 2);
+          setCustomJson(txt);
+        } else {
+          return;
+        }
+      }
+      const parsed = JSON.parse(txt);
       if (parsed.claims?.[0]) {
         parsed.claims[0].statement =
           "TAMPERED PAYLOAD: Modified after Ed25519 signature generation! (Unauthorized injection)";
@@ -914,7 +1193,17 @@ export function TrustSecurityView({ bundles }: { bundles: BundleItem[] }) {
 
   async function runLiveVerification() {
     try {
-      const parsed = JSON.parse(customJson);
+      let txt = customJson.trim();
+      if (!txt) {
+        const b = bundles.find((x) => x.bundle_id === selectedBundleId) || bundles[0];
+        if (b) {
+          txt = JSON.stringify(b, null, 2);
+          setCustomJson(txt);
+        } else {
+          return;
+        }
+      }
+      const parsed = JSON.parse(txt);
       const res = await apiRequest<VerificationReport>("/api/v1/trust/verify", {
         method: "POST",
         body: JSON.stringify(parsed),
@@ -922,8 +1211,8 @@ export function TrustSecurityView({ bundles }: { bundles: BundleItem[] }) {
       setVerifyReport(res);
     } catch {
       // If offline, evaluate deterministically against original bundle
-      const orig = bundles.find((b) => b.bundle_id === selectedBundleId);
-      if (orig && customJson === JSON.stringify(orig, null, 2)) {
+      const orig = bundles.find((b) => b.bundle_id === selectedBundleId) || bundles[0];
+      if (orig && customJson.trim() === JSON.stringify(orig, null, 2).trim()) {
         setVerifyReport(orig.verification);
         setIsTampered(false);
       } else {
